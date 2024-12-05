@@ -37,7 +37,7 @@ CREATE TABLE `users` (
   `password` VARCHAR(255) NOT NULL,
   `phone` VARCHAR(20) NOT NULL,
   `date_of_birth` DATE NOT NULL,
-  `note` VARCHAR(255) NOT NULL,
+  `note` VARCHAR(255),
   `role_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến vai trò",
   `status` INT NOT NULL DEFAULT 1 COMMENT "Trạng thái người dùng: 0 - Không hoạt động, 1 - Đang hoạt động",
   `created_at` TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -47,6 +47,9 @@ CREATE TABLE `users` (
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
+
+INSERT INTO users (id, full_name, username, password, phone, date_of_birth, role_id, created_at, updated_at)
+VALUES ("US001", "Nguyen Van A", "anguyen", "122222", "11111", "2000-11-11", 4, now(), now());
 
 CREATE TABLE `roles_permissions` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -154,10 +157,14 @@ CREATE TABLE `schedules` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
+INSERT INTO schedules (id, schedule_config_id, driver_id, departure_time, created_at, updated_at)
+VALUES ("HT-001", "HT001", "US001", now(), now(), now());
+
 CREATE TABLE `expenses_configs` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
   `type` TEXT NOT NULL COMMENT "Loại chi phí: Nhiên liệu, Thay dầu,...",
   `note` TEXT COMMENT "Ghi chú của cấu hình chi phí",
+  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Trạng thái: 0 - Chưa xóa, 1 - Đã xóa",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
   PRIMARY KEY (`id`)
@@ -165,18 +172,25 @@ CREATE TABLE `expenses_configs` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
-INSERT INTO `expenses_configs` (id, type, note, created_at, updated_at)
-VALUES ("CP001", "Nhiên liệu", "Chi phí nhiên liệu", now(), now()),
-		("CP002", "Sữa chữa", "Chi phí sửa chữa xe", now(), now()),
-        ("CP003", "Cúng xe", "Chi phí cúng xe", now(), now());
+INSERT INTO `expenses_configs` (id, type, note, deleted, created_at, updated_at)
+VALUES ("CP001", "Nhiên liệu", "Chi phí nhiên liệu", b'0', now(), now()),
+		("CP002", "Sữa chữa", "Chi phí sửa chữa xe", b'0', now(), now()),
+        ("CP003", "Cúng xe", "Chi phí cúng xe", b'0', now(), now());
+        
+INSERT INTO `expenses_configs` (id, type, note, deleted, created_at, updated_at)
+VALUES ("CP004", "Nhiên liệu", "Chi phí nhiên liệu", b'0', now(), now());
+
+select * from expenses;
 
 CREATE TABLE `expenses` (
   `id` VARCHAR(255) NOT NULL,
   `schedule_id`  VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến lịch trình",
-  `expenses_confid_id`  VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến cấu hình chi phí",
+  `expenses_config_id`  VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến cấu hình chi phí",
   `amount` FLOAT NOT NULL DEFAULT 0 COMMENT "Giá tiền",
   `note` TEXT COMMENT "Ghi chú của chi phí",
-  `status` INT DEFAULT 0 COMMENT "Trạng thái của chi phí: 0 - Chưa duyệt, 1 - Đã duyệt",
+  `img_path` VARCHAR(255) DEFAULT NULL COMMENT "Đường dẫn lưu ảnh hóa đơn",
+  `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái của chi phí: 0 - Chưa duyệt, 1 - Đã duyệt",
+  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Trạng thái: 0 - Chưa xóa, 1 - Đã xóa",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
   PRIMARY KEY (`id`),
