@@ -124,6 +124,7 @@ CREATE TABLE `schedule_configs` (
   `place_b` VARCHAR(255) NOT NULL,
   `amount` FLOAT NOT NULL DEFAULT 0 COMMENT "Giá tiền cho mỗi hành trình",
   `note` TEXT COMMENT "Ghi chú cho hành trình",
+  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Đã xóa: 0 - false, 1 - true",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
   PRIMARY KEY (`id`)
@@ -131,13 +132,13 @@ CREATE TABLE `schedule_configs` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
-INSERT INTO `schedule_configs` (id, place_a, place_b, amount, note, created_at, updated_at)
-VALUES ("HT001", "Hà Nội", "Thành phố Hồ Chí Minh", 10000000, "Tuyến: Hà Nội - Hồ Chí Minh", now(), now()),
-		("HT002", "Hà Nội", "Đà Nẵng", 7000000, "Tuyến: Hà Nội - Đà Nẵng", now(), now()),
-        ("HT003", "Hà Nội", "Thừa Thiên - Huế", 5500000, "Tuyến: Hà Nội - Thừa Thiên-Huế", now(), now()),
-        ("HT004", "Hà Nội", "Bình Dương", 9000000, "Tuyến: Hà Nội - Bình Dương", now(), now()),
-        ("HT005", "Hà Nội", "Bắc Giang", 4000000, "Tuyến: Hà Nội - Bắc Giang", now(), now()),
-        ("HT006", "Hà Nội", "Lào Cai", 4500000, "Tuyến: Hà Nội - Lào Cai", now(), now());
+INSERT INTO `schedule_configs` (id, place_a, place_b, amount, note, deleted, created_at, updated_at)
+VALUES ("HT001", "Hà Nội", "Thành phố Hồ Chí Minh", 10000000, "Tuyến: Hà Nội - Hồ Chí Minh", b'0', now(), now()),
+		("HT002", "Hà Nội", "Đà Nẵng", 7000000, "Tuyến: Hà Nội - Đà Nẵng", b'0', now(), now()),
+        ("HT003", "Hà Nội", "Thừa Thiên - Huế", 5500000, "Tuyến: Hà Nội - Thừa Thiên-Huế", b'0', now(), now()),
+        ("HT004", "Hà Nội", "Bình Dương", 9000000, "Tuyến: Hà Nội - Bình Dương", b'0', now(), now()),
+        ("HT005", "Hà Nội", "Bắc Giang", 4000000, "Tuyến: Hà Nội - Bắc Giang", b'0', now(), now()),
+        ("HT006", "Hà Nội", "Lào Cai", 4500000, "Tuyến: Hà Nội - Lào Cai", b'0', now(), now());
 
 CREATE TABLE `schedules` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
@@ -145,9 +146,10 @@ CREATE TABLE `schedules` (
   `driver_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Tài xế lái xe",
   `attach_document` VARCHAR(255) COMMENT "Đường dẫn lưu tài liệu bổ sung",
   `departure_time` TIMESTAMP NOT NULL COMMENT "Thời gian khởi hành",
-  `arrival_time` TIMESTAMP COMMENT "Thời gian hoàn thành",
+  `arrival_time` TIMESTAMP NOT NULL COMMENT "Thời gian hoàn thành",
   `note` TEXT COMMENT "Ghi chú của mỗi hành trình",
   `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành",
+  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Đã xóa: 0 - false, 1 - true",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
   PRIMARY KEY (`id`),
@@ -157,8 +159,8 @@ CREATE TABLE `schedules` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
-INSERT INTO schedules (id, schedule_config_id, driver_id, departure_time, created_at, updated_at)
-VALUES ("HT-001", "HT001", "US001", now(), now(), now());
+INSERT INTO schedules (id, schedule_config_id, driver_id, departure_time, arrival_time, created_at, updated_at)
+VALUES ("HT-001", "HT001", "US001", now(), now(), now(), now());
 
 CREATE TABLE `expenses_configs` (
   `id` VARCHAR(255) UNIQUE NOT NULL,

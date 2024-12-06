@@ -23,7 +23,7 @@ public class ExpensesMapper {
                 .imgPath(dto.getImgPath())
                 .status(0)
                 .deleted(false)
-                .createdAt(new Date())
+                .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                 .updatedAt(new Date())
                 .build();
     }
