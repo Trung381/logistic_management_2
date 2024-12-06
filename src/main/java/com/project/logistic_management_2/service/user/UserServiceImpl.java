@@ -26,7 +26,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public User updateUser(Integer id, UserDTO userDto) {
+    public User updateUser(String id, UserDTO userDto) {
         if (userDto.getId() == null) {
             throw new IllegalArgumentException("User ID must be provided for updating.");
         }
@@ -44,7 +44,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public User getUserById(Integer id, Boolean all) {
+    public User getUserById(String id, Boolean all) {
         User user = userRepo.getUserById(id, all);
         if(user == null){
             throw new NotFoundException("User not found with ID: "+id);
@@ -53,7 +53,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public String deleteById(Integer id) {
+    public String deleteById(String id) {
 //        repository.deleteUser(id);
         return (userRepo.deleteUser(id) > 0 ? "Deleted" : "failure");
     }

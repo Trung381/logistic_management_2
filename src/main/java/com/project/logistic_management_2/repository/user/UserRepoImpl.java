@@ -28,7 +28,7 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
     }
 
     @Override
-    public User getUserById(Integer id, Boolean all){
+    public User getUserById(String id, Boolean all){
         QUser qUser = QUser.user;
         BooleanBuilder builder = new BooleanBuilder()
                 .and(qUser.id.eq(id));
@@ -42,7 +42,7 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
 
     @Modifying
     @Transactional
-    public long deleteUser(Integer id){
+    public long deleteUser(String id){
         QUser qUser = QUser.user;
 //        query.delete(qUser)
 //                .where(qUser.id.eq(id))

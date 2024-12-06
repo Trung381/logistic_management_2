@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface UserRepoCustom {
     List<User> getAll(Boolean all);
-    User getUserById(Integer id, Boolean all);
-    long deleteUser(Integer id);
+    User getUserById(String id, Boolean all);
+    long deleteUser(String id);
     User findByUsername(String username);
 }

@@ -2,6 +2,8 @@ package com.project.logistic_management_2.mapper.user;
 
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -24,6 +26,7 @@ public class UserMapper{
             return null;
         }
         return User.builder()
+                .id(Utils.genID(IDKey.USER))
                 .fullName(dto.getFullName())
                 .phone(dto.getPhone())
                 .note(dto.getNote())

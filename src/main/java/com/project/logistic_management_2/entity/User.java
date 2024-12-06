@@ -13,9 +13,9 @@ import java.util.Date;
 @AllArgsConstructor
 @Table(name = "users")
 public class User {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String id;
 
     @Column(name = "full_name")
     private String fullName;

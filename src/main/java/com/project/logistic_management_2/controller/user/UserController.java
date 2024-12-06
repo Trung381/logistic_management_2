@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<BaseResponse<User>> updateUser(@PathVariable Integer id, @Valid @RequestBody UserDTO userDto) {
+    public ResponseEntity<BaseResponse<User>> updateUser(@PathVariable String id, @Valid @RequestBody UserDTO userDto) {
         User updatedUser = userService.updateUser(id,userDto);
         return ResponseEntity.ok(BaseResponse.ok(updatedUser));
     }
@@ -42,13 +42,13 @@ public class UserController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<BaseResponse<User>> getUserById(@PathVariable Integer id, @RequestParam Boolean all) {
+    public ResponseEntity<BaseResponse<User>> getUserById(@PathVariable String id, @RequestParam Boolean all) {
         User user = userService.getUserById(id,all);
         return ResponseEntity.ok(BaseResponse.ok(user));
     }
 
     @GetMapping("/delete/{id}")
-    public ResponseEntity<BaseResponse<String>> deleteUserById(@PathVariable Integer id) {
+    public ResponseEntity<BaseResponse<String>> deleteUserById(@PathVariable String id) {
         String notice = userService.deleteById(id);
         return ResponseEntity.ok(BaseResponse.ok(notice));
     }
