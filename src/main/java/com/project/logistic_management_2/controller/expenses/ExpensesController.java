@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.controller.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
-import com.project.logistic_management_2.dto.response.BaseResponse;
+import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.service.expenses.ExpensesService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
