@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.exception;
 
-import com.project.logistic_management_2.dto.response.BaseResponse;
+import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.EditNotAllowedException;
 import com.project.logistic_management_2.exception.def.ForbiddenException;
