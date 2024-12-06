@@ -1,10 +1,7 @@
 package com.project.logistic_management_2.exception;
 
 import com.project.logistic_management_2.dto.BaseResponse;
-import com.project.logistic_management_2.exception.def.ConflictException;
-import com.project.logistic_management_2.exception.def.EditNotAllowedException;
-import com.project.logistic_management_2.exception.def.ForbiddenException;
-import com.project.logistic_management_2.exception.def.NotFoundException;
+import com.project.logistic_management_2.exception.def.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -66,6 +63,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 BaseResponse.fail(e.getMessage()),
                 HttpStatus.CONFLICT
+        );
+    }
+
+    @ExceptionHandler(InvalidParameterException.class)
+    public ResponseEntity<Object> handleInvalidParameterException(InvalidParameterException e) {
+        return new ResponseEntity<>(
+                BaseResponse.fail(e.getMessage()),
+                HttpStatus.BAD_REQUEST
         );
     }
 }
