@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.dto;
+package com.project.logistic_management_2.dto.response;
 
 import lombok.*;
 
@@ -14,7 +14,6 @@ public class BaseResponse<T> {
         return BaseResponse.<T>builder()
                 .data(data)
                 .status("success")
-                .message("hehe trung đặt message ni cho case success đấy 😼(hiện alert message này nhen)")
                 .build();
     }
 
