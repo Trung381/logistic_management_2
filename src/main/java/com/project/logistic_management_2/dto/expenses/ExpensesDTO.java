@@ -14,6 +14,10 @@ import java.util.Date;
 public class ExpensesDTO {
     private String id;
 
+    //Thong tin tai xe lien quan
+    private String driverId;
+    private String driverName;
+
     //Mã lịch trình
     @NotBlank(message = "Thông tin lịch trình không được để trống!")
     private String scheduleId;
