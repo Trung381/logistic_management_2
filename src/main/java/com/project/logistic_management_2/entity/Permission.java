@@ -11,11 +11,14 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "roles")
-public class Role {
+@Table(name = "permissions")
+public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(name = "title")
+    private String title;
 
     @Column(name = "name")
     private String name;
