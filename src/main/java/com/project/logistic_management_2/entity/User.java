@@ -13,7 +13,6 @@ import java.util.Date;
 @AllArgsConstructor
 @Table(name = "users")
 public class User {
-
     @Id
     private String id;
 

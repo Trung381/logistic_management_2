@@ -22,6 +22,9 @@ public class ExpensesConfig {
     @Column(name = "note")
     private String note;
 
+    @Column(name = "deleted")
+    private Boolean deleted;
+
     @Column(name = "created_at")
     @Temporal(value = TemporalType.TIMESTAMP)
     private Date createdAt;

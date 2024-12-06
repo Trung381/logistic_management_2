@@ -20,13 +20,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final AuthenticationProvider authenProvider;
-
+  
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-//                        .anyRequest().permitAll()
                                 .requestMatchers("/auth/**").permitAll() // Cho phép truy cập không xác thực đến /auth/**
 //                                .anyRequest().authenticated()
                                 .anyRequest().permitAll()
