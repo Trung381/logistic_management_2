@@ -11,31 +11,22 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "schedules")
-public class Schedule {
+@Table(name = "schedule_configs")
+public class ScheduleConfig {
     @Id
     private String id;
 
-    @Column(name = "schedule_config_id")
-    private String scheduleConfigId;
+    @Column(name = "place_a")
+    private String placeA;
 
-    @Column(name = "driver_id")
-    private String driverId;
+    @Column(name = "place_b")
+    private String placeB;
 
-    @Column(name = "attach_document")
-    private String attachDocument;
-
-    @Column(name = "departure_time")
-    private Date departureTime;
-
-    @Column(name = "arrival_time")
-    private Date arrivalTime;
+    @Column(name = "amount")
+    private Float amount;
 
     @Column(name = "note")
     private String note;
-
-    @Column(name = "status")
-    private Integer status;
 
     @Column(name = "deleted")
     private Boolean deleted;
