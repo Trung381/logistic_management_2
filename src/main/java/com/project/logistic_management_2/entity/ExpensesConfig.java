@@ -5,26 +5,28 @@ import lombok.*;
 
 import java.util.Date;
 
+@Entity
+@Table(name = "expenses_configs")
 @Getter
 @Setter
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "roles")
-public class Role {
+public class ExpensesConfig {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "type")
+    private String type;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "note")
+    private String note;
+
     @Column(name = "created_at")
+    @Temporal(value = TemporalType.TIMESTAMP)
     private Date createdAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
+    @Temporal(value = TemporalType.TIMESTAMP)
     private Date updatedAt;
 }
