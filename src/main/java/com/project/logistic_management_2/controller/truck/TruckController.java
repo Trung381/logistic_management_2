@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.controller.truck;
 
-import com.project.logistic_management_2.dto.request.TruckDTO;
+import com.project.logistic_management_2.dto.truck.TruckDTO;
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.service.truck.TruckService;
 import jakarta.validation.Valid;

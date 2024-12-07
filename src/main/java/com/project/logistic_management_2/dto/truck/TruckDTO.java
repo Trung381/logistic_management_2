@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.dto.request;
+package com.project.logistic_management_2.dto.truck;
 
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;

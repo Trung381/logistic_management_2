@@ -1,7 +1,6 @@
 package com.project.logistic_management_2.service.truck;
 
-import com.project.logistic_management_2.dto.request.TruckDTO;
-import com.project.logistic_management_2.entity.Truck;
+import com.project.logistic_management_2.dto.truck.TruckDTO;
 
 import java.util.List;
 
