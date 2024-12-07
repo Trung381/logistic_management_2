@@ -51,6 +51,7 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
 
                 schedule.note.as("note"),
                 schedule.attachDocument.as("attachDocument"),
+                schedule.type.as("type"),
                 schedule.status.as("status"),
                 schedule.createdAt.as("createdAt"),
                 schedule.updatedAt.as("updatedAt")

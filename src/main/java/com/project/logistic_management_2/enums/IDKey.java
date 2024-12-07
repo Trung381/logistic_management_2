@@ -1,7 +1,5 @@
 package com.project.logistic_management_2.enums;
 
-import lombok.AllArgsConstructor;
-
 public enum IDKey {
     EXPENSES("EX"),
     EXPENSES_CONFIG("EXC"),

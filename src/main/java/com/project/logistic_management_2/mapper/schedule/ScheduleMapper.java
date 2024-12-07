@@ -20,6 +20,7 @@ public class ScheduleMapper {
                 .departureTime(dto.getDepartureTime())
                 .arrivalTime(dto.getDepartureTime())
                 .note(dto.getNote())
+                .type(dto.getType())
                 .status(0)
                 .deleted(false)
                 .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
@@ -36,6 +37,7 @@ public class ScheduleMapper {
         schedule.setDepartureTime(dto.getDepartureTime());
         schedule.setArrivalTime(dto.getArrivalTime());
         schedule.setNote(dto.getNote());
+        schedule.setType(dto.getType());
         schedule.setUpdatedAt(new Date());
     }
 }

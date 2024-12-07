@@ -148,6 +148,7 @@ CREATE TABLE `schedules` (
   `departure_time` TIMESTAMP NOT NULL COMMENT "Thời gian khởi hành",
   `arrival_time` TIMESTAMP NOT NULL COMMENT "Thời gian hoàn thành",
   `note` TEXT COMMENT "Ghi chú của mỗi hành trình",
+  `type` INT NOT NULL DEFAULT 1 COMMENT "Loại lịch trình: 0 - Chạy nội bộ, 1 - Tính lương",
   `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành",
   `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Đã xóa: 0 - false, 1 - true",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),

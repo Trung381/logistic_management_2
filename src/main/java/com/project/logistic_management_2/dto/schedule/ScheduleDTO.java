@@ -37,6 +37,9 @@ public class ScheduleDTO {
     private String note;
     //Ảnh đính kèm
     private String attachDocument;
+    //Loại hành trình: 0 - nội bộ, 1 - tính lương
+    @NotNull(message = "Loại hành trình không được để trống")
+    private Integer type;
     //Trạng thái
     private Integer status;
 

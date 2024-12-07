@@ -34,6 +34,9 @@ public class Schedule {
     @Column(name = "note")
     private String note;
 
+    @Column(name = "type")
+    private Integer type;
+
     @Column(name = "status")
     private Integer status;
 
