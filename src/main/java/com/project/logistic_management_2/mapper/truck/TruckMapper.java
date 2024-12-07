@@ -2,8 +2,6 @@ package com.project.logistic_management_2.mapper.truck;
 
 import com.project.logistic_management_2.dto.truck.TruckDTO;
 import com.project.logistic_management_2.entity.Truck;
-import com.project.logistic_management_2.enums.IDKey;
-import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -13,7 +11,6 @@ public class TruckMapper {
     public Truck toTruck(TruckDTO truckDTO) {
         if(truckDTO==null)  return null;
         return Truck.builder()
-                .id(Utils.genID(IDKey.TRUCK))
                 .driverId(truckDTO.getDriverId())
                 .licensePlate(truckDTO.getLicensePlate())
                 .capacity(truckDTO.getCapacity())

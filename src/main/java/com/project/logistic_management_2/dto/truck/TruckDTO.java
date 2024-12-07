@@ -1,5 +1,7 @@
 package com.project.logistic_management_2.dto.truck;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -10,8 +12,7 @@ import java.util.Date;
 @Data
 
 public class TruckDTO {
-    @Id
-    private String id;
+    private Integer id;
     @Size(min = 8, message = "Biển số xe tối thiểu 8 ký tự")
     private String licensePlate;
     @NotNull(message = "Dung tích xe không được để trống")

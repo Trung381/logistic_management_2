@@ -5,6 +5,7 @@ import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import static com.project.logistic_management_2.entity.QExpenses.expenses;
 import static com.project.logistic_management_2.entity.QExpensesConfig.expensesConfig;
 import static com.project.logistic_management_2.entity.QSchedule.schedule;
+import static com.project.logistic_management_2.entity.QTruck.truck;
 import static com.project.logistic_management_2.entity.QUser.user;
 
 import com.project.logistic_management_2.repository.BaseRepo;
@@ -29,13 +30,16 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     private ConstructorExpression<ExpensesDTO> expensesProjection() {
         return Projections.constructor(ExpensesDTO.class,
                 expenses.id.as("id"),
-                JPAExpressions.select(schedule.driverId.as("driverId"))
-                        .from(schedule)
-                        .where(schedule.id.eq(expenses.scheduleId)),
-                JPAExpressions.select(user.fullName.as("driverName"))
-                        .from(user, schedule)
+                JPAExpressions.select(truck.driverId.as("driverId"))
+                        .from(truck, schedule)
                         .where(expenses.scheduleId.eq(schedule.id)
-                                .and(schedule.driverId.eq(user.id))
+                                .and(schedule.truckLicense.eq(truck.licensePlate))
+                        ),
+                JPAExpressions.select(user.fullName.as("driverName"))
+                        .from(user, schedule, truck)
+                        .where(expenses.scheduleId.eq(schedule.id)
+                                .and(schedule.truckLicense.eq(truck.licensePlate))
+                                .and(truck.driverId.eq(user.id))
                         ),
                 expenses.scheduleId.as("scheduleId"),
                 expenses.expensesConfigId.as("expensesConfigId"),

@@ -19,7 +19,7 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
     }
 
     @Override
-    public Optional<Truck> getTruckById(String id) {
+    public Optional<Truck> getTruckById(Integer id) {
         QTruck qTruck = QTruck.truck;
 
         BooleanBuilder builder = new BooleanBuilder();
@@ -59,7 +59,7 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
     @Override
     @Modifying
     @Transactional
-    public long delete(String id) {
+    public long delete(Integer id) {
         QTruck qTruck = QTruck.truck;
         BooleanBuilder builder = new BooleanBuilder()
                 .and(qTruck.id.eq(id))
