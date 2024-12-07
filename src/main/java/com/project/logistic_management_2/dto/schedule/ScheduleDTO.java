@@ -21,11 +21,12 @@ public class ScheduleDTO {
     private String placeB;
     private Float amount;
 
-    //Thông tin tài xế + xe
+    //Thông tin tài xế + xe, mooc
     @NotBlank(message = "Thông tin tài xế không được để trống!")
     private String driverId;
     private String driverName;
-    private String licensePlate;
+    private String truckLicense;
+    private String moocLicense;
 
     //Thời gian lấy / giao hàng
     @NotNull(message = "Thời gian lấy hàng không được để trống!")

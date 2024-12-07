@@ -6,7 +6,6 @@ public enum IDKey {
     SCHEDULE("SCD"),
     SCHEDULE_CONFIG("SCDC"),
     USER("US"),
-    TRUCK("TRUCK"),
     WAREHOUSE("WH"),
     GOODS("GS"),
     TRANSACTION("TRANS");

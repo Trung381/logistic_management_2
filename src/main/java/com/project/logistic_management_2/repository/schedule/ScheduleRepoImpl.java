@@ -37,14 +37,13 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
                 //Gia tien
                 scheduleConfig.amount.as("amount"),
                 // Thong tin tai xe
-                schedule.driverId.as("driverId"),
+                truck.driverId.as("driverId"),
                 JPAExpressions.select(user.fullName.as("driverName"))
                         .from(user)
-                        .where(user.id.eq(schedule.driverId)),
+                        .where(truck.driverId.eq(user.id)),
                 //Bien so xe tai
-                JPAExpressions.select(truck.licensePlate.as("licensePlate"))
-                        .from(truck)
-                        .where(truck.driverId.eq(schedule.driverId)),
+                schedule.truckLicense.as("truckLicense"),
+                schedule.moocLicense.as("moocLicense"),
                 //Thoi gian giao nhan hang
                 schedule.departureTime.as("departureTime"),
                 schedule.arrivalTime.as("arrivalTime"),
@@ -62,6 +61,7 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     public List<ScheduleDTO> getAll() {
         return query.from(schedule)
                 .innerJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
+                .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
                 .where(schedule.deleted.eq(false))
                 .select(scheduleProjection())
                 .fetch();
