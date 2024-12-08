@@ -56,15 +56,23 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
 
     @Override
     public List<Truck> getTrucksByType(Integer type) {
+        // Tạo một đối tượng QTruck (QueryDSL) để xây dựng các truy vấn
         QTruck qTruck = QTruck.truck;
 
+        // Tạo một BooleanBuilder để xây dựng các điều kiện lọc trong truy vấn
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qTruck.type.eq(type)); // Lọc theo type (0 hoặc 1)
-        builder.and(qTruck.deleted.eq(1)); // Lọc các bản ghi chưa bị xóa
 
-        return query.from(qTruck)
-                .where(builder)
-                .select(qTruck)
-                .fetch();
+        // Thêm điều kiện lọc: cột "type" phải bằng giá trị "type" được truyền vào
+        builder.and(qTruck.type.eq(type)); // Lọc theo giá trị của type (ví dụ: 0 hoặc 1)
+
+        // Thêm điều kiện lọc: chỉ lấy các bản ghi chưa bị xóa (cột "deleted" = 1)
+        builder.and(qTruck.deleted.eq(1)); // Lọc các bản ghi chưa bị xóa (deleted = 1)
+
+        // Sử dụng QueryDSL để thực hiện truy vấn
+        return query.from(qTruck)               // Chọn bảng Truck làm nguồn truy vấn
+                .where(builder)            // Áp dụng các điều kiện lọc đã xây dựng
+                .select(qTruck)            // Chọn tất cả các cột trong bảng Truck
+                .fetch();                  // Thực thi truy vấn và trả về danh sách kết quả
     }
+
 }
