@@ -10,4 +10,11 @@ public interface TruckRepoCustom {
     Optional<Truck> getTruckByLicensePlate(String licensePlate);
     List<Truck> getAllTrucks();
     long delete(Integer id);
+    /**
+     * Update status by license plate
+     * @Param license (not null): String - license plate of truck
+     * @Param status (not null): Int - status of truck: -1 (maintenance), 0 (unavailable), 1 (available)
+     * @Return numbers of successful rows
+     */
+    long updateStatus(String license, int status);
 }

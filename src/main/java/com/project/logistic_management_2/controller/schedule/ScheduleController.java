@@ -57,5 +57,26 @@ public class ScheduleController {
                 BaseResponse.ok(scheduleService.approveByID(id))
         );
     }
-}
 
+    @GetMapping("/mark_complete/{id}")
+    public ResponseEntity<Object> markComplete(@PathVariable String id) {
+        return ResponseEntity.ok(
+                BaseResponse.ok(scheduleService.markComplete(id))
+        );
+    }
+
+    @GetMapping("/reports")
+    public ResponseEntity<Object> exportReport(@RequestParam String license, @RequestParam String period) {
+        return ResponseEntity.ok(
+                BaseResponse.ok(scheduleService.report(license, period))
+        );
+    }
+
+    //Xuất lương lịch trình của một tài xế trong 1 chu kỳ
+    @GetMapping("/reports/salary")
+    public ResponseEntity<Object> exportScheduleSalary(@RequestParam String driverId, @RequestParam String period) {
+        return ResponseEntity.ok(
+                BaseResponse.ok(scheduleService.exportScheduleSalary(driverId, period))
+        );
+    }
+}

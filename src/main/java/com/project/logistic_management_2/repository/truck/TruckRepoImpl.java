@@ -6,6 +6,7 @@ import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
@@ -68,6 +69,25 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
         return query.update(qTruck)
                 .where(builder)
                 .set(qTruck.deleted, true)
+                .execute();
+    }
+
+    @Override
+    @Modifying
+    @Transactional
+    public long updateStatus(@NotNull String license, int status) {
+        if (status < -1 || status > 1) {
+            return 0;
+        }
+        QTruck qTruck = QTruck.truck;
+
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(qTruck.licensePlate.eq(license))
+                .and(qTruck.deleted.eq(false));
+
+        return query.update(qTruck)
+                .where(builder)
+                .set(qTruck.status, status)
                 .execute();
     }
 

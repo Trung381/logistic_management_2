@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.repository.schedule;
 
-import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
+import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -12,6 +12,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,12 +62,26 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     }
 
     @Override
-    public List<ScheduleDTO> getAll() {
+    public List<ScheduleDTO> getAll(String license, YearMonth period) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(schedule.deleted.eq(false));
+
+        if (license != null && !license.isBlank()) {
+            builder.and(schedule.truckLicense.eq(license).or(schedule.moocLicense.eq(license)));
+        }
+        //Tìm theo chu kỳ nếu period hợp lệ
+        if (period != null) {
+            Date startDate = Date.valueOf(period.atDay(1).atStartOfDay().toLocalDate());
+            Date endDate = Date.valueOf(period.plusMonths(1).atDay(1).atStartOfDay().toLocalDate());
+            builder.and(schedule.createdAt.between(startDate, endDate));
+        }
+
         return query.from(schedule)
                 .innerJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
                 .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
-                .where(schedule.deleted.eq(false))
+                .where(builder)
                 .select(scheduleProjection())
+                .orderBy(schedule.updatedAt.desc())
                 .fetch();
     }
 
@@ -76,6 +94,7 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
         return Optional.ofNullable(
                 query.from(schedule)
                         .innerJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
+                        .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
                         .where(builder)
                         .select(scheduleProjection())
                         .fetchOne()
@@ -109,5 +128,89 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
                 .where(builder)
                 .set(schedule.status, 1)
                 .execute();
+    }
+
+    @Override
+    @Modifying
+    @Transactional
+    public long markComplete(String id) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(schedule.id.eq(id))
+                .and(schedule.deleted.eq(false));
+        return query.update(schedule)
+                .where(builder)
+                .set(schedule.status, 2) //đã hoàn thành:
+                .execute();
+    }
+
+    @Override
+    public List<ScheduleSalaryDTO> exportScheduleSalary(String driverId, YearMonth period) {
+        Date startDate = Date.valueOf(LocalDate.now().atStartOfDay().toLocalDate());
+        Date endDate = Date.valueOf(LocalDate.now().plusMonths(1).atStartOfDay().toLocalDate());
+        ;
+        if (period != null) {
+            startDate = Date.valueOf(period.atDay(1).atStartOfDay().toLocalDate());
+            endDate = Date.valueOf(period.plusMonths(1).atDay(1).atStartOfDay().toLocalDate());
+        }
+
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(schedule.createdAt.between(startDate, endDate))
+                .and(user.id.eq(driverId));
+
+        ConstructorExpression<ScheduleSalaryDTO> expression = Projections.constructor(ScheduleSalaryDTO.class,
+                user.fullName.as("driverName"),
+                scheduleConfig.placeA.as("placeA"),
+                scheduleConfig.placeB.as("placeB"),
+                scheduleConfig.amount.min().coalesce(0f).as("amount"),
+                schedule.id.count().castToNum(Integer.class).coalesce(0).as("count"),
+                scheduleConfig.amount.min().multiply(schedule.id.count()).castToNum(Float.class).coalesce(0f).as("total")
+        );
+
+        return query.from(user)
+                .innerJoin(truck).on(user.id.eq(truck.driverId))
+                .innerJoin(schedule).on(truck.licensePlate.eq(schedule.truckLicense))
+                .innerJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
+                .where(builder)
+                .groupBy(scheduleConfig.placeA, scheduleConfig.placeB)
+                .select(expression)
+                .fetch();
+    }
+
+    @Override
+    public List<ScheduleDTO> exportReport(String license, YearMonth period) {
+        ConstructorExpression<ScheduleDTO> expression = Projections.constructor(ScheduleDTO.class,
+                schedule.scheduleConfigId.coalesce("Chạy nội bộ").as("scheduleConfigId"),
+                scheduleConfig.placeA.as("placeA"),
+                scheduleConfig.placeB.as("placeB"),
+                JPAExpressions.select(truck.driverId.as("driverId"))
+                        .from(truck)
+                        .where(schedule.truckLicense.eq(truck.licensePlate)),
+                JPAExpressions.select(user.fullName)
+                        .from(user, truck)
+                        .where(schedule.truckLicense.eq(truck.licensePlate)
+                                .and(truck.driverId.eq(user.id))
+                        ),
+                schedule.truckLicense.as("truckLicense"),
+                schedule.moocLicense.as("moocLicense"),
+                schedule.departureTime.as("departureTime"),
+                schedule.arrivalTime.as("arrivalTime"),
+                schedule.id.count().castToNum(Integer.class).coalesce(0).as("count")
+        );
+
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(schedule.truckLicense.eq(license));
+
+        if (period != null) {
+            Date startDate = Date.valueOf(period.atDay(1).atStartOfDay().toLocalDate());
+            Date endDate = Date.valueOf(period.plusMonths(1).atDay(1).atStartOfDay().toLocalDate());
+            builder.and(schedule.createdAt.between(startDate, endDate));
+        }
+
+        return query.from(schedule)
+                .leftJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
+                .where(builder)
+                .groupBy(schedule.truckLicense, schedule.moocLicense, schedule.departureTime, schedule.arrivalTime, schedule.scheduleConfigId)
+                .select(expression)
+                .fetch();
     }
 }
