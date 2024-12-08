@@ -16,7 +16,7 @@ public class TruckDTO {
     private float capacity;
     @NotNull(message = "ID tài xế không được để trống")
     private String driver_id;
-    private String type;
+    private Integer type;
     private Integer deleted; // 0: chưa xóa, 1: đã xóa
     private String note;
 }

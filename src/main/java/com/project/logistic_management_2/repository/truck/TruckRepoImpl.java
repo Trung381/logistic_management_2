@@ -5,6 +5,7 @@ import com.project.logistic_management_2.entity.Truck;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import jakarta.persistence.EntityManager;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,7 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
                 .fetchOne();
         return Optional.ofNullable(truck);
     }
+
     @Override
     public Optional<Truck> getTruckByLicensePlate(String licensePlate) {
         QTruck qTruck = QTruck.truck;
@@ -52,4 +54,17 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
                 .fetch();
     }
 
+    @Override
+    public List<Truck> getTrucksByType(Integer type) {
+        QTruck qTruck = QTruck.truck;
+
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qTruck.type.eq(type)); // Lọc theo type (0 hoặc 1)
+        builder.and(qTruck.deleted.eq(1)); // Lọc các bản ghi chưa bị xóa
+
+        return query.from(qTruck)
+                .where(builder)
+                .select(qTruck)
+                .fetch();
+    }
 }

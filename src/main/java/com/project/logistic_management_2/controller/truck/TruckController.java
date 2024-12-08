@@ -37,10 +37,10 @@ public class TruckController {
         );
     }
 
-    @GetMapping("/getById/{id}")
-    public ResponseEntity<Object> getTruckById(@PathVariable String id) {
+    @GetMapping("/getByType/{type}")
+    public ResponseEntity<Object> getTrucksByType(@PathVariable Integer type) {
         return ResponseEntity.ok(
-                BaseResponse.ok(truckService.getTruckById(id))
+                BaseResponse.ok(truckService.getTrucksByType(type))
         );
     }
 

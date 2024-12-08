@@ -9,4 +9,5 @@ public interface TruckRepoCustom {
     Optional<Truck> getTruckById(String id);
     Optional<Truck> getTruckByLicensePlate(String licensePlate);
     List<Truck> getAllTrucks();
+    List<Truck> getTrucksByType(Integer type);
 }

@@ -48,5 +48,4 @@ public class TruckMapper {
         truckDTO.setDeleted(truck.getDeleted());
         return truckDTO;
     }
-
 }

@@ -35,7 +35,7 @@ public class Truck {
     private Integer status;
 
     @Column(name = "type", nullable = false)
-    private String type;
+    private Integer type;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(value = TemporalType.TIMESTAMP)
