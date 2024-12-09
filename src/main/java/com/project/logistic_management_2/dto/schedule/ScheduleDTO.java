@@ -9,13 +9,12 @@ import java.util.Date;
 @Getter
 @Setter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class ScheduleDTO {
     private String id;
 
-    //Thông tin cấu hình lịch trình
-    @NotBlank(message = "Cấu hình lịch trình không được để trống!")
+    //Thông tin cấu hình lịch trình, null nếu chạy nội bộ
+//    @NotBlank(message = "Cấu hình lịch trình không được để trống!")
     private String scheduleConfigId;
     private String placeA;
     private String placeB;
@@ -38,9 +37,47 @@ public class ScheduleDTO {
     private String note;
     //Ảnh đính kèm
     private String attachDocument;
+    //Loại hành trình: 0 - nội bộ, 1 - tính lương
+    @NotNull(message = "Loại hành trình không được để trống")
+    private Integer type;
     //Trạng thái
     private Integer status;
 
+    private Integer count = 1; //Số chuyến phát sinh: mặc định = 1
+
     private Date createdAt;
     private Date updatedAt;
+
+    public ScheduleDTO(String id, String scheduleConfigId, String placeA, String placeB, Float amount, String driverId, String driverName, String truckLicense, String moocLicense, Date departureTime, Date arrivalTime, String note, String attachDocument, Integer type, Integer status, Date createdAt, Date updatedAt) {
+        this.id = id;
+        this.scheduleConfigId = scheduleConfigId;
+        this.placeA = placeA;
+        this.placeB = placeB;
+        this.amount = amount;
+        this.driverId = driverId;
+        this.driverName = driverName;
+        this.truckLicense = truckLicense;
+        this.moocLicense = moocLicense;
+        this.departureTime = departureTime;
+        this.arrivalTime = arrivalTime;
+        this.note = note;
+        this.attachDocument = attachDocument;
+        this.type = type;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public ScheduleDTO(String scheduleConfigId, String placeA, String placeB, String driverId, String driverName, String truckLicense, String moocLicense, Date departureTime, Date arrivalTime, Integer count) {
+        this.scheduleConfigId = scheduleConfigId;
+        this.placeA = placeA;
+        this.placeB = placeB;
+        this.driverId = driverId;
+        this.driverName = driverName;
+        this.truckLicense = truckLicense;
+        this.moocLicense = moocLicense;
+        this.departureTime = departureTime;
+        this.arrivalTime = arrivalTime;
+        this.count = count;
+    }
 }

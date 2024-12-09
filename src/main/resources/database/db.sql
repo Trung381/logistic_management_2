@@ -120,6 +120,8 @@ CREATE TABLE `trucks` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
+select * from trucks;
+
 INSERT INTO trucks (id, driver_id, license_plate, capacity, type, created_at, updated_at)
 VALUES (1, "US001", "10A00000", 10, 0, now(), now()),
 		(2, "US002", "10A11111", 10, 0, now(), now()),
@@ -149,7 +151,7 @@ VALUES ("HT001", "Hà Nội", "Thành phố Hồ Chí Minh", 10000000, "Tuyến:
 
 CREATE TABLE `schedules` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
-  `schedule_config_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến cấu hình lịch trình",
+  `schedule_config_id` VARCHAR(255) COMMENT "Khóa ngoại đến cấu hình lịch trình, null nếu chạy nội bộ",
   -- `truck_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến xe tải (đầu xe)",
 --   `mooc_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến xe tải (rơ-mooc)",
 	`truck_license` VARCHAR(255) NOT NULL,
@@ -158,6 +160,7 @@ CREATE TABLE `schedules` (
   `departure_time` TIMESTAMP NOT NULL COMMENT "Thời gian khởi hành",
   `arrival_time` TIMESTAMP NOT NULL COMMENT "Thời gian hoàn thành",
   `note` TEXT COMMENT "Ghi chú của mỗi hành trình",
+  `type` INT NOT NULL DEFAULT 1 COMMENT "Loại lịch trình: 0 - Chạy nội bộ, 1 - Tính lương",
   `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành",
   `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Đã xóa: 0 - false, 1 - true",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
