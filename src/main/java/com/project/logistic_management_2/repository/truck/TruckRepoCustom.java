@@ -9,6 +9,7 @@ public interface TruckRepoCustom {
     Optional<Truck> getTruckById(Integer id);
     Optional<Truck> getTruckByLicensePlate(String licensePlate);
     List<Truck> getAllTrucks();
+    List<Truck> getTrucksByType(Integer type);
     long delete(Integer id);
     /**
      * Update status by license plate

@@ -7,7 +7,7 @@ import java.util.List;
 public interface TruckService {
     TruckDTO createTruck(TruckDTO truckDTO);
     List<TruckDTO> getAllTrucks();
-    TruckDTO getTruckById(Integer id);
+   List<TruckDTO> getTrucksByType(Integer type);
     TruckDTO getTruckByLicensePlate(String licensePlate);
     TruckDTO updateTruck(Integer id,TruckDTO truckDTO);
     long deleteTruck(Integer id);

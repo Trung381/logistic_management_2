@@ -30,17 +30,17 @@ public class TruckController {
         );
     }
 
-    @GetMapping("/get_by_license/{licensePlate}")
-    public ResponseEntity<Object> getTruckByLicensePlate(@PathVariable String licensePlate) {
+    @GetMapping("/get_by_license/{license}")
+    public ResponseEntity<Object> getTruckByLicensePlate(@PathVariable String license) {
         return ResponseEntity.ok(
-                BaseResponse.ok(truckService.getTruckByLicensePlate(licensePlate))
+                BaseResponse.ok(truckService.getTruckByLicensePlate(license))
         );
     }
 
-    @GetMapping("/get_by_id/{id}")
-    public ResponseEntity<Object> getTruckById(@PathVariable Integer id) {
+    @GetMapping("/get_by_type/{type}")
+    public ResponseEntity<Object> getTrucksByType(@PathVariable Integer type) {
         return ResponseEntity.ok(
-                BaseResponse.ok(truckService.getTruckById(id))
+                BaseResponse.ok(truckService.getTrucksByType(type))
         );
     }
 
