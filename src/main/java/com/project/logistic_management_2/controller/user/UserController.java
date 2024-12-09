@@ -36,14 +36,14 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponse<List<User>>> getAllUsers(@RequestParam Boolean all) {
-        List<User> users = userService.getAllUsers(all);
+    public ResponseEntity<BaseResponse<List<User>>> getAllUsers() {
+        List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(BaseResponse.ok(users));
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<BaseResponse<User>> getUserById(@PathVariable String id, @RequestParam Boolean all) {
-        User user = userService.getUserById(id,all);
+    public ResponseEntity<BaseResponse<User>> getUserById(@PathVariable String id) {
+        User user = userService.getUserById(id);
         return ResponseEntity.ok(BaseResponse.ok(user));
     }
 

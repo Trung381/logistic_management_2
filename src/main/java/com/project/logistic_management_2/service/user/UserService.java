@@ -11,8 +11,8 @@ import java.util.List;
 public interface UserService {
     User createUser(UserDTO userDto);
     User updateUser(String id,UserDTO userDto);
-    List<User> getAllUsers(Boolean all);
-    User getUserById(String id, Boolean all);
+    List<User> getAllUsers();
+    User getUserById(String id);
     String deleteById(String id);
     User findByUsername(String username);
 }

@@ -18,23 +18,24 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
     }
 
     @Override
-    public List<User> getAll(Boolean all){
+    public List<User> getAll(){
         QUser qUser = QUser.user;
-        BooleanBuilder builder = new BooleanBuilder();
-        if(!all){
-            builder.and(qUser.status.eq(1));
-        }
-        return query.selectFrom(qUser).where(builder).fetch();
+//        BooleanBuilder builder = new BooleanBuilder();
+//        if(!all){
+//            builder.and(qUser.status.eq(1));
+//        }
+//        return query.selectFrom(qUser).where(builder).fetch();
+        return query.selectFrom(qUser).fetch();
     }
 
     @Override
-    public User getUserById(String id, Boolean all){
+    public User getUserById(String id){
         QUser qUser = QUser.user;
         BooleanBuilder builder = new BooleanBuilder()
                 .and(qUser.id.eq(id));
-        if(!all){
-            builder.and(qUser.status.eq(1));
-        }
+//        if(!all){
+//            builder.and(qUser.status.eq(1));
+//        }
         return query.selectFrom(qUser)
                 .where(builder)
                 .fetchOne();

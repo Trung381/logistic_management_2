@@ -21,7 +21,7 @@ public class FileStorageService {
                 .toAbsolutePath().normalize();
         try {
             Files.createDirectories(this.fileStorageLocation);
-            System.out.println("Thư mục lưu trữ file: " + this.fileStorageLocation.toString());
+//            System.out.println("Thư mục lưu trữ file: " + this.fileStorageLocation.toString());
         } catch (Exception ex) {
             throw new RuntimeException("Không thể tạo thư mục lưu trữ file!", ex);
         }

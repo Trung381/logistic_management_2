@@ -30,7 +30,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (userDto.getId() == null) {
             throw new IllegalArgumentException("User ID must be provided for updating.");
         }
-        User user = userRepo.getUserById(id, false);
+        User user = userRepo.getUserById(id);
         if(user == null){
             throw new NotFoundException("User not found with User: "+id);
         }
@@ -39,13 +39,13 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public List<User> getAllUsers(Boolean all) {
-        return userRepo.getAll(all);
+    public List<User> getAllUsers() {
+        return userRepo.getAll();
     }
 
     @Override
-    public User getUserById(String id, Boolean all) {
-        User user = userRepo.getUserById(id, all);
+    public User getUserById(String id) {
+        User user = userRepo.getUserById(id);
         if(user == null){
             throw new NotFoundException("User not found with ID: "+id);
         }
