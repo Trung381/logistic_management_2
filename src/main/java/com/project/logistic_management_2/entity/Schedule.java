@@ -19,8 +19,11 @@ public class Schedule {
     @Column(name = "schedule_config_id")
     private String scheduleConfigId;
 
-    @Column(name = "driver_id")
-    private String driverId;
+    @Column(name = "truck_license")
+    private String truckLicense;
+
+    @Column(name = "mooc_license")
+    private String moocLicense;
 
     @Column(name = "attach_document")
     private String attachDocument;

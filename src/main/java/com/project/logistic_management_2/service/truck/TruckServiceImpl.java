@@ -48,7 +48,7 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
     }
 
     @Override
-    public TruckDTO updateTruck(String id, TruckDTO truckDTO) {
+    public TruckDTO updateTruck(Integer id, TruckDTO truckDTO) {
         Truck truck = repository.getTruckById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe cần tìm!"));
 
@@ -58,7 +58,7 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
     }
 
     @Override
-    public long deleteTruck(String id) {
+    public long deleteTruck(Integer id) {
        Truck truck = repository.getTruckById(id)
                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe"));
        return repository.delete(id);

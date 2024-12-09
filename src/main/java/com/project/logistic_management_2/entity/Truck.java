@@ -13,7 +13,8 @@ import java.util.Date;
 @Table(name = "trucks")
 public class Truck {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     @Column(name = "driver_id", nullable = false)
     private String driverId;
     @Column(name = "license_plate", nullable = false)

@@ -45,14 +45,14 @@ public class TruckController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> updateTruck(@PathVariable String id, @Valid @RequestBody TruckDTO truckDTO) {
+    public ResponseEntity<Object> updateTruck(@PathVariable Integer id, @Valid @RequestBody TruckDTO truckDTO) {
         return ResponseEntity.ok(
                 BaseResponse.ok(truckService.updateTruck(id, truckDTO))
         );
     }
 
     @GetMapping("/delete/{id}")
-    public ResponseEntity<Object> deleteTruck(@PathVariable String id) {
+    public ResponseEntity<Object> deleteTruck(@PathVariable Integer id) {
         return ResponseEntity.ok(
                 BaseResponse.ok(truckService.deleteTruck(id))
         );
