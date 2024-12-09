@@ -74,5 +74,4 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
                 .select(qTruck)            // Chọn tất cả các cột trong bảng Truck
                 .fetch();                  // Thực thi truy vấn và trả về danh sách kết quả
     }
-
 }
