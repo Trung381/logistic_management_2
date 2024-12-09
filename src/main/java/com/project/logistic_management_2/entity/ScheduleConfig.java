@@ -5,19 +5,25 @@ import lombok.*;
 
 import java.util.Date;
 
-@Entity
-@Table(name = "expenses_configs")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExpensesConfig {
+@Entity
+@Table(name = "schedule_configs")
+public class ScheduleConfig {
     @Id
     private String id;
 
-    @Column(name = "type")
-    private String type;
+    @Column(name = "place_a")
+    private String placeA;
+
+    @Column(name = "place_b")
+    private String placeB;
+
+    @Column(name = "amount")
+    private Float amount;
 
     @Column(name = "note")
     private String note;
@@ -26,10 +32,8 @@ public class ExpensesConfig {
     private Boolean deleted;
 
     @Column(name = "created_at")
-    @Temporal(value = TemporalType.TIMESTAMP)
     private Date createdAt;
 
     @Column(name = "updated_at")
-    @Temporal(value = TemporalType.TIMESTAMP)
     private Date updatedAt;
 }

@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.*;
+import java.util.Objects;
 
 @Service
 public class FileStorageService {
@@ -21,7 +22,7 @@ public class FileStorageService {
                 .toAbsolutePath().normalize();
         try {
             Files.createDirectories(this.fileStorageLocation);
-//            System.out.println("Thư mục lưu trữ file: " + this.fileStorageLocation.toString());
+            //System.out.println("Thư mục lưu trữ file: " + this.fileStorageLocation.toString());
         } catch (Exception ex) {
             throw new RuntimeException("Không thể tạo thư mục lưu trữ file!", ex);
         }
@@ -29,7 +30,7 @@ public class FileStorageService {
 
     public String storeFile(MultipartFile file) {
         // Lấy tên file gốc
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
         try {
             // Kiểm tra tên file hợp lệ

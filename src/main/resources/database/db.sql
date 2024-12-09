@@ -37,7 +37,7 @@ CREATE TABLE `users` (
   `password` VARCHAR(255) NOT NULL,
   `phone` VARCHAR(20) NOT NULL,
   `date_of_birth` DATE NOT NULL,
-  `note` VARCHAR(255) NOT NULL,
+  `note` VARCHAR(255),
   `role_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến vai trò",
   `status` INT NOT NULL DEFAULT 1 COMMENT "Trạng thái người dùng: 0 - Không hoạt động, 1 - Đang hoạt động",
   `created_at` TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -47,6 +47,10 @@ CREATE TABLE `users` (
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
+
+INSERT INTO users (id, full_name, username, password, phone, date_of_birth, role_id, created_at, updated_at)
+VALUES ("US001", "Nguyen Van A", "anguyen", "122222", "11111", "2000-11-11", 4, now(), now()),
+		("US002", "Tran Van B", "btran", "001010101", "133333", "2000-10-10", 4, now(), now());
 
 CREATE TABLE `roles_permissions` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -71,7 +75,6 @@ CREATE TABLE `salary_received` (
   `phone_allowance` FLOAT DEFAULT 0 COMMENT "Tiền phụ cấp",
   `basic_salary` FLOAT DEFAULT 0 COMMENT "Lương cơ bản",
   `period` VARCHAR(7) NOT NULL COMMENT "Chu kỳ thanh toán lương, format: YYYY-MM",
-  `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái: 0 - Chưa thanh toán, 1 - Đã thanh toán",
   `job_allowance` FLOAT DEFAULT 0 COMMENT "Tiền phụ cấp công việc",
   `bonus` FLOAT DEFAULT 0 COMMENT "Tiền thưởng",
   `monthly_paid_leave` FLOAT DEFAULT 0 COMMENT "Lương ngày nghỉ trong tháng",
@@ -101,12 +104,14 @@ DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `trucks` (
-  `id` VARCHAR(255) UNIQUE NOT NULL,
-  `driver_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến user",
-  `license_plate` VARCHAR(255) NOT NULL,
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `driver_id` VARCHAR(255) COMMENT "Khóa ngoại đến user, null nếu là mooc",
+  `license_plate` VARCHAR(255) UNIQUE NOT NULL,
   `capacity` FLOAT NOT NULL DEFAULT 0 COMMENT "Tải trọng của xe",
   `note` TEXT COMMENT "Ghi chú thêm",
+  `type` INT NOT NULL DEFAULT 0 COMMENT "Loại: 0 - xe tải, 1 - mooc",
   `status` INT NOT NULL DEFAULT 1 COMMENT "Trạng thái của xe: -1: Bảo trì, 0 - Không có sẵn, 1 - Có sẵn",
+  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Đã xóa: 0 - false, 1 - true",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
   PRIMARY KEY (`id`),
@@ -115,12 +120,20 @@ CREATE TABLE `trucks` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
+select * from trucks;
+
+INSERT INTO trucks (id, driver_id, license_plate, capacity, type, created_at, updated_at)
+VALUES (1, "US001", "10A00000", 10, 0, now(), now()),
+		(2, "US002", "10A11111", 10, 0, now(), now()),
+        (3, null, "10A22222", 10, 1, now(), now());
+
 CREATE TABLE `schedule_configs` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
   `place_a` VARCHAR(255) NOT NULL,
   `place_b` VARCHAR(255) NOT NULL,
   `amount` FLOAT NOT NULL DEFAULT 0 COMMENT "Giá tiền cho mỗi hành trình",
   `note` TEXT COMMENT "Ghi chú cho hành trình",
+  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Đã xóa: 0 - false, 1 - true",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
   PRIMARY KEY (`id`)
@@ -128,36 +141,49 @@ CREATE TABLE `schedule_configs` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
-INSERT INTO `schedule_configs` (id, place_a, place_b, amount, note, created_at, updated_at)
-VALUES ("HT001", "Hà Nội", "Thành phố Hồ Chí Minh", 10000000, "Tuyến: Hà Nội - Hồ Chí Minh", now(), now()),
-		("HT002", "Hà Nội", "Đà Nẵng", 7000000, "Tuyến: Hà Nội - Đà Nẵng", now(), now()),
-        ("HT003", "Hà Nội", "Thừa Thiên - Huế", 5500000, "Tuyến: Hà Nội - Thừa Thiên-Huế", now(), now()),
-        ("HT004", "Hà Nội", "Bình Dương", 9000000, "Tuyến: Hà Nội - Bình Dương", now(), now()),
-        ("HT005", "Hà Nội", "Bắc Giang", 4000000, "Tuyến: Hà Nội - Bắc Giang", now(), now()),
-        ("HT006", "Hà Nội", "Lào Cai", 4500000, "Tuyến: Hà Nội - Lào Cai", now(), now());
+INSERT INTO `schedule_configs` (id, place_a, place_b, amount, note, deleted, created_at, updated_at)
+VALUES ("HT001", "Hà Nội", "Thành phố Hồ Chí Minh", 10000000, "Tuyến: Hà Nội - Hồ Chí Minh", b'0', now(), now()),
+		("HT002", "Hà Nội", "Đà Nẵng", 7000000, "Tuyến: Hà Nội - Đà Nẵng", b'0', now(), now()),
+        ("HT003", "Hà Nội", "Thừa Thiên - Huế", 5500000, "Tuyến: Hà Nội - Thừa Thiên-Huế", b'0', now(), now()),
+        ("HT004", "Hà Nội", "Bình Dương", 9000000, "Tuyến: Hà Nội - Bình Dương", b'0', now(), now()),
+        ("HT005", "Hà Nội", "Bắc Giang", 4000000, "Tuyến: Hà Nội - Bắc Giang", b'0', now(), now()),
+        ("HT006", "Hà Nội", "Lào Cai", 4500000, "Tuyến: Hà Nội - Lào Cai", b'0', now(), now());
 
 CREATE TABLE `schedules` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
-  `schedule_config_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến cấu hình lịch trình",
-  `driver_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Tài xế lái xe",
+  `schedule_config_id` VARCHAR(255) COMMENT "Khóa ngoại đến cấu hình lịch trình, null nếu chạy nội bộ",
+  -- `truck_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến xe tải (đầu xe)",
+--   `mooc_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến xe tải (rơ-mooc)",
+	`truck_license` VARCHAR(255) NOT NULL,
+    `mooc_license` VARCHAR(255) NOT NULL,
   `attach_document` VARCHAR(255) COMMENT "Đường dẫn lưu tài liệu bổ sung",
   `departure_time` TIMESTAMP NOT NULL COMMENT "Thời gian khởi hành",
-  `arrival_time` TIMESTAMP COMMENT "Thời gian hoàn thành",
+  `arrival_time` TIMESTAMP NOT NULL COMMENT "Thời gian hoàn thành",
   `note` TEXT COMMENT "Ghi chú của mỗi hành trình",
+  `type` INT NOT NULL DEFAULT 1 COMMENT "Loại lịch trình: 0 - Chạy nội bộ, 1 - Tính lương",
   `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành",
+  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Đã xóa: 0 - false, 1 - true",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`driver_id`) REFERENCES `users`(`id`),
+  -- FOREIGN KEY (`truck_id`) REFERENCES `trucks`(`id`),
+--   FOREIGN KEY (`mooc_id`) REFERENCES `trucks`(`id`),
+-- FOREIGN KEY (`truck_license`) REFERENCES `trucks`(`license_plate`),
+-- FOREIGN KEY (`mooc_license`) REFERENCES `trucks`(`license_plate`),
   FOREIGN KEY (`schedule_config_id`) REFERENCES `schedule_configs`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
+INSERT INTO schedules (id, schedule_config_id, truck_license, mooc_license, departure_time, arrival_time, created_at, updated_at)
+VALUES ("HT-001", "HT001", "10A00000", "10A33333", now(), now(), now(), now()),
+		("HT-002", "HT002", "10A11111", "10A33333", now(), now(), now(), now());
+
 CREATE TABLE `expenses_configs` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
   `type` TEXT NOT NULL COMMENT "Loại chi phí: Nhiên liệu, Thay dầu,...",
   `note` TEXT COMMENT "Ghi chú của cấu hình chi phí",
+  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Trạng thái: 0 - Chưa xóa, 1 - Đã xóa",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
   PRIMARY KEY (`id`)
@@ -165,18 +191,23 @@ CREATE TABLE `expenses_configs` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
-INSERT INTO `expenses_configs` (id, type, note, created_at, updated_at)
-VALUES ("CP001", "Nhiên liệu", "Chi phí nhiên liệu", now(), now()),
-		("CP002", "Sữa chữa", "Chi phí sửa chữa xe", now(), now()),
-        ("CP003", "Cúng xe", "Chi phí cúng xe", now(), now());
+INSERT INTO `expenses_configs` (id, type, note, deleted, created_at, updated_at)
+VALUES ("CP001", "Nhiên liệu", "Chi phí nhiên liệu", b'0', now(), now()),
+		("CP002", "Sữa chữa", "Chi phí sửa chữa xe", b'0', now(), now()),
+        ("CP003", "Cúng xe", "Chi phí cúng xe", b'0', now(), now());
+        
+INSERT INTO `expenses_configs` (id, type, note, deleted, created_at, updated_at)
+VALUES ("CP004", "Nhiên liệu", "Chi phí nhiên liệu", b'0', now(), now());
 
 CREATE TABLE `expenses` (
   `id` VARCHAR(255) NOT NULL,
   `schedule_id`  VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến lịch trình",
-  `expenses_confid_id`  VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến cấu hình chi phí",
+  `expenses_config_id`  VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến cấu hình chi phí",
   `amount` FLOAT NOT NULL DEFAULT 0 COMMENT "Giá tiền",
   `note` TEXT COMMENT "Ghi chú của chi phí",
-  `status` INT DEFAULT 0 COMMENT "Trạng thái của chi phí: 0 - Chưa duyệt, 1 - Đã duyệt",
+  `img_path` VARCHAR(255) DEFAULT NULL COMMENT "Đường dẫn lưu ảnh hóa đơn",
+  `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái của chi phí: 0 - Chưa duyệt, 1 - Đã duyệt",
+  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Trạng thái: 0 - Chưa xóa, 1 - Đã xóa",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
   PRIMARY KEY (`id`),

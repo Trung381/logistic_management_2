@@ -28,12 +28,19 @@ public class Expenses {
     @Column(name = "note")
     private String note;
 
+    //Duong dan luu anh hoa don
+    @Column(name = "img_path")
+    private String imgPath;
+
     /* Trạng thái chi phí
     0: Chưa duyệt (Mặc định)
     1: Đã duyệt
     */
     @Column(name = "status")
     private Integer status;
+
+    @Column(name = "deleted")
+    private Boolean deleted;
 
     @Column(name = "created_at")
     @Temporal(value = TemporalType.TIMESTAMP)
