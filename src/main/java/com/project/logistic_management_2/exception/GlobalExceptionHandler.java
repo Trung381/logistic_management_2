@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidParameterException.class)
-    public ResponseEntity<BaseResponse<?>> handleInvalidParameterException(InvalidParameterException e) {
+    public ResponseEntity<Object> handleInvalidParameterException(InvalidParameterException e) {
         return new ResponseEntity<>(
                 BaseResponse.fail(e.getMessage()),
                 HttpStatus.BAD_REQUEST

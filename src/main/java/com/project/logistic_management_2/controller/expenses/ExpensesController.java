@@ -57,4 +57,11 @@ public class ExpensesController {
                 BaseResponse.ok(expensesService.approveByID(id))
         );
     }
+
+    @GetMapping("/reports")
+    public ResponseEntity<Object> exportReport(@RequestParam String driverId, @RequestParam String period) {
+        return ResponseEntity.ok(
+                BaseResponse.ok(expensesService.report(driverId, period))
+        );
+    }
 }

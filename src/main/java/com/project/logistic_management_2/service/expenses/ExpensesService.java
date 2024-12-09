@@ -12,4 +12,5 @@ public interface ExpensesService {
     ExpensesDTO update(String id, ExpensesDTO dto);
     long deleteByID(String id);
     long approveByID(String id);
+    List<ExpensesDTO> report(String driverId, String period);
 }

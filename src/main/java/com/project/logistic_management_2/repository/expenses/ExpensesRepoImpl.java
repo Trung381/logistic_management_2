@@ -18,6 +18,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,31 +43,50 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                                 .and(schedule.truckLicense.eq(truck.licensePlate))
                                 .and(truck.driverId.eq(user.id))
                         ),
+                //Mã lịch trình
                 expenses.scheduleId.as("scheduleId"),
+                //Thông tin cấu hình chi phí: mã, loại chi phí
                 expenses.expensesConfigId.as("expensesConfigId"),
-                // Loại chi phí
                 JPAExpressions.select(expensesConfig.type.as("expensesConfigType"))
                         .from(expensesConfig)
                         .where(expensesConfig.id.eq(expenses.expensesConfigId)),
-                expenses.amount.as("amount"),
-                expenses.note.as("note"),
-                expenses.imgPath.as("imgPath"),
-                expenses.status.as("status"),
+
+                expenses.amount.as("amount"),   //Giá tiền
+                expenses.note.as("note"),       //Ghi chú
+                expenses.imgPath.as("imgPath"), //Đường dẫn ảnh đính kèm
+                expenses.status.as("status"),   //Trạng thái chi phí
                 expenses.createdAt.as("createdAt"),
                 expenses.updatedAt.as("updatedAt")
         );
     }
 
     @Override
-    public List<ExpensesDTO> getAll() {
-        return query.from(expenses)
-                .where(expenses.deleted.eq(false))
+    public List<ExpensesDTO> getAll(String driverId, YearMonth period) {
+        //Điều kiện truy vấn: Chưa bị xóa
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(expenses.deleted.eq(false));
+        //Tìm theo mã tài xế nếu tham số driverId hợp lệ
+        if (driverId != null && !driverId.isBlank()) {
+            builder.and(expenses.scheduleId.eq(schedule.id))
+                    .and(schedule.driverId.eq(driverId));
+        }
+        //Tìm theo chu kỳ nếu period hợp lệ
+        if (period != null) {
+            Date startDate = Date.valueOf(period.atDay(1).atStartOfDay().toLocalDate());
+            Date endDate = Date.valueOf(period.plusMonths(1).atDay(1).atStartOfDay().toLocalDate());
+            builder.and(expenses.createdAt.between(startDate, endDate));
+        }
+
+        //Truy vấn, trả về kết quả
+        return query.from(expenses, schedule)
+                .where(builder)
                 .select(expensesProjection())
                 .fetch();
     }
 
     @Override
     public Optional<ExpensesDTO> getByID(String id) {
+        //Truy vấn theo id và chưa bị xóa
         BooleanBuilder builder = new BooleanBuilder()
                 .and(expenses.id.eq(id))
                 .and(expenses.deleted.eq(false));
