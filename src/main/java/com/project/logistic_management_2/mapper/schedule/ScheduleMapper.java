@@ -15,11 +15,13 @@ public class ScheduleMapper {
         return Schedule.builder()
                 .id(Utils.genID(IDKey.SCHEDULE))
                 .scheduleConfigId(dto.getScheduleConfigId())
-                .driverId(dto.getDriverId())
+                .truckLicense(dto.getTruckLicense())
+                .moocLicense(dto.getMoocLicense())
                 .attachDocument(dto.getAttachDocument())
                 .departureTime(dto.getDepartureTime())
                 .arrivalTime(dto.getDepartureTime())
                 .note(dto.getNote())
+                .type(dto.getType())
                 .status(0)
                 .deleted(false)
                 .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
@@ -31,11 +33,13 @@ public class ScheduleMapper {
         if (dto == null) return;
         schedule.setId(id);
         schedule.setScheduleConfigId(dto.getScheduleConfigId());
-        schedule.setDriverId(dto.getDriverId());
+        schedule.setTruckLicense(dto.getTruckLicense());
+        schedule.setMoocLicense(dto.getMoocLicense());
         schedule.setAttachDocument(dto.getAttachDocument());
         schedule.setDepartureTime(dto.getDepartureTime());
         schedule.setArrivalTime(dto.getArrivalTime());
         schedule.setNote(dto.getNote());
+        schedule.setType(dto.getType());
         schedule.setUpdatedAt(new Date());
     }
 }
