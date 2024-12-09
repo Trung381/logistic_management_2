@@ -68,7 +68,8 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         //Tìm theo mã tài xế nếu tham số driverId hợp lệ
         if (driverId != null && !driverId.isBlank()) {
             builder.and(expenses.scheduleId.eq(schedule.id))
-                    .and(schedule.driverId.eq(driverId));
+                    .and(schedule.truckLicense.eq(truck.licensePlate))
+                    .and(truck.driverId.eq(driverId));
         }
         //Tìm theo chu kỳ nếu period hợp lệ
         if (period != null) {
@@ -78,7 +79,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         }
 
         //Truy vấn, trả về kết quả
-        return query.from(expenses, schedule)
+        return query.from(expenses, schedule, truck)
                 .where(builder)
                 .select(expensesProjection())
                 .fetch();

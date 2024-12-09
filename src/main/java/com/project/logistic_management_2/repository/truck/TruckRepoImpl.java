@@ -103,7 +103,7 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
         builder.and(qTruck.type.eq(type)); // Lọc theo giá trị của type (ví dụ: 0 hoặc 1)
 
         // Thêm điều kiện lọc: chỉ lấy các bản ghi chưa bị xóa (cột "deleted" = 1)
-        builder.and(qTruck.deleted.eq(1)); // Lọc các bản ghi chưa bị xóa (deleted = 1)
+        builder.and(qTruck.deleted.eq(false)); // Lọc các bản ghi chưa bị xóa (deleted = false)
 
         // Sử dụng QueryDSL để thực hiện truy vấn
         return query.from(qTruck)               // Chọn bảng Truck làm nguồn truy vấn

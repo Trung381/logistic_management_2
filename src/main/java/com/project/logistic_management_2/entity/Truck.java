@@ -24,7 +24,7 @@ public class Truck {
     @Column(name = "note")
     private String note;
     @Column(name = "deleted", nullable = false)
-    private Boolean deleted; //1 là chưa xóa, 0 là đã xóa
+    private Boolean deleted; //0 là chưa xóa, 1 là đã xóa
 
     /*
     Trạng thái của xe:
