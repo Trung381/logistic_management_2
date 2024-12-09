@@ -10,4 +10,5 @@ public interface TruckRepoCustom {
     Optional<Truck> getTruckByLicensePlate(String licensePlate);
     List<Truck> getAllTrucks();
     long delete(String id);
+    List<Truck> getTrucksByType(Integer type);
 }

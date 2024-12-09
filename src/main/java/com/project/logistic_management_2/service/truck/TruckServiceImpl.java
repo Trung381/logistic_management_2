@@ -31,15 +31,16 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
         return trucks.stream().map(mapper::toTruckDTO).toList();
     }
 
-
     @Override
-    public TruckDTO getTruckById(String id) {
-        if(id == null) return null;
-        Truck truck = repository.getTruckById(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe cần tìm!"));
-        return mapper.toTruckDTO(truck);
+    public List<TruckDTO> getTrucksByType(Integer type) {
+        List<Truck> trucks = repository.getTrucksByType(type);
+        if (trucks.isEmpty()) {
+            throw new NotFoundException("Không tìm thấy xe với loại: " + type);
+        }
+        return trucks.stream().map(mapper::toTruckDTO).toList();
     }
 
+    @Override
     public TruckDTO getTruckByLicensePlate(String licensePlate) {
         Truck truck = repository.getTruckByLicensePlate(licensePlate)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy xe với biển số: " + licensePlate));
