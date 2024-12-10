@@ -5,15 +5,17 @@ import com.project.logistic_management_2.entity.Goods;
 import com.project.logistic_management_2.mapper.goods.GoodsMapper;
 import com.project.logistic_management_2.repository.goods.GoodsRepo;
 import com.project.logistic_management_2.service.BaseService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class GoodsServiceImpl extends BaseService<GoodsRepo, GoodsMapper> implements GoodsService {
-    public GoodsServiceImpl(GoodsRepo repo, GoodsMapper mapper) {
-        super(repo, mapper);
-    }
+@RequiredArgsConstructor
+public class GoodsServiceImpl extends BaseService implements GoodsService {
+
+    private final GoodsRepo repository;
+    private final GoodsMapper mapper;
 
     @Override
     public List<GoodsDTO> getAllGoods() {

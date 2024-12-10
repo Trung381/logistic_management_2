@@ -2,6 +2,8 @@ package com.project.logistic_management_2.mapper.transaction;
 
 import com.project.logistic_management_2.dto.request.TransactionDTO;
 import com.project.logistic_management_2.entity.Transaction;
+import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -14,6 +16,7 @@ public class TransactionMapper {
         if (dto == null) return null;
 
         return Transaction.builder()
+                .id(Utils.genID(IDKey.EXPENSES))
                 .refUserId(dto.getRefUserId())
                 .goodsId(dto.getGoodsId())
                 .quantity(dto.getQuantity())

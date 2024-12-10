@@ -5,16 +5,17 @@ import com.project.logistic_management_2.entity.WareHouse;
 import com.project.logistic_management_2.mapper.wareHouse.WareHouseMapper;
 import com.project.logistic_management_2.repository.wareHouse.WareHouseRepo;
 import com.project.logistic_management_2.service.BaseService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class WareHouseServiceImpl extends BaseService<WareHouseRepo, WareHouseMapper> implements WareHouseService {
+@RequiredArgsConstructor
+public class WareHouseServiceImpl extends BaseService implements WareHouseService {
 
-    public WareHouseServiceImpl(WareHouseRepo repo, WareHouseMapper mapper) {
-        super(repo,mapper);
-    }
+    private final WareHouseRepo repository;
+    private final WareHouseMapper mapper;
 
     @Override
     public List<WareHouseDTO> getAllWareHouses() {

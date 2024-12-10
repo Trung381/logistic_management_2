@@ -15,7 +15,6 @@ import java.util.Date;
 @AllArgsConstructor
 public class Goods {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
 
     @Column(name = "warehouse_id")

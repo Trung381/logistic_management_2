@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.controller.transaction;
 
+import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.request.TransactionDTO;
-import com.project.logistic_management_2.dto.response.BaseResponse;
 import com.project.logistic_management_2.service.transaction.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,10 +46,29 @@ public class TransactionController {
     public ResponseEntity<Object> getTransactionByFilter(
             @RequestParam(required = false) String wareHouseId,
             @RequestParam(required = false) Boolean origin,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Timestamp fromDate,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Timestamp toDate) {
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate) {
 
-        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(wareHouseId, origin, fromDate, toDate);
+        Timestamp fromTimestamp = null;
+        Timestamp toTimestamp = null;
+
+        if (fromDate != null) {
+            try {
+                fromTimestamp = Timestamp.valueOf(fromDate.replace("T", " ") + ".000");
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("Invalid fromDate format.");
+            }
+        }
+
+        if (toDate != null) {
+            try {
+                toTimestamp = Timestamp.valueOf(toDate.replace("T", " ") + ".000");
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("Invalid toDate format.");
+            }
+        }
+
+        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(wareHouseId, origin, fromTimestamp, toTimestamp);
 
         return ResponseEntity.ok(BaseResponse.ok(transactions));
     }

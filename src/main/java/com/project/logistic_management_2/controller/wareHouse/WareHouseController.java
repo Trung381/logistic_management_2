@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.controller.wareHouse;
 
-import com.project.logistic_management_2.dto.response.BaseResponse;
+import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.service.wareHouse.WareHouseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -11,18 +11,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class GoodsMapper {
-    public Goods toGoods(GoodsDTO dto) {
-        if (dto == null) return null;
-
-        return Goods.builder()
-                .warehouseId(dto.getWarehouseId())
-                .name(dto.getName())
-                .quantity(dto.getQuantity())
-                .amount(dto.getAmount())
-                .createdAt(new Date())
-                .updatedAt(new Date())
-                .build();
-    }
 
     public List<GoodsDTO> toGoodsDTOList(List<Goods> goodsList) {
         if (goodsList == null || goodsList.isEmpty()) return null;
@@ -40,12 +28,4 @@ public class GoodsMapper {
         ).collect(Collectors.toList());
     }
 
-    public void updateGoods(Goods goods, GoodsDTO dto) {
-        if (dto == null || goods == null) return;
-
-        goods.setName(dto.getName());
-        goods.setQuantity(dto.getQuantity());
-        goods.setAmount(dto.getAmount());
-        goods.setUpdatedAt(new Date());
-    }
 }

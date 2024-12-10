@@ -9,21 +9,20 @@ import com.project.logistic_management_2.mapper.transaction.TransactionMapper;
 import com.project.logistic_management_2.repository.goods.GoodsRepo;
 import com.project.logistic_management_2.repository.transaction.TransactionRepo;
 import com.project.logistic_management_2.service.BaseService;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
 
 @Service
-public class TransactionServiceImpl extends BaseService<TransactionRepo, TransactionMapper> implements TransactionService {
+@RequiredArgsConstructor
+public class TransactionServiceImpl extends BaseService implements TransactionService {
 
     private final GoodsRepo goodsRepo;
-
-    public TransactionServiceImpl(TransactionRepo repo, TransactionMapper mapper
-                                , GoodsRepo goodsRepo) {
-        super(repo, mapper);
-        this.goodsRepo = goodsRepo;
-    }
+    private final TransactionRepo repository;
+    private final TransactionMapper mapper;
 
     @Override
     public TransactionDTO createTransaction(TransactionDTO transactionDTO) {
