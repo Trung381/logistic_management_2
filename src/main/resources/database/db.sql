@@ -251,35 +251,19 @@ VALUES ("H001", "K001", "Gạch", 30, 5000000, now(), now()),
         ("H003", "K001", "Xi măng", 50, 7000000, now(), now()),
         ("H004", "K002", "Thuốc nổ", 5, 7000000, now(), now());
         
-CREATE TABLE `outbound_transactions` (
+CREATE TABLE `transactions` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
-  `creator_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Người chịu trách nhiệm",
-  `approver_id` VARCHAR(255) NOT NULL COMMENT "Người duyệt",
-  `schedule_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến lịch trình",
-  `approved_time` TIMESTAMP COMMENT "Thời gian duyệt",
+  `ref_user_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Người chịu trách nhiệm",
   `goods_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến hàng hóa",
   `quantity` FLOAT NOT NULL DEFAULT 0,
-  `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái giao dịch: (-1) - Không duyệt, 0 - Chờ duyệt, 1 - Đã duyệt, 2 - Đã hoàn thành",
-  `created_at` TIMESTAMP NOT NULL DEFAULT now(),
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`creator_id`) REFERENCES `users`(`id`),
-  FOREIGN KEY (`approver_id`) REFERENCES `users`(`id`),
-  FOREIGN KEY (`goods_id`) REFERENCES `goods`(`id`),
-  FOREIGN KEY (`schedule_id`) REFERENCES `schedules`(`id`)
-) ENGINE = InnoDB
-DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
-
-CREATE TABLE `inbound_transactions` (
-  `id` VARCHAR(255) UNIQUE NOT NULL,
-  `intake_user_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Người chịu trách nhiệm cho lần giao dịch",
-  `intake_time` TIMESTAMP NOT NULL COMMENT "Thời gian giao dịch",
-  `goods_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến hàng hóa",
-  `quantity` FLOAT NOT NULL DEFAULT 0 COMMENT "Số lượng/Khối lượng hàng hóa trên hóa đơn nhập vào",
+  `transaction_time` TIMESTAMP NOT NULL,
+  `origin` BIT NOT NULL DEFAULT 0 COMMENT "0 - Giao dịch nhập, 1 - Giao dịch xuất",
+  `destination` VARCHAR(255),
+  `deleted` BIT NOT NULL DEFAULT 0 COMMENT "0 - Chưa xóa, 1 - Đã xóa",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`intake_user_id`) REFERENCES `users`(`id`),
+  FOREIGN KEY (`ref_user_id`) REFERENCES `users`(`id`),
   FOREIGN KEY (`goods_id`) REFERENCES `goods`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
