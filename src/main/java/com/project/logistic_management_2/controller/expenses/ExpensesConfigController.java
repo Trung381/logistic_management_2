@@ -10,26 +10,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/expenses")
+@RequestMapping("/expenses/configs")
 @RequiredArgsConstructor
 public class ExpensesConfigController {
     private final ExpensesConfigService expensesConfigService;
 
-    @GetMapping("/configs")
+    @GetMapping()
     public ResponseEntity<Object> getExpensesConfigs() {
         return ResponseEntity.ok(
                 BaseResponse.ok(expensesConfigService.getAll())
         );
     }
 
-    @GetMapping("/configs/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Object> getExpensesConfigByID(@PathVariable String id) {
         return ResponseEntity.ok(
                 BaseResponse.ok(expensesConfigService.getByID(id))
         );
     }
 
-    @PostMapping("/configs/create")
+    @PostMapping("/create")
     public ResponseEntity<Object> createExpensesConfig(@Valid @RequestBody ExpensesConfigDTO dto) {
         return new ResponseEntity<>(
                 BaseResponse.ok(expensesConfigService.create(dto)),
@@ -37,14 +37,14 @@ public class ExpensesConfigController {
         );
     }
 
-    @PostMapping("/configs/update/{id}")
+    @PostMapping("/update/{id}")
     public ResponseEntity<Object> updateExpensesConfig(@PathVariable String id, @Valid @RequestBody ExpensesConfigDTO dto) {
         return ResponseEntity.ok(
                 BaseResponse.ok(expensesConfigService.update(id, dto))
         );
     }
 
-    @GetMapping("/configs/delete/{id}")
+    @GetMapping("/delete/{id}")
     public ResponseEntity<Object> deleteExpensesConfigByID(@PathVariable String id) {
         return ResponseEntity.ok(
                 BaseResponse.ok(expensesConfigService.deleteByID(id))

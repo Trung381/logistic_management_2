@@ -216,6 +216,22 @@ CREATE TABLE `expenses` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE `expense_advances` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `driver_id`  VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến tài xế (bảng user)",
+  `period`  VARCHAR(7) NOT NULL COMMENT "Chu kỳ ứng tiền - yyyy-MM",
+  `advance` FLOAT NOT NULL DEFAULT 0 COMMENT "Tiền ứng",
+  `remaining_balance` FLOAT DEFAULT 0 COMMENT "Tiền dư sau khi tính toán các chi phí phát sinh",
+  `note` TEXT COMMENT "Ghi chú",
+  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Trang thái: 0 - chưa xóa, 1 - đã xóa",
+  `created_at` TIMESTAMP NOT NULL DEFAULT now(),
+  `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`driver_id`) REFERENCES `users`(`id`)
+) ENGINE = InnoDB
+DEFAULT CHARSET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
 CREATE TABLE `warehouses` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
   `name` VARCHAR(255) NOT NULL,
