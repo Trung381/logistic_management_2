@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.service.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
+import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
@@ -87,5 +88,10 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
         YearMonth periodYM = YearMonth.parse(period);
 
         return expensesRepo.getAll(driverId, periodYM);
+    }
+
+    @Override
+    public List<ExpensesReportDTO> reportForAll(String period) {
+        return expensesRepo.reportForAll(period);
     }
 }

@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.repository.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
+import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 import com.project.logistic_management_2.entity.Expenses;
 
 import java.sql.Date;
@@ -13,4 +14,5 @@ public interface ExpensesRepoCustom {
     Optional<ExpensesDTO> getByID(String id);
     long delete(String id);
     long approve(String id);
+    List<ExpensesReportDTO> reportForAll(String period);
 }
