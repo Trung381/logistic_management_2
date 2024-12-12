@@ -18,6 +18,7 @@ public class GoodsDTO {
 
     @NotBlank(message = "ID kho không được để trống")
     private String warehouseId;
+    private String warehouseName;
 
     @NotBlank(message = "Tên hàng hóa không được để trống")
     private String name;

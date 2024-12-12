@@ -7,5 +7,5 @@ import java.util.List;
 
 @Service
 public interface GoodsService {
-    List<GoodsDTO> getAllGoods();
+    List<GoodsDTO> getGoodsByFilter(String warehouseId);
 }

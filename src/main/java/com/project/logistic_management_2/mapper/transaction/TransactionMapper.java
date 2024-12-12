@@ -7,8 +7,7 @@ import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Component
 public class TransactionMapper {
@@ -18,6 +17,7 @@ public class TransactionMapper {
         return Transaction.builder()
                 .id(Utils.genID(IDKey.EXPENSES))
                 .refUserId(dto.getRefUserId())
+                .customerName(dto.getCustomerName())
                 .goodsId(dto.getGoodsId())
                 .quantity(dto.getQuantity())
                 .transactionTime(dto.getTransactionTime())
@@ -30,47 +30,10 @@ public class TransactionMapper {
                 .build();
     }
 
-    public TransactionDTO toTransactionDTO(Transaction transaction) {
-        if (transaction == null) return null;
-
-        return TransactionDTO.builder()
-                .id(transaction.getId())
-                .refUserId(transaction.getRefUserId())
-                .goodsId(transaction.getGoodsId())
-                .quantity(transaction.getQuantity())
-                .transactionTime(transaction.getTransactionTime())
-                .origin(transaction.getOrigin())
-                .destination(transaction.getDestination())
-                .image(transaction.getImage())
-                .deleted(transaction.getDeleted())
-                .createdAt(transaction.getCreatedAt())
-                .updatedAt(transaction.getUpdatedAt())
-                .build();
-    }
-
-    public List<TransactionDTO> toTransactionDTOList(List<Transaction> transactionList) {
-        if (transactionList == null || transactionList.isEmpty()) return null;
-
-        return transactionList.stream().map(transaction ->
-                TransactionDTO.builder()
-                    .id(transaction.getId())
-                    .refUserId(transaction.getRefUserId())
-                    .goodsId(transaction.getGoodsId())
-                    .quantity(transaction.getQuantity())
-                    .transactionTime(transaction.getTransactionTime())
-                    .origin(transaction.getOrigin())
-                    .destination(transaction.getDestination())
-                    .image(transaction.getImage())
-                    .deleted(transaction.getDeleted())
-                    .createdAt(transaction.getCreatedAt())
-                    .updatedAt(transaction.getUpdatedAt())
-                    .build()
-        ).collect(Collectors.toList());
-    }
-
     public void updateTransaction(Transaction transaction, TransactionDTO dto) {
         if (transaction == null || dto == null) return;
         transaction.setRefUserId(dto.getRefUserId());
+        transaction.setCustomerName(dto.getCustomerName());
         transaction.setGoodsId(dto.getGoodsId());
         transaction.setQuantity(dto.getQuantity());
         transaction.setTransactionTime(dto.getTransactionTime());
@@ -79,8 +42,4 @@ public class TransactionMapper {
         transaction.setUpdatedAt(new Date());
     }
 
-    public void deleteTransaction(Transaction transaction) {
-        if (transaction == null) return;
-        transaction.setDeleted(true);
-    }
 }

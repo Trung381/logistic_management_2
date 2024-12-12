@@ -12,7 +12,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WareHouseDTO {
+public class WarehousesDTO {
     private String id;
 
     @NotBlank(message = "Tên kho không được để trống")

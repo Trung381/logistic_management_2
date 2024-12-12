@@ -38,13 +38,18 @@ public class TransactionController {
     }
 
     @PostMapping("/delete/{id}")
-    public void deleteTransaction(@PathVariable String id) {
-        transactionService.deleteTransaction(id);
+    public ResponseEntity<Object> deleteTransaction(@PathVariable String id) {
+        return ResponseEntity.ok(transactionService.deleteTransaction(id));
+    }
+
+    @GetMapping("/getById/{id}")
+    public ResponseEntity<Object> getTransactionById(@PathVariable String id) {
+        return ResponseEntity.ok(transactionService.getTransactionById(id));
     }
 
     @GetMapping("/filter")
     public ResponseEntity<Object> getTransactionByFilter(
-            @RequestParam(required = false) String wareHouseId,
+            @RequestParam(required = false) String warehouseId,
             @RequestParam(required = false) Boolean origin,
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) {
@@ -68,7 +73,7 @@ public class TransactionController {
             }
         }
 
-        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(wareHouseId, origin, fromTimestamp, toTimestamp);
+        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(warehouseId, origin, fromTimestamp, toTimestamp);
 
         return ResponseEntity.ok(BaseResponse.ok(transactions));
     }

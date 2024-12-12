@@ -10,6 +10,7 @@ import java.util.List;
 public interface TransactionService {
     TransactionDTO createTransaction(TransactionDTO transactionDTO);
     TransactionDTO updateTransaction(String id ,TransactionDTO transactionDTO);
-    TransactionDTO deleteTransaction(String id);
-    List<TransactionDTO> getTransactionByFilter(String wareHouseId, Boolean origin, Timestamp fromDate, Timestamp toDate);
+    long deleteTransaction(String id);
+    TransactionDTO getTransactionById(String id);
+    List<TransactionDTO> getTransactionByFilter(String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate);
 }
