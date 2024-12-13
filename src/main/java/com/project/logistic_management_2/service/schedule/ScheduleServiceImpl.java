@@ -12,6 +12,7 @@ import com.project.logistic_management_2.mapper.schedule.ScheduleMapper;
 import com.project.logistic_management_2.repository.schedule.ScheduleRepo;
 import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.service.notification.NotificationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,6 +30,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     private final ScheduleRepo scheduleRepo;
     private final TruckRepo truckRepo;
     private final ScheduleMapper scheduleMapper;
+    private final NotificationService notificationService;
     private final PermissionType type = PermissionType.SCHEDULES;
 
     @Override
@@ -58,6 +60,11 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         scheduleRepo.save(schedule);
         truckRepo.updateStatus(dto.getTruckLicense(), 0);
         truckRepo.updateStatus(dto.getMoocLicense(), 0);
+
+        // Gửi notification qua WebSocket
+        String notifyMsg = "Lịch trình mới được khởi tạo cần được phê duyệt lúc " + new Date();
+        notificationService.sendNotification("{\"message\":\"" + notifyMsg + "\"}");
+
         return scheduleRepo.getByID(schedule.getId()).get();
     }
 
