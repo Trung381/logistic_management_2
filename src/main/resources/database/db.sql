@@ -40,8 +40,8 @@ VALUES (1, "ADMIN", "Quản trị viên", now(), now()),
 		(2, "ACCOUNTANT", "Kế toán", now(), now()),
         (3, "MANAGER", "Quản lý", now(), now()),
         (4, "DRIVER", "Tài xế", now(), now());
-        
-CREATE TABLE `roles_permissions` (
+
+CREATE TABLE `role_permission` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `role_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến vai trò",
   `permission_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến quyền hạn",
@@ -59,7 +59,7 @@ DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 -- Role ADMIN (role_id = 1)
-INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
+INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
 (1, 1, 1, 1, 1, 1, 1, NOW(), NOW()),
 (2, 1, 9, 1, 1, 1, 1, NOW(), NOW()),
 (3, 1, 8, 1, 1, 1, 1, NOW(), NOW()),
@@ -71,7 +71,7 @@ INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `
 (9, 1, 2, 1, 1, 1, 1, NOW(), NOW());
 
 -- Role ACCOUNTANT (role_id = 2)
-INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
+INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
 (10, 2, 1, 0, 0, 0, 0, NOW(), NOW()),
 (11, 2, 9, 1, 1, 0, 0, NOW(), NOW()),
 (12, 2, 8, 0, 0, 0, 0, NOW(), NOW()),
@@ -83,7 +83,7 @@ INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `
 (18, 2, 2, 0, 0, 0, 0, NOW(), NOW());
 
 -- Role MANAGER (role_id = 3)
-INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
+INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
 (19, 3, 1, 0, 0, 0, 0, NOW(), NOW()),
 (20, 3, 9, 1, 1, 0, 0, NOW(), NOW()),
 (21, 3, 8, 1, 1, 1, 0, NOW(), NOW()),
@@ -95,7 +95,7 @@ INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `
 (27, 3, 2, 0, 0, 0, 0, NOW(), NOW());
 
 -- Role DRIVER (role_id = 4)
-INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
+INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
 (28, 4, 1, 0, 0, 0, 0, NOW(), NOW()),
 (29, 4, 9, 0, 0, 0, 0, NOW(), NOW()),
 (30, 4, 8, 0, 0, 0, 0, NOW(), NOW()),

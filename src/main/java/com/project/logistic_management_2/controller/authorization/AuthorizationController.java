@@ -17,10 +17,10 @@ public class AuthorizationController {
     @Autowired
     private RolePermissionService rolePermissionService;
 
-    @PostMapping("/check-permission")
-    public ResponseEntity<BaseResponse<Boolean>> checkPermisson(@RequestParam String permissionName, @RequestParam PermissionKey key){
-        return ResponseEntity.ok(BaseResponse.ok(rolePermissionService.hasPermission(permissionName, key)));
-    }
+//    @PostMapping("/check-permission")
+//    public ResponseEntity<BaseResponse<Boolean>> checkPermisson(@RequestParam String permissionName, @RequestParam PermissionKey key){
+//        return ResponseEntity.ok(BaseResponse.ok(rolePermissionService.hasPermission(permissionName, key)));
+//    }
 
     @PostMapping("/authorization")
     public ResponseEntity<BaseResponse<Boolean>> updateRolePermission(@Valid @RequestBody UpdateRolePermissionRequest request) {
