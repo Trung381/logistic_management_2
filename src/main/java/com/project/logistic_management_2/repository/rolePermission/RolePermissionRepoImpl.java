@@ -56,10 +56,10 @@ public class RolePermissionRepoImpl extends BaseRepo implements RolePermissionRe
 
         BooleanBuilder builder = new BooleanBuilder()
                 .and(qRolePermission.roleId.eq(roleId))
-                .and(qPermission.name.eq(key.name()));
+                .and(qPermission.name.eq(type.name()));
 
-        if (type != null){
-            switch(type){
+        if (key != null){
+            switch(key){
                 case VIEW:
                     builder.and(qRolePermission.canView.eq(true));
                     break;

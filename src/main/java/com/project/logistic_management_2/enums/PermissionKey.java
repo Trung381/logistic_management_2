@@ -4,21 +4,14 @@ import lombok.Getter;
 
 @Getter
 public enum PermissionKey {
-    USERS("Quản lý người dùng", "USERS"),
-    PERMISSIONS("Phân quyền", "PERMISSIONS"),
-    CONFIGS("Quản lý cấu hình", "CONFIGS"),
-    TRUCKS("Quản lý xe tải", "TRUCKS"),
-    EXPENSES("Quản lý chi phí", "EXPENSES"),
-    SCHEDULES("Quản lý lịch trình", "SCHEDULES"),
-    SALARIES("Quản lý lương", "SALARIES"),
-    TRANSACTIONS("Quản lý giao dịch", "TRANSACTIONS"),
-    REPORTS("Báo cáo", "REPORTS");
+    VIEW("can_view"),
+    WRITE("can_write"),
+    DELETE("can_delete"),
+    APPROVE("can_approve");
 
-    private final String title;
-    private final String name;
+    private final String column;
 
-    PermissionKey(String title, String name){
-        this.title = title;
-        this.name = name;
+    PermissionKey(String column){
+        this.column = column;
     }
 }
