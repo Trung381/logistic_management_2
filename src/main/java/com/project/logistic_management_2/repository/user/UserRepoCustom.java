@@ -5,8 +5,8 @@ import com.project.logistic_management_2.entity.User;
 import java.util.List;
 
 public interface UserRepoCustom {
-    List<User> getAll(Boolean all);
-    User getUserById(String id, Boolean all);
+    List<User> getAll();
+    User getUserById(String id);
     long deleteUser(String id);
     User findByUsername(String username);
 }

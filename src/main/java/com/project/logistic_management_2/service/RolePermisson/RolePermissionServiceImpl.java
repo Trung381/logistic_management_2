@@ -22,6 +22,7 @@ import java.util.List;
 public class RolePermissionServiceImpl extends BaseService implements RolePermissionService {
 
     private final RolePermissionRepo rolePermissionRepo;
+    private PermissionType type = PermissionType.PERMISSIONS;
     private final RolePermissionMapper rolePermissionMapper;
 
     @Override
@@ -34,6 +35,8 @@ public class RolePermissionServiceImpl extends BaseService implements RolePermis
     @Override
     @Transactional
     public long updateRolePermission(UpdateRolePermissionRequest dto) {
+
+        checkPermission(type, PermissionKey.WRITE);
 
         List<Path<?>> paths = new ArrayList<>();
         List<Object> values = new ArrayList<>();

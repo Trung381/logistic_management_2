@@ -13,11 +13,11 @@ import java.nio.file.*;
 import java.util.Objects;
 
 @Service
-public class FileStorageService {
+public class FileStorageServiceImpl implements FileStoarageService {
 
     private final Path fileStorageLocation;
 
-    public FileStorageService(@Value("${file.upload-dir}") String uploadDir) {
+    public FileStorageServiceImpl(@Value("${file.upload-dir}") String uploadDir) {
         this.fileStorageLocation = Paths.get(uploadDir)
                 .toAbsolutePath().normalize();
         try {
