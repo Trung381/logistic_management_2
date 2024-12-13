@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.entity;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,21 +14,23 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WareHouse {
+public class GoodsReport {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "goods_id")
+    private String goodsId;
 
-    @Column(name = "note")
-    private String note;
+    @Column(name = "beginning_inventory")
+    private Float beginningInventory;
+
+    @Column(name = "ending_inventory")
+    private Float endingInventory;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
-    private Date updatedAt;
 }

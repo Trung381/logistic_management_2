@@ -9,11 +9,12 @@ import com.project.logistic_management_2.mapper.transaction.TransactionMapper;
 import com.project.logistic_management_2.repository.goods.GoodsRepo;
 import com.project.logistic_management_2.repository.transaction.TransactionRepo;
 import com.project.logistic_management_2.service.BaseService;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.security.InvalidParameterException;
 import java.sql.Timestamp;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -44,7 +45,7 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
         Transaction transaction = mapper.toTransaction(transactionDTO);
         repository.save(transaction);
 
-        return mapper.toTransactionDTO(transaction);
+        return repository.getTransactionsById(transaction.getId()).get();
     }
 
     @Override
@@ -82,21 +83,24 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
         mapper.updateTransaction(transaction,transactionDTO);
         repository.save(transaction);
 
-        return mapper.toTransactionDTO(transaction);
+        return repository.getTransactionsById(id).get();
     }
 
     @Override
-    public TransactionDTO deleteTransaction(String id) {
-        Transaction transaction = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin giao dịch"));
-        mapper.deleteTransaction(transaction);
-        repository.save(transaction);
-        return mapper.toTransactionDTO(transaction);
+    public long deleteTransaction(String id) {
+        repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy giao dịch"));
+        return repository.deleteTransaction(id);
     }
 
     @Override
-    public List<TransactionDTO> getTransactionByFilter(String wareHouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
-        List<Transaction> transactions = repository.getTransactionByFilter(wareHouseId, origin, fromDate, toDate);
-        return mapper.toTransactionDTOList(transactions);
+    public TransactionDTO getTransactionById(String id) {
+        return repository.getTransactionsById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin giao dịch!"));
+    }
+
+    @Override
+    public List<TransactionDTO> getTransactionByFilter(String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
+        return repository.getTransactionByFilter(warehouseId, origin, fromDate, toDate);
     }
 }

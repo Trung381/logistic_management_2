@@ -19,9 +19,13 @@ public class TransactionDTO {
 
     @NotBlank(message = "ID người kiểm duyệt không được để trống")
     private String refUserId;
+    private String fullNameUser;
+
+    private String customerName;
 
     @NotBlank(message = "ID hàng hóa không được để trống")
     private String goodsId;
+    private String goodsName;
 
     @NotNull(message = "Số lượng hàng hóa không được để trống")
     private Float quantity;
@@ -30,14 +34,17 @@ public class TransactionDTO {
 
     @NotNull(message = "Loại giao dịch không được để trống")
     private Boolean origin;
+    private String originDescription;
 
     private String destination;
 
     private String image;
 
-    private Boolean deleted;
-
     private Date createdAt;
 
     private Date updatedAt;
+
+
 }
+
+

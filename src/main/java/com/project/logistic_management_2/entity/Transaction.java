@@ -18,6 +18,9 @@ public class Transaction {
     @Column(name = "ref_user_id")
     private String refUserId;
 
+    @Column(name = "customer_name")
+    private String customerName;
+
     @Column(name = "goods_id")
     private String goodsId;
 

@@ -357,7 +357,7 @@ CREATE TABLE `goods` (
   FOREIGN KEY (`warehouse_id`) REFERENCES `warehouses`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 INSERT INTO `goods` (id, warehouse_id, name, quantity, amount, created_at, updated_at)
 VALUES ("H001", "K001", "Gạch", 30, 5000000, now(), now()),
@@ -395,6 +395,8 @@ CREATE TABLE `notification` (
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
+
+
 
 -- Chi tiết lương
 -- select
