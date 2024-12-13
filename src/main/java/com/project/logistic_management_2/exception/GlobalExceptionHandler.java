@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -71,6 +72,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 BaseResponse.fail(e.getMessage()),
                 HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Object> handleMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
+        String errorMessage = "Phương thức HTTP không được hỗ trợ: " + ex.getMethod();
+        return new ResponseEntity<>(
+                BaseResponse.fail(errorMessage),
+                HttpStatus.METHOD_NOT_ALLOWED
         );
     }
 }

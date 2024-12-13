@@ -27,8 +27,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                                 .requestMatchers("/auth/**").permitAll() // Cho phép truy cập không xác thực đến /auth/**
-//                                .anyRequest().authenticated()
-                                .anyRequest().permitAll()
+                                .anyRequest().authenticated()
+//                                .anyRequest().permitAll()
                 )
                 .exceptionHandling(e -> e
                         .accessDeniedHandler((request, response, accessDeniedException) -> {

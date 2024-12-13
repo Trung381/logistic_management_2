@@ -2,7 +2,6 @@ package com.project.logistic_management_2.service.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
-import com.project.logistic_management_2.entity.Expenses;
 
 import java.util.List;
 
