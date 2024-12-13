@@ -3,6 +3,8 @@ package com.project.logistic_management_2.service.schedule;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.entity.Schedule;
+import com.project.logistic_management_2.enums.PermissionKey;
+import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
@@ -27,15 +29,17 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     private final ScheduleRepo scheduleRepo;
     private final TruckRepo truckRepo;
     private final ScheduleMapper scheduleMapper;
-
+    private final PermissionType type = PermissionType.SCHEDULES;
 
     @Override
     public List<ScheduleDTO> getAll() {
+        checkPermission(type, PermissionKey.VIEW);
         return scheduleRepo.getAll(null, null);
     }
 
     @Override
     public ScheduleDTO getByID(String id) {
+        checkPermission(type, PermissionKey.VIEW);
         if (id == null || id.isEmpty()) {
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }
@@ -46,6 +50,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     @Override
     @Transactional
     public ScheduleDTO create(ScheduleDTO dto) {
+        checkPermission(type, PermissionKey.WRITE);
         //Cập nhật trạng thái xe
         //đầu xe + mooc
 
@@ -58,6 +63,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
     @Override
     public ScheduleDTO update(String id, ScheduleDTO dto) {
+        checkPermission(type, PermissionKey.WRITE);
         if (id == null || id.isEmpty()) {
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }
@@ -81,6 +87,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
     @Override
     public long deleteByID(String id) {
+        checkPermission(type, PermissionKey.DELETE);
         if (id == null || id.isEmpty()) {
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }
@@ -89,6 +96,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
     @Override
     public long approveByID(String id) {
+        checkPermission(type, PermissionKey.APPROVE);
         if (id == null || id.isEmpty()) {
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }
@@ -113,6 +121,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     //Báo cáo lịch trình theo xe: biển số xe, tháng nào
     @Override
     public List<ScheduleDTO> report(String license, String period) {
+        checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
         YearMonth periodYM = parsePeriod(period);
 //        return scheduleRepo.getAll(license, periodYM);
 
