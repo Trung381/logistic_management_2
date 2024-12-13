@@ -64,4 +64,11 @@ public class ExpensesController {
                 BaseResponse.ok(expensesService.report(driverId, period))
         );
     }
+
+    @GetMapping("/reports/all")
+    public ResponseEntity<Object> exportReportForAll(@RequestParam String period) {
+        return ResponseEntity.ok(
+                BaseResponse.ok(expensesService.reportForAll(period))
+        );
+    }
 }

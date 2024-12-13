@@ -63,6 +63,8 @@ dependencies {
 
     //Excel
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
+
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
 tasks.named('test') {

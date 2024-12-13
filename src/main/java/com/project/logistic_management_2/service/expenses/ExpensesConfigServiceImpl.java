@@ -2,10 +2,11 @@ package com.project.logistic_management_2.service.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.entity.ExpensesConfig;
+import com.project.logistic_management_2.enums.PermissionKey;
+import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesConfigMapper;
-import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
 import com.project.logistic_management_2.repository.expenses.ExpensesConfigRepo;
 import com.project.logistic_management_2.service.BaseService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.List;
 public class ExpensesConfigServiceImpl extends BaseService implements ExpensesConfigService {
     private final ExpensesConfigRepo expensesConfigRepo;
     private final ExpensesConfigMapper expensesConfigMapper;
+    private final PermissionType type = PermissionType.CONFIGS;
 
     /**
      * Get all expenses configurations
@@ -26,6 +28,7 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
      */
     @Override
     public List<ExpensesConfigDTO> getAll() {
+        checkPermission(type, PermissionKey.VIEW);
         return expensesConfigRepo.getAll();
     }
 
@@ -37,6 +40,7 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
      */
     @Override
     public ExpensesConfigDTO getByID(String id) {
+        checkPermission(type, PermissionKey.VIEW);
         if (id == null || id.isEmpty()) {
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }
@@ -47,6 +51,7 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
 
     @Override
     public ExpensesConfigDTO create(ExpensesConfigDTO dto) {
+        checkPermission(type, PermissionKey.WRITE);
         ExpensesConfig config = expensesConfigMapper.toExpensesConfig(dto);
         expensesConfigRepo.save(config);
         return expensesConfigMapper.toExpensesConfigDTO(dto, config);
@@ -54,6 +59,7 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
 
     @Override
     public ExpensesConfigDTO update(String id, ExpensesConfigDTO dto) {
+        checkPermission(type, PermissionKey.WRITE);
         if (id == null || id.isEmpty()) {
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }
@@ -68,6 +74,7 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
 
     @Override
     public long deleteByID(String id) {
+        checkPermission(type, PermissionKey.DELETE);
         if (id == null || id.isEmpty()) {
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }

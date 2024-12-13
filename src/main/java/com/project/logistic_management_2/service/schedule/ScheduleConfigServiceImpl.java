@@ -2,6 +2,8 @@ package com.project.logistic_management_2.service.schedule;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import com.project.logistic_management_2.entity.ScheduleConfig;
+import com.project.logistic_management_2.enums.PermissionKey;
+import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.schedule.ScheduleConfigMapper;
@@ -17,14 +19,17 @@ import java.util.List;
 public class ScheduleConfigServiceImpl extends BaseService implements ScheduleConfigService {
     private final ScheduleConfigRepo scheduleConfigRepo;
     private final ScheduleConfigMapper scheduleConfigMapper;
+    private final PermissionType type = PermissionType.CONFIGS;
 
     @Override
     public List<ScheduleConfigDTO> getAll() {
+        checkPermission(type, PermissionKey.VIEW);
         return scheduleConfigRepo.getAll();
     }
 
     @Override
     public ScheduleConfigDTO getByID(String id) {
+        checkPermission(type, PermissionKey.VIEW);
         if (id == null || id.isEmpty()) {
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }
@@ -35,6 +40,7 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
 
     @Override
     public ScheduleConfigDTO create(ScheduleConfigDTO dto) {
+        checkPermission(type, PermissionKey.WRITE);
         ScheduleConfig config = scheduleConfigMapper.toScheduleConfig(dto);
         scheduleConfigRepo.save(config);
         return scheduleConfigMapper.toScheduleConfigDTO(dto, config);
@@ -42,6 +48,7 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
 
     @Override
     public ScheduleConfigDTO update(String id, ScheduleConfigDTO dto) {
+        checkPermission(type, PermissionKey.WRITE);
         if (id == null || id.isEmpty()) {
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }
@@ -56,6 +63,7 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
 
     @Override
     public long deleteByID(String id) {
+        checkPermission(type, PermissionKey.DELETE);
         if (id == null || id.isEmpty()) {
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }

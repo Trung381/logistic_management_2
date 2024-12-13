@@ -147,7 +147,7 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     public List<ScheduleSalaryDTO> exportScheduleSalary(String driverId, YearMonth period) {
         Date startDate = Date.valueOf(LocalDate.now().atStartOfDay().toLocalDate());
         Date endDate = Date.valueOf(LocalDate.now().plusMonths(1).atStartOfDay().toLocalDate());
-        ;
+
         if (period != null) {
             startDate = Date.valueOf(period.atDay(1).atStartOfDay().toLocalDate());
             endDate = Date.valueOf(period.plusMonths(1).atDay(1).atStartOfDay().toLocalDate());

@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.service.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
-import com.project.logistic_management_2.entity.Expenses;
+import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 
 import java.util.List;
 
@@ -13,4 +13,5 @@ public interface ExpensesService {
     long deleteByID(String id);
     long approveByID(String id);
     List<ExpensesDTO> report(String driverId, String period);
+    List<ExpensesReportDTO> reportForAll(String period);
 }

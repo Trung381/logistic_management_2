@@ -23,6 +23,7 @@ public class RolePermissionServiceImpl extends BaseService implements RolePermis
 
     private final RolePermissionRepo rolePermissionRepo;
     private PermissionType type = PermissionType.PERMISSIONS;
+    private final RolePermissionMapper rolePermissionMapper;
 
     @Override
     public boolean hasPermission(PermissionType type, PermissionKey key){
