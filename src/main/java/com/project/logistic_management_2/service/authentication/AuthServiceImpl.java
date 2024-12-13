@@ -5,6 +5,7 @@ import com.project.logistic_management_2.dto.authentication.AuthRequest;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.dto.authentication.AuthResponse;
 import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.user.UserMapper;
 import com.project.logistic_management_2.repository.user.UserRepo;
@@ -40,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
     public User register(UserDTO userDto) {
         // Kiểm tra xem username đã tồn tại chưa
         if (userRepo.findByUsername(userDto.getUsername()) != null) {
-            throw new IllegalArgumentException("Username đã được sử dụng.");
+            throw new ConflictException("Tên đăng nhập đã tồn tại.");
         }
 
         return userService.createUser(userDto);
