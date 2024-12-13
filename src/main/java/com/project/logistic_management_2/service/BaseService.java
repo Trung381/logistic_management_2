@@ -2,6 +2,7 @@ package com.project.logistic_management_2.service;
 
 import com.project.logistic_management_2.entity.User;
 import com.project.logistic_management_2.enums.PermissionKey;
+import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.exception.def.ForbiddenException;
 import com.project.logistic_management_2.repository.rolePermission.RolePermissionRepo;
 import com.project.logistic_management_2.repository.user.UserRepo;
@@ -27,9 +28,9 @@ public class BaseService {
         return userRepository.findByUsername(username);
     }
 
-    protected boolean checkPermission(String permission, PermissionKey key) {
+    protected boolean checkPermission(PermissionType type, PermissionKey key) {
         User user = getCurrentUser();
-        if (!rolePermissonRepo.hasPermission(user.getRoleId(), permission, key)) {
+        if (!rolePermissonRepo.hasPermission(user.getRoleId(), type, key)) {
             throw new ForbiddenException("Huh, no permission to access :)");
         }
         return true;

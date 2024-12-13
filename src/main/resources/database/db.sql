@@ -40,8 +40,8 @@ VALUES (1, "ADMIN", "Quản trị viên", now(), now()),
 		(2, "ACCOUNTANT", "Kế toán", now(), now()),
         (3, "MANAGER", "Quản lý", now(), now()),
         (4, "DRIVER", "Tài xế", now(), now());
-        
-CREATE TABLE `roles_permissions` (
+
+CREATE TABLE `role_permission` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `role_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến vai trò",
   `permission_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến quyền hạn",
@@ -59,7 +59,7 @@ DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 -- Role ADMIN (role_id = 1)
-INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
+INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
 (1, 1, 1, 1, 1, 1, 1, NOW(), NOW()),
 (2, 1, 9, 1, 1, 1, 1, NOW(), NOW()),
 (3, 1, 8, 1, 1, 1, 1, NOW(), NOW()),
@@ -71,7 +71,7 @@ INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `
 (9, 1, 2, 1, 1, 1, 1, NOW(), NOW());
 
 -- Role ACCOUNTANT (role_id = 2)
-INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
+INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
 (10, 2, 1, 0, 0, 0, 0, NOW(), NOW()),
 (11, 2, 9, 1, 1, 0, 0, NOW(), NOW()),
 (12, 2, 8, 0, 0, 0, 0, NOW(), NOW()),
@@ -83,7 +83,7 @@ INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `
 (18, 2, 2, 0, 0, 0, 0, NOW(), NOW());
 
 -- Role MANAGER (role_id = 3)
-INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
+INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
 (19, 3, 1, 0, 0, 0, 0, NOW(), NOW()),
 (20, 3, 9, 1, 1, 0, 0, NOW(), NOW()),
 (21, 3, 8, 1, 1, 1, 0, NOW(), NOW()),
@@ -95,7 +95,7 @@ INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `
 (27, 3, 2, 0, 0, 0, 0, NOW(), NOW());
 
 -- Role DRIVER (role_id = 4)
-INSERT INTO `roles_permissions` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
+INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
 (28, 4, 1, 0, 0, 0, 0, NOW(), NOW()),
 (29, 4, 9, 0, 0, 0, 0, NOW(), NOW()),
 (30, 4, 8, 0, 0, 0, 0, NOW(), NOW()),
@@ -260,7 +260,6 @@ CREATE TABLE `expense_advances` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
-
 -- Bảng users
 INSERT INTO `users` (`id`, `full_name`, `username`, `password`, `phone`, `date_of_birth`, `note`, `role_id`, `status`) VALUES
 ('user_001', 'Nguyễn Văn A', 'nguyenvana', 'hashed_password_1', '0901234567', '1990-05-15', 'Nhân viên mới', 1, 1),
@@ -322,8 +321,6 @@ INSERT INTO `expenses` (`id`, `schedule_id`, `expenses_config_id`, `amount`, `no
 ('exp_007', 'schedule_006', 'exp_config_004', 100000, 'Phí cầu đường', NULL, 0),
 ('exp_008', 'schedule_006', 'exp_config_004', 100000, 'Phí cầu đường', NULL, 0);
 
-select * from expenses;
-
 -- Bảng expense_advances
 INSERT INTO `expense_advances` (`driver_id`, `period`, `advance`, `remaining_balance`, `note`) VALUES
 ('user_004', '2023-10', 1000000, 200000, 'Ứng tiền đi đường'),
@@ -332,23 +329,6 @@ INSERT INTO `expense_advances` (`driver_id`, `period`, `advance`, `remaining_bal
 ('user_004', '2023-11', 1200000, 0, 'Ứng cho chuyến đi mới'),
 ('user_005', '2023-11', 1300000, 100000, 'Ứng lương'),
 ('user_007', '2023-11', 700000, 150000, 'Ứng tiền sửa xe');
-
-select users.id, users.full_name, schedules.truck_license, schedules.mooc_license, expense_advances.advance, expense_advances.remaining_balance 
-from users 
-left join trucks on users.id = trucks.driver_id 
-left join schedules on trucks.license_plate = schedules.truck_license
-left join expense_advances on expense_advances.driver_id = users.id
-left join expenses on expenses.schedule_id = schedules.id
-where users.role_id = 4 and period="2023-11";
-
-select expenses_configs.type, sum(amount) from expenses, expenses_configs where expenses.expenses_config_id = expenses_configs.id group by expenses.expenses_config_id;
-
-select u1_0.id, u1_0.full_name, s1_0.truck_license, s1_0.mooc_license,
-(select ea2_0.remaining_balance from expense_advances ea2_0 where ea2_0.driver_id=u1_0.id and ea2_0.period="2023-10"),ea1_0.advance,ec1_0.id,ec1_0.type,sum(e1_0.amount),ea1_0.remaining_balance 
-from expense_advances ea1_0 join users u1_0 on ea1_0.driver_id=u1_0.id join trucks t1_0 on ea1_0.driver_id=t1_0.driver_id join schedules s1_0 on t1_0.license_plate=s1_0.truck_license 
-join expenses e1_0 on e1_0.schedule_id=s1_0.id join expenses_configs ec1_0 on e1_0.expenses_config_id=ec1_0.id where ea1_0.period="2023-11" 
-group by u1_0.id,u1_0.full_name,s1_0.truck_license,s1_0.mooc_license,ea1_0.advance,ec1_0.id,ec1_0.type,ea1_0.remaining_balance;
-
 
 CREATE TABLE `warehouses` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
