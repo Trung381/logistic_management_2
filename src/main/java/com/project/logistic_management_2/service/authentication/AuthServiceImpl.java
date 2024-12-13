@@ -7,6 +7,7 @@ import com.project.logistic_management_2.dto.authentication.AuthResponse;
 import com.project.logistic_management_2.entity.User;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.user.UserMapper;
+import com.project.logistic_management_2.repository.user.UserRepo;
 import com.project.logistic_management_2.service.JwtService;
 import com.project.logistic_management_2.service.user.UserService;
 import jakarta.transaction.Transactional;
@@ -23,20 +24,22 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserMapper userMapper;
+    private final UserRepo userRepo;
 
     @Autowired
-    public AuthServiceImpl(UserService userService, AuthenticationManager authenticationManager, JwtService jwtService, UserMapper userMapper) {
+    public AuthServiceImpl(UserService userService, AuthenticationManager authenticationManager, JwtService jwtService, UserMapper userMapper, UserRepo userRepo) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userMapper = userMapper;
+        this.userRepo = userRepo;
     }
 
     @Override
     @Transactional
     public User register(UserDTO userDto) {
         // Kiểm tra xem username đã tồn tại chưa
-        if (userService.findByUsername(userDto.getUsername()) != null) {
+        if (userRepo.findByUsername(userDto.getUsername()) != null) {
             throw new IllegalArgumentException("Username đã được sử dụng.");
         }
 
@@ -54,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("Sai tên đăng nhập hoặc mật khẩu.");
         }
 
-        User user = userService.findByUsername(authRequest.getUsername());
+        User user = userRepo.findByUsername(authRequest.getUsername());
         if (user == null) {
             throw new NotFoundException("Không tìm thấy người dùng.");
         }

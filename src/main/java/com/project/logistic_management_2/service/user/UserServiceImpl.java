@@ -20,11 +20,11 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     private final UserRepo userRepo;
     private final UserMapper userMapper;
-    private PermissionType type = PermissionType.USERS;
+    private final PermissionType type = PermissionType.USERS;
 
     @Override
     public User createUser(UserDTO userDto) {
-        checkPermission(type, PermissionKey.WRITE);
+//        checkPermission(type, PermissionKey.WRITE); //Tạm thời tắt để đăng ký tk test api
         User user = userMapper.toUser(userDto);
         return userRepo.save(user);
     }

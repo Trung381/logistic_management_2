@@ -27,7 +27,7 @@ public class ReportServiceImpl extends BaseService implements ReportService {
     private UserService userService;
     @Autowired
     private ReportRepo reportRepo;
-    private PermissionType type = PermissionType.USERS;
+    private final PermissionType type = PermissionType.REPORTS;
 
     @Override
     public ReportDetailSalaryDTO getReport(String userId, String period){
@@ -47,10 +47,7 @@ public class ReportServiceImpl extends BaseService implements ReportService {
             throw new IllegalArgumentException("UserId không hợp lệ!");
         }
 
-        String regex = "^(\\d{4}-(0[1-9]|1[0-2]))$";
-        if (!Pattern.matches(regex, period)) {
-            throw new IllegalArgumentException("Định dạng chu kỳ không hợp lệ! Dạng đúng: yyyy-MM");
-        }
+        validatePeriod(period);
     }
 
     private void validatePeriod(String period) {
