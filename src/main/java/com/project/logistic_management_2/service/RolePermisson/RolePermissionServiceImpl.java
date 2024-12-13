@@ -3,13 +3,14 @@ package com.project.logistic_management_2.service.RolePermisson;
 import com.project.logistic_management_2.dto.rolepermission.UpdateRolePermissionRequest;
 import com.project.logistic_management_2.entity.QRolePermission;
 import com.project.logistic_management_2.enums.PermissionKey;
+import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.mapper.rolePermission.RolePermissionMapper;
 import com.project.logistic_management_2.repository.rolePermission.RolePermissionRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathBuilder;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -17,16 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class RolePermissionServiceImpl extends BaseService implements RolePermissionService {
 
-    @Autowired
-    private RolePermissionRepo rolePermissionRepo;
-    @Autowired
-    private RolePermissionMapper rolePermissionMapper;
+    private final RolePermissionRepo rolePermissionRepo;
+    private PermissionType type = PermissionType.PERMISSIONS;
 
     @Override
-    public boolean hasPermission(String permissionName, PermissionKey key){
-        return checkPermission(permissionName, key);
+    public boolean hasPermission(PermissionType type, PermissionKey key){
+        return checkPermission(type, key);
     }
 
 
@@ -34,6 +34,8 @@ public class RolePermissionServiceImpl extends BaseService implements RolePermis
     @Override
     @Transactional
     public long updateRolePermission(UpdateRolePermissionRequest dto) {
+
+        checkPermission(type, PermissionKey.WRITE);
 
         List<Path<?>> paths = new ArrayList<>();
         List<Object> values = new ArrayList<>();

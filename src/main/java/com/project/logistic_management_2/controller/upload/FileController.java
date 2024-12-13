@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.controller.upload;
 
 
-import com.project.logistic_management_2.service.upload.FileStorageService;
+import com.project.logistic_management_2.service.upload.FileStorageServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +17,7 @@ import java.nio.file.Files;
 public class FileController {
 
     @Autowired
-    private FileStorageService fileStorageService;
+    private FileStorageServiceImpl fileStorageService;
 
     // API Upload File
     @PostMapping("/upload")

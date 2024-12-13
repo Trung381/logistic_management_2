@@ -2,7 +2,8 @@ package com.project.logistic_management_2.controller.report;
 
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.report.ReportDetailSalaryDTO;
-import com.project.logistic_management_2.dto.user.UserReportDTO;
+import com.project.logistic_management_2.dto.report.SummarySalaryDTO;
+import com.project.logistic_management_2.repository.report.ReportRepo;
 import com.project.logistic_management_2.service.report.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReportController {
     private final ReportService reportService;
+    private final ReportRepo reportRepo;
 
     @GetMapping("/detail-salary-report")
     public ResponseEntity<ReportDetailSalaryDTO> getDetailSalary(@RequestParam String userId, @RequestParam String period) {
@@ -24,7 +26,7 @@ public class ReportController {
     }
 
     @GetMapping("/summary-salary-report")
-    public ResponseEntity<BaseResponse<List<UserReportDTO>>> getSumarySalaryReport(@RequestParam String period) {
-        return ResponseEntity.ok(BaseResponse.ok(reportService.getSumarySalaryReport(period)));
+    public ResponseEntity<BaseResponse<List<SummarySalaryDTO>>> getSumarySalaryReport(@RequestParam String period) {
+        return ResponseEntity.ok(BaseResponse.ok(reportService.getSummarySalaryReport(period)));
     }
 }

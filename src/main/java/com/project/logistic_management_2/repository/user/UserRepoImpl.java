@@ -33,9 +33,6 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
         QUser qUser = QUser.user;
         BooleanBuilder builder = new BooleanBuilder()
                 .and(qUser.id.eq(id));
-//        if(!all){
-//            builder.and(qUser.status.eq(1));
-//        }
         return query.selectFrom(qUser)
                 .where(builder)
                 .fetchOne();
@@ -45,9 +42,6 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
     @Transactional
     public long deleteUser(String id){
         QUser qUser = QUser.user;
-//        query.delete(qUser)
-//                .where(qUser.id.eq(id))
-//                .execute();
         return query.update(qUser)
                 .where(qUser.id.eq(id))
                 .set(qUser.status,0)

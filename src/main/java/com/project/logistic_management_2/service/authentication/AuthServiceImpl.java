@@ -40,8 +40,6 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Username đã được sử dụng.");
         }
 
-        User user = userMapper.toUser(userDto);
-
         return userService.createUser(userDto);
     }
 
