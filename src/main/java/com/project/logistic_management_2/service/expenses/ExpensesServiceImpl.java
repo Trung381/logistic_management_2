@@ -7,10 +7,12 @@ import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
 import com.project.logistic_management_2.repository.expenses.ExpensesRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -19,6 +21,7 @@ import java.util.regex.Pattern;
 public class ExpensesServiceImpl extends BaseService implements ExpensesService {
     private final ExpensesRepo expensesRepo;
     private final ExpensesMapper expensesMapper;
+    private final NotificationService notificationService;
 
     @Override
     public List<ExpensesDTO> getAll() {
@@ -39,6 +42,10 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     public ExpensesDTO create(ExpensesDTO dto) {
         Expenses expenses = expensesMapper.toExpenses(dto);
         expensesRepo.save(expenses);
+
+        String notifyMsg = "Có một chi phí được tạo mới cần được phê duyệt lúc " + new Date();
+        notificationService.sendNotification("{\"message\":\"" + notifyMsg + "\"}");
+
         return expensesRepo.getByID(expenses.getId()).get();
     }
 
