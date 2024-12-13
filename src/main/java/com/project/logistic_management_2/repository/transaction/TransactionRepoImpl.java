@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.repository.transaction;
 
 import com.project.logistic_management_2.dto.request.TransactionDTO;
+import com.project.logistic_management_2.entity.Transaction;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -12,7 +13,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -108,5 +112,30 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
                 .where(builder)
                 .set(transaction.deleted, true)
                 .execute();
+    }
+
+    @Override
+    public Float getQuantityByOrigin(String goodsId, Boolean origin , YearMonth yearMonth) {
+        Date startDate = Date.valueOf(LocalDate.now().atStartOfDay().toLocalDate());
+        Date endDate = Date.valueOf(LocalDate.now().plusMonths(1).atStartOfDay().toLocalDate());
+
+        if (yearMonth != null) {
+            startDate = Date.valueOf(yearMonth.atDay(1).atStartOfDay().toLocalDate());
+            endDate = Date.valueOf(yearMonth.atDay(yearMonth.lengthOfMonth()).atStartOfDay().toLocalDate());
+
+        }
+
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(transaction.createdAt.between(startDate, endDate))
+                .and(transaction.origin.eq(origin))
+                .and(transaction.goodsId.eq(goodsId));
+
+        Float totalQuantity = query.from(transaction)
+                .where(builder)
+                .select(transaction.quantity.sum())  // sum() trả về BigDecimal
+                .fetchOne();
+
+        // Kiểm tra nếu totalQuantity là null, trả về 0f nếu không có kết quả
+        return totalQuantity != null ? totalQuantity : 0f;
     }
 }

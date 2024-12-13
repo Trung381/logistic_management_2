@@ -27,5 +27,4 @@ public class GoodsMapper {
                         .build()
         ).collect(Collectors.toList());
     }
-
 }
