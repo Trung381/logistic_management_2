@@ -6,6 +6,7 @@ import com.project.logistic_management_2.entity.QPermission;
 import com.project.logistic_management_2.entity.QRole;
 import com.project.logistic_management_2.entity.QRolePermission;
 import com.project.logistic_management_2.enums.PermissionKey;
+import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Path;
@@ -49,20 +50,20 @@ public class RolePermissionRepoImpl extends BaseRepo implements RolePermissionRe
     }
 
     @Override
-    public boolean hasPermission(Integer roleId, String permissionName, PermissionKey key) {
+    public boolean hasPermission(Integer roleId, PermissionType type, PermissionKey key) {
         QRolePermission qRolePermission = QRolePermission.rolePermission;
         QPermission qPermission = QPermission.permission;
 
         BooleanBuilder builder = new BooleanBuilder()
                 .and(qRolePermission.roleId.eq(roleId))
-                .and(qPermission.name.eq(permissionName));
+                .and(qPermission.name.eq(type.name()));
 
         if (key != null){
             switch(key){
-                case READ:
+                case VIEW:
                     builder.and(qRolePermission.canView.eq(true));
                     break;
-                case CREATE:
+                case WRITE:
                     builder.and(qRolePermission.canWrite.eq(true));
                     break;
                 case APPROVE:

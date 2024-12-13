@@ -7,13 +7,20 @@ import static com.project.logistic_management_2.entity.QExpensesConfig.expensesC
 import static com.project.logistic_management_2.entity.QSchedule.schedule;
 import static com.project.logistic_management_2.entity.QTruck.truck;
 import static com.project.logistic_management_2.entity.QUser.user;
+import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseAdvances;
 
+import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
+import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
@@ -22,6 +29,7 @@ import java.sql.Date;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
@@ -32,17 +40,8 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     private ConstructorExpression<ExpensesDTO> expensesProjection() {
         return Projections.constructor(ExpensesDTO.class,
                 expenses.id.as("id"),
-                JPAExpressions.select(truck.driverId.as("driverId"))
-                        .from(truck, schedule)
-                        .where(expenses.scheduleId.eq(schedule.id)
-                                .and(schedule.truckLicense.eq(truck.licensePlate))
-                        ),
-                JPAExpressions.select(user.fullName.as("driverName"))
-                        .from(user, schedule, truck)
-                        .where(expenses.scheduleId.eq(schedule.id)
-                                .and(schedule.truckLicense.eq(truck.licensePlate))
-                                .and(truck.driverId.eq(user.id))
-                        ),
+                user.id.as("driverId"),
+                user.fullName.as("driverName"),
                 //Mã lịch trình
                 expenses.scheduleId.as("scheduleId"),
                 //Thông tin cấu hình chi phí: mã, loại chi phí
@@ -50,7 +49,6 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 JPAExpressions.select(expensesConfig.type.as("expensesConfigType"))
                         .from(expensesConfig)
                         .where(expensesConfig.id.eq(expenses.expensesConfigId)),
-
                 expenses.amount.as("amount"),   //Giá tiền
                 expenses.note.as("note"),       //Ghi chú
                 expenses.imgPath.as("imgPath"), //Đường dẫn ảnh đính kèm
@@ -65,11 +63,10 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         //Điều kiện truy vấn: Chưa bị xóa
         BooleanBuilder builder = new BooleanBuilder()
                 .and(expenses.deleted.eq(false));
+
         //Tìm theo mã tài xế nếu tham số driverId hợp lệ
         if (driverId != null && !driverId.isBlank()) {
-            builder.and(expenses.scheduleId.eq(schedule.id))
-                    .and(schedule.truckLicense.eq(truck.licensePlate))
-                    .and(truck.driverId.eq(driverId));
+            builder.and(user.id.eq(driverId));
         }
         //Tìm theo chu kỳ nếu period hợp lệ
         if (period != null) {
@@ -79,7 +76,10 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         }
 
         //Truy vấn, trả về kết quả
-        return query.from(expenses, schedule, truck)
+        return query.from(expenses)
+                .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
+                .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
+                .innerJoin(user).on(truck.driverId.eq(user.id))
                 .where(builder)
                 .select(expensesProjection())
                 .fetch();
@@ -94,6 +94,9 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
 
         return Optional.ofNullable(
                 query.from(expenses)
+                        .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
+                        .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
+                        .innerJoin(user).on(truck.driverId.eq(user.id))
                         .where(builder)
                         .select(expensesProjection())
                         .fetchOne()
@@ -127,5 +130,81 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 .where(builder)
                 .set(expenses.status, 1)
                 .execute();
+    }
+
+    @Override
+    public List<ExpensesReportDTO> reportForAll(String period) {
+        //Truy vấn chi phí phát sinh: ExpensesIncurredDTO
+        ConstructorExpression<ExpensesIncurredDTO> expensesIncurredExpression = Projections.constructor(
+                ExpensesIncurredDTO.class,
+                expensesConfig.id.as("expensesConfigId"),   //ID loại chi phí
+                expensesConfig.type.as("type"),             //Loại chi phí
+                expenses.amount.sum().as("amount")          //Tổng tiền của loại tương ứng
+        );
+
+        String prevPeriod = prevPeriod(period);
+
+        //Truy vấn thông tin cơ bản của báo cáo chi phí: ExpensesReportDTO
+        ConstructorExpression<ExpensesReportDTO> reportExpression = Projections.constructor(
+                ExpensesReportDTO.class,
+                user.id.as("driverId"),                 //ID tài xế
+                user.fullName.as("driverName"),         //Tên tài xế
+                //Danh sách biển số xe (Dạng String)
+                Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", schedule.truckLicense).as("truckLicense"),
+                //Danh sách biển số rơ-mooc (String)
+                Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", schedule.moocLicense).as("moocLicense"),
+                //Số dư từ chu kỳ ứng trước
+                JPAExpressions.select(expenseAdvances.remainingBalance.coalesce(0f).as("prevRemainingBalance"))
+                        .from(expenseAdvances)
+                        .where(expenseAdvances.driverId.eq(user.id).and(expenseAdvances.period.eq(prevPeriod))),
+                expenseAdvances.advance.coalesce(0f).as("advance"),                   //Tiền ứng trong chu kỳ
+                expenseAdvances.remainingBalance.coalesce(0f).as("remainingBalance")  //Số dư kỳ hiện tại (kỳ đang truy vấn), mặc định null cho đến cuối kỳ
+        );
+
+        List<ExpensesReportDTO> reports = reportsQuery(period, reportExpression);
+
+        //Truy vấn danh sách chi phí phát sinh cho từng tài xế
+        for (ExpensesReportDTO report : reports) {
+            report.setExpensesIncurred(
+                    expensesIncurredEachDriverQuery(report.getDriverId(), expensesIncurredExpression)
+            );
+        }
+
+        return reports;
+    }
+
+    //Tính và trả về chu kỳ trước
+    private String prevPeriod(String period) {
+        YearMonth yearMonth = YearMonth.parse(period);
+        YearMonth prevMonth = yearMonth.minusMonths(1);
+        return prevMonth.toString();
+    }
+
+    private List<ExpensesReportDTO> reportsQuery(String period, ConstructorExpression<ExpensesReportDTO> expression) {
+        //Điều kiện truy vấn
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(user.roleId.eq(4))                //Tài xế
+                .and(expenseAdvances.period.eq(period));    //Chu kỳ truy vấn
+
+        //Danh sách báo cáo, gồm các thông tin cơ bản không bao gồm danh sách chi phí phát sinh của từng tài xế
+        return query.from(user)
+                .leftJoin(truck).on(truck.driverId.eq(user.id))
+                .leftJoin(schedule).on(truck.licensePlate.eq(schedule.truckLicense))
+                .leftJoin(expenseAdvances).on(expenseAdvances.driverId.eq(user.id))
+                .where(builder)
+                .select(expression)
+                .groupBy(user.id, user.fullName, expenseAdvances.advance, expenseAdvances.remainingBalance)
+                .fetch();
+    }
+
+    private List<ExpensesIncurredDTO> expensesIncurredEachDriverQuery(String driverId, ConstructorExpression<ExpensesIncurredDTO> expression) {
+        return query.from(expenses)
+                .innerJoin(expensesConfig).on(expenses.expensesConfigId.eq(expensesConfig.id))
+                .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
+                .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
+                .select(expression)
+                .where(truck.driverId.eq(driverId))
+                .groupBy(expensesConfig.id, expensesConfig.type)
+                .fetch();
     }
 }
