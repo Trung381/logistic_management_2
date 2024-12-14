@@ -3,6 +3,8 @@ package com.project.logistic_management_2.service.transaction;
 import com.project.logistic_management_2.dto.request.TransactionDTO;
 import com.project.logistic_management_2.entity.Goods;
 import com.project.logistic_management_2.entity.Transaction;
+import com.project.logistic_management_2.enums.PermissionKey;
+import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.transaction.TransactionMapper;
@@ -24,9 +26,12 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
     private final GoodsRepo goodsRepo;
     private final TransactionRepo repository;
     private final TransactionMapper mapper;
+    private final PermissionType type = PermissionType.TRANSACTIONS;
 
     @Override
     public TransactionDTO createTransaction(TransactionDTO transactionDTO) {
+
+        checkPermission(type, PermissionKey.WRITE);
 
         Goods goods = goodsRepo.findById(transactionDTO.getGoodsId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng hóa"));
@@ -50,6 +55,8 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
 
     @Override
     public TransactionDTO updateTransaction(String id, TransactionDTO transactionDTO) {
+
+        checkPermission(type, PermissionKey.WRITE);
 
         Transaction transaction = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin giao dịch"));
@@ -88,6 +95,9 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
 
     @Override
     public long deleteTransaction(String id) {
+
+        checkPermission(type, PermissionKey.DELETE);
+
         repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy giao dịch"));
         return repository.deleteTransaction(id);
@@ -95,12 +105,18 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
 
     @Override
     public TransactionDTO getTransactionById(String id) {
+
+        checkPermission(type, PermissionKey.VIEW);
+
         return repository.getTransactionsById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin giao dịch!"));
     }
 
     @Override
     public List<TransactionDTO> getTransactionByFilter(String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
+
+        checkPermission(type, PermissionKey.VIEW);
+
         return repository.getTransactionByFilter(warehouseId, origin, fromDate, toDate);
     }
 }
