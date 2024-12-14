@@ -11,7 +11,7 @@ CREATE TABLE `permissions` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 INSERT INTO `permissions` (`id`, `title`, `name`, `created_at`, `updated_at`) VALUES
 (1, 'Quản lý người dùng', 'USERS', NOW(), NOW()),
@@ -22,7 +22,10 @@ INSERT INTO `permissions` (`id`, `title`, `name`, `created_at`, `updated_at`) VA
 (6, 'Quản lý lịch trình', 'SCHEDULES', NOW(), NOW()),
 (7, 'Quản lý lương', 'SALARIES', NOW(), NOW()),
 (8, 'Quản lý giao dịch', 'TRANSACTIONS', NOW(), NOW()),
-(9, 'Báo cáo', 'REPORTS', NOW(), NOW());
+(9, 'Báo cáo', 'REPORTS', NOW(), NOW()),
+(10, 'Quản lý kho', 'WAREHOUSES', NOW(), NOW()),
+(11, 'Quản lý hàng hóa', 'GOODS', NOW(), NOW()),
+(12, 'Quản lý giao dịch', 'TRANSACTION', NOW(), NOW());
 
 CREATE TABLE `roles` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -33,7 +36,7 @@ CREATE TABLE `roles` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 INSERT INTO `roles` (id, name, title, created_at, updated_at)
 VALUES (1, "ADMIN", "Quản trị viên", now(), now()),
@@ -56,7 +59,7 @@ CREATE TABLE `role_permission` (
   FOREIGN KEY (`role_id`) REFERENCES `roles`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 -- Role ADMIN (role_id = 1)
 INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
@@ -68,43 +71,55 @@ INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `ca
 (6, 1, 5, 1, 1, 1, 1, NOW(), NOW()),
 (7, 1, 4, 1, 1, 1, 1, NOW(), NOW()),
 (8, 1, 3, 1, 1, 1, 1, NOW(), NOW()),
-(9, 1, 2, 1, 1, 1, 1, NOW(), NOW());
+(9, 1, 2, 1, 1, 1, 1, NOW(), NOW()),
+(10, 1, 10, 1, 1, 1, 1, NOW(), NOW()),
+(11, 1, 11, 1, 1, 1, 1, NOW(), NOW()),
+(12, 1, 12, 1, 1, 1, 1, NOW(), NOW());
 
 -- Role ACCOUNTANT (role_id = 2)
 INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
-(10, 2, 1, 0, 0, 0, 0, NOW(), NOW()),
-(11, 2, 9, 1, 1, 0, 0, NOW(), NOW()),
-(12, 2, 8, 0, 0, 0, 0, NOW(), NOW()),
-(13, 2, 7, 1, 1, 1, 0, NOW(), NOW()),
-(14, 2, 6, 1, 0, 0, 1, NOW(), NOW()),
-(15, 2, 5, 1, 1, 1, 1, NOW(), NOW()),
-(16, 2, 4, 0, 0, 0, 0, NOW(), NOW()),
-(17, 2, 3, 0, 0, 0, 0, NOW(), NOW()),
-(18, 2, 2, 0, 0, 0, 0, NOW(), NOW());
+(13, 2, 1, 0, 0, 0, 0, NOW(), NOW()),
+(14, 2, 9, 1, 1, 0, 0, NOW(), NOW()),
+(15, 2, 8, 0, 0, 0, 0, NOW(), NOW()),
+(16, 2, 7, 1, 1, 1, 0, NOW(), NOW()),
+(17, 2, 6, 1, 0, 0, 1, NOW(), NOW()),
+(18, 2, 5, 1, 1, 1, 1, NOW(), NOW()),
+(19, 2, 4, 0, 0, 0, 0, NOW(), NOW()),
+(20, 2, 3, 0, 0, 0, 0, NOW(), NOW()),
+(21, 2, 2, 0, 0, 0, 0, NOW(), NOW()),
+(22, 2, 10, 0, 0, 0, 0, NOW(), NOW()),
+(23, 2, 11, 0, 0, 0, 0, NOW(), NOW()),
+(24, 2, 12, 0, 0, 0, 0, NOW(), NOW());
 
 -- Role MANAGER (role_id = 3)
 INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
-(19, 3, 1, 0, 0, 0, 0, NOW(), NOW()),
-(20, 3, 9, 1, 1, 0, 0, NOW(), NOW()),
-(21, 3, 8, 1, 1, 1, 0, NOW(), NOW()),
-(22, 3, 7, 0, 0, 0, 0, NOW(), NOW()),
-(23, 3, 6, 1, 0, 0, 1, NOW(), NOW()),
-(24, 3, 5, 1, 0, 0, 1, NOW(), NOW()),
-(25, 3, 4, 1, 0, 0, 0, NOW(), NOW()),
-(26, 3, 3, 0, 0, 0, 0, NOW(), NOW()),
-(27, 3, 2, 0, 0, 0, 0, NOW(), NOW());
+(25, 3, 1, 0, 0, 0, 0, NOW(), NOW()),
+(26, 3, 9, 1, 1, 0, 0, NOW(), NOW()),
+(27, 3, 8, 1, 1, 1, 0, NOW(), NOW()),
+(28, 3, 7, 0, 0, 0, 0, NOW(), NOW()),
+(29, 3, 6, 1, 0, 0, 1, NOW(), NOW()),
+(30, 3, 5, 1, 0, 0, 1, NOW(), NOW()),
+(31, 3, 4, 1, 0, 0, 0, NOW(), NOW()),
+(32, 3, 3, 0, 0, 0, 0, NOW(), NOW()),
+(33, 3, 2, 0, 0, 0, 0, NOW(), NOW()),
+(34, 3, 10, 1, 0, 0, 0, NOW(), NOW()),
+(35, 3, 11, 1, 0, 0, 0, NOW(), NOW()),
+(36, 3, 12, 1, 0, 0, 0, NOW(), NOW());
 
 -- Role DRIVER (role_id = 4)
 INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
-(28, 4, 1, 0, 0, 0, 0, NOW(), NOW()),
-(29, 4, 9, 0, 0, 0, 0, NOW(), NOW()),
-(30, 4, 8, 0, 0, 0, 0, NOW(), NOW()),
-(31, 4, 7, 0, 0, 0, 0, NOW(), NOW()),
-(32, 4, 6, 1, 1, 1, 0, NOW(), NOW()),
-(33, 4, 5, 1, 1, 1, 0, NOW(), NOW()),
-(34, 4, 4, 1, 0, 0, 0, NOW(), NOW()),
-(35, 4, 3, 0, 0, 0, 0, NOW(), NOW()),
-(36, 4, 2, 0, 0, 0, 0, NOW(), NOW());
+(37, 4, 1, 0, 0, 0, 0, NOW(), NOW()),
+(38, 4, 9, 0, 0, 0, 0, NOW(), NOW()),
+(39, 4, 8, 0, 0, 0, 0, NOW(), NOW()),
+(40, 4, 7, 0, 0, 0, 0, NOW(), NOW()),
+(41, 4, 6, 1, 1, 1, 0, NOW(), NOW()),
+(42, 4, 5, 1, 1, 1, 0, NOW(), NOW()),
+(43, 4, 4, 1, 0, 0, 0, NOW(), NOW()),
+(44, 4, 3, 0, 0, 0, 0, NOW(), NOW()),
+(45, 4, 2, 0, 0, 0, 0, NOW(), NOW()),
+(46, 4, 10, 0, 0, 0, 0, NOW(), NOW()),
+(47, 4, 11, 0, 0, 0, 0, NOW(), NOW()),
+(48, 4, 12, 0, 0, 0, 0, NOW(), NOW());
 
 CREATE TABLE `users` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
@@ -122,7 +137,7 @@ CREATE TABLE `users` (
   FOREIGN KEY (`role_id`) REFERENCES `roles`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 CREATE TABLE `salary_received` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -141,7 +156,7 @@ CREATE TABLE `salary_received` (
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 CREATE TABLE `salary_deduction` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -156,7 +171,7 @@ CREATE TABLE `salary_deduction` (
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 CREATE TABLE `trucks` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -173,7 +188,7 @@ CREATE TABLE `trucks` (
   FOREIGN KEY (`driver_id`) REFERENCES `users`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 CREATE TABLE `schedule_configs` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
@@ -187,7 +202,7 @@ CREATE TABLE `schedule_configs` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 CREATE TABLE `schedules` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
@@ -213,7 +228,7 @@ CREATE TABLE `schedules` (
   FOREIGN KEY (`schedule_config_id`) REFERENCES `schedule_configs`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 CREATE TABLE `expenses_configs` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
@@ -225,7 +240,7 @@ CREATE TABLE `expenses_configs` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 CREATE TABLE `expenses` (
   `id` VARCHAR(255) NOT NULL,
@@ -242,7 +257,7 @@ CREATE TABLE `expenses` (
   FOREIGN KEY (`schedule_id`) REFERENCES `schedules`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 CREATE TABLE `expense_advances` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -258,16 +273,16 @@ CREATE TABLE `expense_advances` (
   FOREIGN KEY (`driver_id`) REFERENCES `users`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 -- Bảng users
 INSERT INTO `users` (`id`, `full_name`, `username`, `password`, `phone`, `date_of_birth`, `note`, `role_id`, `status`) VALUES
 ('user_001', 'Nguyễn Văn A', 'nguyenvana', 'hashed_password_1', '0901234567', '1990-05-15', 'Nhân viên mới', 1, 1),
 ('user_002', 'Trần Thị B', 'tranthib', 'hashed_password_2', '0912345678', '1995-10-20', 'Kế toán trưởng', 2, 1),
-('user_003', 'Lê Văn C', 'levanc', 'hashed_password_3', '0923456789', '1988-03-10', NULL, 3, 1),
+('user_003', 'Lê Văn C', 'levanc', 'hashed_password_3', '0923456789', '1988-03-10', 'Nhân viên quèn', 3, 1),
 ('user_004', 'Phạm Thị D', 'phamthid', 'hashed_password_4', '0934567890', '1992-07-25', 'Tài xế xe tải', 4, 1),
 ('user_005', 'Hoàng Văn E', 'hoangvane', 'hashed_password_5', '0945678901', '1998-12-01', 'Tài xế mooc', 4, 1),
-('user_006', 'Đào Thị F', 'daothif', 'hashed_password_6', '0956789012', '1991-09-18', NULL, 2, 1),
+('user_006', 'Đào Thị F', 'daothif', 'hashed_password_6', '0956789012', '1991-09-18', 'Nhân viên quèn 2', 2, 1),
 ('user_007', 'Vũ Văn G', 'vuvang', 'hashed_password_7', '0967890123', '1997-02-05', 'Tài xế tập sự', 4, 0);
 
 -- Bảng trucks
@@ -339,7 +354,7 @@ CREATE TABLE `warehouses` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 INSERT INTO `warehouses` (id, name, note, created_at, updated_at)
 VALUES ("K001", "Kho A", "Kho chứa vật liệu xây dựng", now(), now()),
@@ -368,6 +383,7 @@ VALUES ("H001", "K001", "Gạch", 30, 5000000, now(), now()),
 CREATE TABLE `transactions` (
   `id` VARCHAR(255) UNIQUE NOT NULL,
   `ref_user_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Người chịu trách nhiệm",
+  `customer_name` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Người chịu trách nhiệm",
   `goods_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến hàng hóa",
   `quantity` FLOAT NOT NULL DEFAULT 0,
   `transaction_time` TIMESTAMP NOT NULL,
@@ -381,7 +397,20 @@ CREATE TABLE `transactions` (
   FOREIGN KEY (`goods_id`) REFERENCES `goods`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
+
+CREATE TABLE `goods_report` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `goods_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến hàng hóa",
+    `beginning_inventory` FLOAT NOT NULL DEFAULT 0 COMMENT "Số lượng tồn đầu kỳ",
+    `ending_inventory` FLOAT NOT NULL DEFAULT 0 COMMENT "Số lượng tồn cuối kỳ",
+    `created_at` TIMESTAMP NOT NULL DEFAULT now(),
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`goods_id`) REFERENCES `goods`(`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
+
 
 CREATE TABLE `notification` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -394,7 +423,7 @@ CREATE TABLE `notification` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+COLLATE = utf8mb4_general_ci;
 
 
 
