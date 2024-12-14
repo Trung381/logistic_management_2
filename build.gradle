@@ -24,18 +24,24 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    //Spring security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    //Quartz Scheduler
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+
+    //Driver cho cơ sở dữ liệu MySQL
+    runtimeOnly 'mysql:mysql-connector-java:8.0.29'
+    implementation 'org.flywaydb:flyway-mysql'
+    implementation 'org.flywaydb:flyway-core:10.20.1'
+
 
     //Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
-    //JPA/Hibernate
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-//	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-    //Driver cho cơ sở dữ liệu MySQL
-    runtimeOnly 'mysql:mysql-connector-java:8.0.33'
 
     //QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -43,32 +49,25 @@ dependencies {
 
     //Validate
     implementation 'org.hibernate.validator:hibernate-validator'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
-    //Spring security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     //JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-    //Quartz Scheduler
-    implementation 'org.springframework.boot:spring-boot-starter-quartz'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
     //Excel
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
 
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-
