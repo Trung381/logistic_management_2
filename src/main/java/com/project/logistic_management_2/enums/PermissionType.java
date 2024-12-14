@@ -12,7 +12,11 @@ public enum PermissionType {
     SCHEDULES("Quản lý lịch trình", "SCHEDULES"),
     SALARIES("Quản lý lương", "SALARIES"),
     TRANSACTIONS("Quản lý giao dịch", "TRANSACTIONS"),
-    REPORTS("Báo cáo", "REPORTS");
+    REPORTS("Báo cáo", "REPORTS"),
+    WAREHOUSES("Quản lý kho", "WAREHOUSES"),
+    GOODS("Quản lý hàng hóa", "GOODS"),
+    TRANSACTION("Quản lý giao dịch", "TRANSACTION");
+    ;
 
     private final String title;
     private final String name;

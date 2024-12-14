@@ -3,6 +3,8 @@ package com.project.logistic_management_2.service.goods;
 import com.project.logistic_management_2.dto.request.GoodsReportDTO;
 import com.project.logistic_management_2.entity.Goods;
 import com.project.logistic_management_2.entity.GoodsReport;
+import com.project.logistic_management_2.enums.PermissionKey;
+import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.repository.goods.GoodsRepo;
 import com.project.logistic_management_2.repository.goods.GoodsReportRepo;
 import com.project.logistic_management_2.repository.transaction.TransactionRepo;
@@ -22,6 +24,7 @@ public class GoodsReportServiceImpl extends BaseService implements GoodsReportSe
     private final GoodsRepo goodsRepo;
     private final TransactionRepo transactionRepo;
     private final GoodsReportRepo goodsReportRepo;
+    private final PermissionType type = PermissionType.REPORTS;
 
     @Override
     @Scheduled(cron = "0 0 0 1 * *")
@@ -52,6 +55,9 @@ public class GoodsReportServiceImpl extends BaseService implements GoodsReportSe
     }
 
     public List<GoodsReportDTO> getGoodsReportByYearMonth(YearMonth yearMonth) {
+
+        checkPermission(type, PermissionKey.VIEW);
+
         return goodsReportRepo.getGoodReportDTOByYearMonth(yearMonth);
     }
 }
