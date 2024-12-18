@@ -14,7 +14,7 @@ public class ScheduleMapper {
         if (dto == null) return null;
         return Schedule.builder()
                 .id(Utils.genID(IDKey.SCHEDULE))
-                .scheduleConfigId(dto.getScheduleConfigId())
+                .scheduleConfigId(dto.getScheduleConfigId().isBlank() ? null : dto.getScheduleConfigId())
                 .truckLicense(dto.getTruckLicense())
                 .moocLicense(dto.getMoocLicense())
                 .attachDocument(dto.getAttachDocument())

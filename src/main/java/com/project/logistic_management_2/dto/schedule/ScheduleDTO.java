@@ -25,13 +25,15 @@ public class ScheduleDTO {
     @NotBlank(message = "Thông tin tài xế không được để trống!")
     private String driverId;
     private String driverName;
+    @NotBlank(message = "Thông tin xe tải không được để trống!")
     private String truckLicense;
+    @NotBlank(message = "Thông tin rơ-mooc không được để trống!")
     private String moocLicense;
 
     //Thời gian lấy / giao hàng
-    @NotNull(message = "Thời gian lấy hàng không được để trống!")
+//    @NotNull(message = "Thời gian lấy hàng không được để trống!")
     private Date departureTime;
-    @NotNull(message = "Thời gian giao hàng không được để trống!")
+//    @NotNull(message = "Thời gian giao hàng không được để trống!")
     private Date arrivalTime;
 
     //Ghi chú

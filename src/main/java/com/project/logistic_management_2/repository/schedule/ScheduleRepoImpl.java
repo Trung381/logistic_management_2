@@ -93,7 +93,7 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
 
         return Optional.ofNullable(
                 query.from(schedule)
-                        .innerJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
+                        .leftJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
                         .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
                         .where(builder)
                         .select(scheduleProjection())

@@ -201,7 +201,7 @@ COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `schedules` (
     `id` VARCHAR(255) UNIQUE NOT NULL,
-    `schedule_config_id` VARCHAR(255) COMMENT "Khóa ngoại đến cấu hình lịch trình, null nếu chạy nội bộ",
+    `schedule_config_id` VARCHAR(255) NULL COMMENT "Khóa ngoại đến cấu hình lịch trình, null nếu chạy nội bộ",
     -- `truck_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến xe tải (đầu xe)",
 --   `mooc_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến xe tải (rơ-mooc)",
     `truck_license` VARCHAR(255) NOT NULL,
