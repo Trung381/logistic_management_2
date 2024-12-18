@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0.29
+    container_name: mysql
+    ports:
+      - 3306:3306
+    networks:
+      - spring-boot-network
+    environment:
+      MYSQL_ROOT_PASSWORD:
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring-boot-app
+    ports:
+      - 8080:8080
+    networks:
+      - spring-boot-network
+    environment:
+      SECRET_KEY:
+      UPLOAD_DIR:
+      DB_URL: jdbc:mysql://mysql:3306/logistic_management?createDatabaseIfNotExist=true
+      DB_USERNAME:
+      DB_PASSWORD:
+    depends_on:
+      - mysql
+
+networks:
+  spring-boot-network:
+
+volumes:
+  mysql-data:
