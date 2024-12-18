@@ -14,14 +14,21 @@ import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.notification.NotificationService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Service
@@ -32,6 +39,35 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     private final ScheduleMapper scheduleMapper;
     private final NotificationService notificationService;
     private final PermissionType type = PermissionType.SCHEDULES;
+    private final Validator validator;
+
+    /**
+     *
+     * @param dto: object needs validation
+     * @param <T>: Object type of dto
+     */
+    private <T> void validateDTO(T dto) {
+        if (!(dto instanceof ScheduleDTO scheduleDTO)) {
+            return;
+        }
+        if (scheduleDTO.getType() == 1) {
+            if (scheduleDTO.getScheduleConfigId().isBlank()) {
+                throw new InvalidParameterException("Cấu hình lịch trình không được để trống!");
+            }
+            if (scheduleDTO.getDepartureTime() == null) {
+                throw new InvalidParameterException("Thời gian lấy hàng không được để trống!");
+            }
+            if (scheduleDTO.getArrivalTime() == null) {
+                throw new InvalidParameterException("Thời gian giao hàng không được để trống!");
+            }
+        }
+        if (truckRepo.getTruckByLicensePlate(scheduleDTO.getTruckLicense()).isEmpty()) {
+            throw new InvalidParameterException("Xe tải có biển số " + scheduleDTO.getTruckLicense() + " không tồn tại!");
+        }
+        if (truckRepo.getTruckByLicensePlate(scheduleDTO.getMoocLicense()).isEmpty()) {
+            throw new InvalidParameterException("Rơ-mooc có biển số " + scheduleDTO.getMoocLicense() + " không tồn tại!");
+        }
+    }
 
     @Override
     public List<ScheduleDTO> getAll() {
@@ -53,6 +89,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     @Transactional
     public ScheduleDTO create(ScheduleDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
+        validateDTO(dto);
         //Cập nhật trạng thái xe
         //đầu xe + mooc
 
@@ -71,6 +108,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     @Override
     public ScheduleDTO update(String id, ScheduleDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
+        validateDTO(dto);
         if (id == null || id.isEmpty()) {
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }
