@@ -11,6 +11,7 @@ public class TruckMapper {
     public Truck toTruck(TruckDTO truckDTO) {
         if(truckDTO==null)  return null;
         return Truck.builder()
+                .id(truckDTO.getId() != null ? truckDTO.getId() : null)
                 .driverId(truckDTO.getDriverId())
                 .licensePlate(truckDTO.getLicensePlate())
                 .capacity(truckDTO.getCapacity())
