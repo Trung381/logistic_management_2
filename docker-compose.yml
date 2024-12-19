@@ -36,3 +36,49 @@ networks:
 
 volumes:
   mysql-data:
+
+
+#version: '3.8'
+#
+#services:
+#  mysql:
+#    image: mysql:8.0.29
+#    container_name: mysql
+#    ports:
+#      - 3307:3306
+#    networks:
+#      - spring-boot-network
+#    environment:
+#      MYSQL_ROOT_PASSWORD: root
+#      MYSQL_DATABASE: logistic_management
+#    volumes:
+#      - mysql-data:/var/lib/mysql
+#    healthcheck:
+#      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+#      timeout: 20s
+#      retries: 10
+#
+#  app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    container_name: spring-boot-app
+#    ports:
+#      - 8080:8080
+#    networks:
+#      - spring-boot-network
+#    environment:
+#      SECRET_KEY: 404E635266556A586e3272357538782F413F4428472B4B6250645367566b5970
+#      UPLOAD_DIR: D:/ITS/logistic_management_2/src/main/resources/uploads
+#      DB_URL: jdbc:mysql://mysql:3306/logistic_management?createDatabaseIfNotExist=true
+#      DB_USERNAME: root
+#      DB_PASSWORD: root
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#
+#networks:
+#  spring-boot-network:
+#
+#volumes:
+#  mysql-data:
