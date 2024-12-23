@@ -8,6 +8,7 @@ services:
       - 3306:3306
     networks:
       - spring-boot-network
+    # network_mode: "host"
     environment:
       MYSQL_ROOT_PASSWORD:
     volumes:
@@ -82,3 +83,39 @@ volumes:
 #
 #volumes:
 #  mysql-data:
+
+
+
+# version: '3.8'
+
+# services:
+#   mysql:
+#     image: mysql:8.0.29
+#     container_name: mysql
+#     ports:
+#       - 3306:3306 # Bạn có thể bỏ ports nếu muốn container chỉ truy cập trên host
+#     network_mode: "host"
+#     environment:
+#       MYSQL_ROOT_PASSWORD: your_mysql_root_password
+#     volumes:
+#       - mysql-data:/var/lib/mysql
+
+#   app:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     container_name: spring-boot-app
+#     ports:
+#       - 8080:8080
+#     network_mode: "host"
+#     environment:
+#       SECRET_KEY: your_secret_key
+#       UPLOAD_DIR: /app/uploads
+#       DB_URL: jdbc:mysql://localhost:3306/logistic_management?createDatabaseIfNotExist=true
+#       DB_USERNAME: your_db_username
+#       DB_PASSWORD: your_db_password
+#     depends_on:
+#       - mysql
+
+# volumes:
+#   mysql-data:
