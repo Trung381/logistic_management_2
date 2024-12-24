@@ -35,21 +35,21 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
         return Projections.constructor(TransactionDTO.class,
                 transaction.id.as("id"),
                 transaction.refUserId.as("refUserId"),
-                JPAExpressions.select(user.fullName.as("fullNameUser"))
+                JPAExpressions.select(user.fullName.as("fullNameRefUser"))
                         .from(user)
                         .where(user.id.eq(transaction.refUserId)),
-                transaction.customerName.as("customerName"),
                 transaction.goodsId.as("goodsId"),
                 JPAExpressions.select(goods.name.as("goodsName"))
                         .from(goods)
                         .where(goods.id.eq(transaction.goodsId)),
                 transaction.quantity.as("quantity"),
+                transaction.destination.as("destination"),
+                transaction.customerName.as("customerName"),
                 transaction.transactionTime.as("transactionTime"),
                 transaction.origin.as("origin"),
                 new CaseBuilder()
-                        .when(transaction.origin.eq(true)).then("nhập hàng")
-                        .otherwise("xuất hàng").as("originDescription"),
-                transaction.destination.as("destination"),
+                        .when(transaction.origin.eq(true)).then("Nhập hàng")
+                        .otherwise("Xuất hàng").as("originDescription"),
                 transaction.image.as("image"),
                 transaction.createdAt.as("createdAt"),
                 transaction.updatedAt.as("updatedAt")

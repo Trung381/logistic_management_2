@@ -11,8 +11,14 @@ import com.project.logistic_management_2.mapper.transaction.TransactionMapper;
 import com.project.logistic_management_2.repository.goods.GoodsRepo;
 import com.project.logistic_management_2.repository.transaction.TransactionRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.FileFactory;
+import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.InvalidParameterException;
 import java.sql.Timestamp;
@@ -21,6 +27,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionServiceImpl extends BaseService implements TransactionService {
 
     private final GoodsRepo goodsRepo;
@@ -118,5 +125,34 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
         checkPermission(type, PermissionKey.VIEW);
 
         return repository.getTransactionByFilter(warehouseId, origin, fromDate, toDate);
+    }
+
+    @Override
+    public List<Transaction> importTransactionData(MultipartFile importFile) {
+
+        checkPermission(type, PermissionKey.WRITE);
+
+        Workbook workbook = FileFactory.getWorkbookStream(importFile);
+        List<TransactionDTO> transactionDTOList = ExcelUtils.getImportData(workbook, ImportConfig.transactionImport);
+
+        List<Transaction> transactions = mapper.toTransactions(transactionDTOList);
+
+        for(Transaction transaction : transactions) {
+            Goods goods = goodsRepo.findById(transaction.getGoodsId())
+                    .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng hóa"));
+
+            if(transaction.getOrigin()) {
+                goods.setQuantity(goods.getQuantity() + transaction.getQuantity());
+                goodsRepo.save(goods);
+            } else {
+                if(goods.getQuantity() < transaction.getQuantity()) {
+                    throw new ConflictException("Không đủ " + goods.getName() + "trong kho");
+                }
+                goods.setQuantity(goods.getQuantity() - transaction.getQuantity());
+                goodsRepo.save(goods);
+            }
+        }
+        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
+        return repository.saveAll(transactions);
     }
 }

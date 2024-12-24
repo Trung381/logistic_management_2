@@ -1,14 +1,15 @@
 package com.project.logistic_management_2.mapper.schedule;
 
-import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
-import com.project.logistic_management_2.entity.ExpensesConfig;
 import com.project.logistic_management_2.entity.ScheduleConfig;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ScheduleConfigMapper {
@@ -24,6 +25,25 @@ public class ScheduleConfigMapper {
                 .createdAt(new Date())
                 .updatedAt(new Date())
                 .build();
+    }
+
+    public List<ScheduleConfig> toScheduleConfigList(List<ScheduleConfigDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return dtos.stream().map(dto ->
+                ScheduleConfig.builder()
+                        .id(Utils.genID(IDKey.SCHEDULE_CONFIG))
+                        .placeA(dto.getPlaceA())
+                        .placeB(dto.getPlaceB())
+                        .amount(dto.getAmount())
+                        .note(dto.getNote())
+                        .deleted(false)
+                        .createdAt(new Date())
+                        .updatedAt(new Date())
+                        .build()
+        ).collect(Collectors.toList());
     }
 
     public void updateScheduleConfig(ScheduleConfig config, ScheduleConfigDTO dto) {

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 public class Utils {
@@ -13,6 +14,7 @@ public class Utils {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddyyMMmmssHH");
         String code = now.format(formatter);
-        return key.label + code;
+        int randomPart = ThreadLocalRandom.current().nextInt(1000, 9999);
+        return key.label + code + randomPart;
     }
 }
