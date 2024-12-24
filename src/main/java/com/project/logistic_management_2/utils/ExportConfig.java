@@ -8,10 +8,9 @@ import com.project.logistic_management_2.dto.request.GoodsDTO;
 import com.project.logistic_management_2.dto.request.GoodsReportDTO;
 import com.project.logistic_management_2.dto.request.TransactionDTO;
 import com.project.logistic_management_2.dto.request.WarehousesDTO;
-import com.project.logistic_management_2.dto.salary.SalaryDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
-import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.dto.truck.TruckDTO;
+import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.ScheduleConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -87,4 +86,5 @@ public class ExportConfig {
     public static final ExportConfig scheduleConfigExport = createExportConfig(ScheduleConfig.class, 0, 1);
     public static final ExportConfig scheduleExport = createExportConfig(ScheduleDTO.class, 0, 1);
     public static final ExportConfig truckExport = createExportConfig(TruckDTO.class, 0, 1);
+    public static final ExportConfig userExport = createExportConfig(UserDTO.class, 0, 1);
 }

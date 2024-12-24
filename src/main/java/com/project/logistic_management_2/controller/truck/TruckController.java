@@ -71,7 +71,7 @@ public class TruckController {
     }
 
     @GetMapping("/export")
-    public ResponseEntity<Object> exportSchedule() throws Exception {
+    public ResponseEntity<Object> exportTruck() throws Exception {
         List<TruckDTO> trucks = truckService.getAllTrucks();
 
         if (!CollectionUtils.isEmpty(trucks)) {
@@ -94,7 +94,7 @@ public class TruckController {
     }
 
     @PostMapping("/import")
-    public ResponseEntity<Object> importScheduleData(@RequestParam("file") MultipartFile importFile) {
+    public ResponseEntity<Object> importTruckData(@RequestParam("file") MultipartFile importFile) {
         return new ResponseEntity<>(
                 BaseResponse.ok(truckService.importTruckData(importFile)),
                 HttpStatus.CREATED

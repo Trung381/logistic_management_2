@@ -122,4 +122,24 @@ public class ImportConfig {
         truckImport.setCellImportConfigs(truckImportCellConfigs);
     }
 
+    public static final ImportConfig userImport;
+    static{
+        userImport = new ImportConfig();
+        userImport.setSheetIndex(0);
+        userImport.setHeaderIndex(0);
+        userImport.setStartRow(1);
+        userImport.setDataClazz(TransactionDTO.class);
+        List<CellConfig> userImportCellConfigs = new ArrayList<>();
+
+        userImportCellConfigs.add(new CellConfig(0, "Họ tên","fullName"));
+        userImportCellConfigs.add(new CellConfig(1, "Số ĐT","phone"));
+        userImportCellConfigs.add(new CellConfig(2, "Ghi chú","note"));
+        userImportCellConfigs.add(new CellConfig(3, "Ngày sinh","dateOfBirth"));
+        userImportCellConfigs.add(new CellConfig(4, "Tên tài khoản","username"));
+        userImportCellConfigs.add(new CellConfig(5, "Mật khẩu","password"));
+        userImportCellConfigs.add(new CellConfig(6, "Mã quyền","roleId"));
+
+        userImport.setCellImportConfigs(userImportCellConfigs);
+    }
+
 }

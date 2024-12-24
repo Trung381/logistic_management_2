@@ -4,6 +4,7 @@ package com.project.logistic_management_2.service.user;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,4 +16,7 @@ public interface UserService {
     User getUserById(String id);
     String deleteById(String id);
     User findByUsername(String username);
+    List<UserDTO> getDriver();
+    List<UserDTO> getAdmin();
+    List<User> importUserData(MultipartFile importFile);
 }
