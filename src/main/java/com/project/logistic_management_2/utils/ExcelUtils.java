@@ -1,5 +1,8 @@
 package com.project.logistic_management_2.utils;
 
+import com.project.logistic_management_2.dto.report.ReportDetailSalaryDTO;
+import com.project.logistic_management_2.dto.salary.SalaryDTO;
+import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -14,6 +17,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -55,40 +59,59 @@ public class ExcelUtils {
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
 
-    public static List<File> getFilesExcelStoreDataFromDatabase(List<?> list, String fileName, ExportConfig exportConfig) throws Exception {
-        XSSFWorkbook workbook = new XSSFWorkbook();
 
-        File file;
-        try {
-            file = ResourceUtils.getFile(PATH_TEMPLATE + fileName);
-        }catch (Exception e){
-            log.info("File not found");
-            file = FileFactory.createFile(fileName, workbook);
+    private static void processInsertData(XSSFWorkbook workbook, Object data, ExportConfig exportConfig) throws Exception {
+        if (data instanceof List<?> list && !list.isEmpty()) {
+            Object firstElement = list.get(0);
+
+            if (firstElement instanceof ReportDetailSalaryDTO) {
+                // Xử lý đặc biệt cho ReportDetailSalaryDTO
+                processReportDetailSalary(workbook, (ReportDetailSalaryDTO) firstElement);
+            } else {
+                // Xử lý chung cho danh sách các đối tượng khác
+                processGenericList(workbook, list, exportConfig);
+            }
+        } else {
+            throw new IllegalArgumentException("Unsupported data type for export: " + data.getClass());
         }
-
-        processInsertData(workbook, list, exportConfig);
-
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
-        workbook.write(fileOutputStream);
-        List<File> result = new ArrayList<>();
-        result.add(file);
-        return result;
     }
 
-    private static void processInsertData(XSSFWorkbook xssfWorkbook, List<?> list, ExportConfig exportConfig) {
-        // Tạo freeze pane
-        XSSFSheet newSheet = xssfWorkbook.createSheet("sheet1");
-        newSheet.createFreezePane(4, 2, 4, 2);
 
-        XSSFCellStyle titleCellStyle = createTitleCellStyle(xssfWorkbook);
-        XSSFCellStyle dataCellStyle = createDataCellStyle(xssfWorkbook);
+    private static void processReportDetailSalary(XSSFWorkbook workbook, ReportDetailSalaryDTO reportDetail) throws Exception {
+        // Cấu hình xuất cho Salary
+        ExportConfig salaryConfig = ExportConfig.createExportConfig(SalaryDTO.class, 0, 1);
+
+        // Cấu hình xuất cho Schedules
+        ExportConfig schedulesConfig = ExportConfig.createExportConfig(ScheduleSalaryDTO.class, 1, 1);
+
+        // Xuất dữ liệu Salary vào Sheet 1
+        Sheet salarySheet = workbook.createSheet("Salary");
+        insertFieldNameAsTitleToWorkbook(salaryConfig.getCellExportConfigList(), salarySheet, createTitleCellStyle(workbook));
+        insertDataToWorkbook(workbook, salaryConfig, List.of(reportDetail.getSalary()), createDataCellStyle(workbook));
+
+        // Xuất danh sách Schedule vào Sheet 2
+        Sheet schedulesSheet = workbook.createSheet("Schedules");
+        insertFieldNameAsTitleToWorkbook(schedulesConfig.getCellExportConfigList(), schedulesSheet, createTitleCellStyle(workbook));
+        insertDataToWorkbook(workbook, schedulesConfig, reportDetail.getSchedules(), createDataCellStyle(workbook));
+    }
+
+    private static void processGenericList(XSSFWorkbook workbook, List<?> list, ExportConfig exportConfig) {
+        // Tạo sheet
+        Sheet sheet = workbook.createSheet("sheet1");
+
+        // Tạo freeze pane
+        sheet.createFreezePane(4, 2, 4, 2);
+
+        XSSFCellStyle titleCellStyle = createTitleCellStyle(workbook);
+        XSSFCellStyle dataCellStyle = createDataCellStyle(workbook);
 
         // Sử dụng exportConfig để chèn tên trường làm tiêu đề vào Excel
-        insertFieldNameAsTitleToWorkbook(exportConfig.getCellExportConfigList(), newSheet, titleCellStyle);
+        insertFieldNameAsTitleToWorkbook(exportConfig.getCellExportConfigList(), sheet, titleCellStyle);
 
         // Sử dụng exportConfig để chèn dữ liệu vào Excel
-        insertDataToWorkbook(xssfWorkbook, exportConfig, list, dataCellStyle);
+        insertDataToWorkbook(workbook, exportConfig, list, dataCellStyle);
     }
+
 
 
     private static <T> void insertDataToWorkbook(Workbook workbook, ExportConfig exportConfig, List<T> datas,
@@ -133,8 +156,8 @@ public class ExcelUtils {
         //insert field name to cell
         for (CellConfig cellConfig : cellConfigs) {
             Cell currentCell = row.createCell(i);
-            String fieldName = cellConfig.getFieldName();
-            currentCell.setCellValue(fieldName);
+            String headerName = cellConfig.getHeaderName();
+            currentCell.setCellValue(headerName);
             currentCell.setCellStyle(titleCellStyle);
             sheet.autoSizeColumn(i);
             i++;
@@ -168,14 +191,22 @@ public class ExcelUtils {
             Field field = getDeclaredField(clazz, fieldName);
             if (!ObjectUtils.isEmpty(field)) {
                 field.setAccessible(true);
-                return !ObjectUtils.isEmpty(field.get(data)) ? field.get(data).toString() : "";
+                Object value = field.get(data);
+
+                // Nếu là Float hoặc Double, định dạng thành chuỗi
+                if (value instanceof Float || value instanceof Double) {
+                    DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
+                    return decimalFormat.format(value);
+                }
+                return value != null ? value.toString() : "";
             }
             return "";
         } catch (Exception e) {
-            log.info("" + e);
+            log.error("Error retrieving value for field: " + fieldName, e);
             return "";
         }
     }
+
 
     private static Field getDeclaredField(Class clazz, String fieldName) {
         if (ObjectUtils.isEmpty(clazz) || ObjectUtils.isEmpty(fieldName)) {
@@ -513,6 +544,9 @@ public class ExcelUtils {
         dataCellStyle.setBorderTop(BorderStyle.THIN);
         dataCellStyle.setFont(dataFont);
         dataCellStyle.setWrapText(true);
+
+        DataFormat format = xssfWorkbook.createDataFormat();
+        dataCellStyle.setDataFormat(format.getFormat("@"));
 
         return dataCellStyle;
     }

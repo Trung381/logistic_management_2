@@ -9,8 +9,13 @@ import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesConfigMapper;
 import com.project.logistic_management_2.repository.expenses.ExpensesConfigRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.FileFactory;
+import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -79,5 +84,19 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }
         return expensesConfigRepo.delete(id);
+    }
+
+    @Override
+    public List<ExpensesConfig> importExpensesConfigData(MultipartFile importFile) {
+
+        checkPermission(type, PermissionKey.WRITE);
+
+        Workbook workbook = FileFactory.getWorkbookStream(importFile);
+        List<ExpensesConfigDTO> expensesConfigDTOList = ExcelUtils.getImportData(workbook, ImportConfig.expensesImport);
+
+        List<ExpensesConfig> expensesConfigs = expensesConfigMapper.toExpensesConfigList(expensesConfigDTOList);
+
+        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
+        return expensesConfigRepo.saveAll(expensesConfigs);
     }
 }

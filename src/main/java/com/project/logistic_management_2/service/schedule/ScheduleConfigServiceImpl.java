@@ -9,8 +9,13 @@ import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.schedule.ScheduleConfigMapper;
 import com.project.logistic_management_2.repository.schedule.ScheduleConfigRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.FileFactory;
+import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -68,5 +73,19 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
             throw new InvalidParameterException("Tham số không hợp lệ!");
         }
         return scheduleConfigRepo.delete(id);
+    }
+
+    @Override
+    public List<ScheduleConfig> importScheduleConfigData(MultipartFile importFile) {
+
+        checkPermission(type, PermissionKey.WRITE);
+
+        Workbook workbook = FileFactory.getWorkbookStream(importFile);
+        List<ScheduleConfigDTO> scheduleConfigDTOList = ExcelUtils.getImportData(workbook, ImportConfig.scheduleConfigImport);
+
+        List<ScheduleConfig> scheduleConfig = scheduleConfigMapper.toScheduleConfigList(scheduleConfigDTOList);
+
+        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
+        return scheduleConfigRepo.saveAll(scheduleConfig);
     }
 }

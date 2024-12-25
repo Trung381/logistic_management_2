@@ -8,8 +8,13 @@ import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.truck.TruckMapper;
 import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.FileFactory;
+import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,56 +25,72 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
     private final TruckRepo repository;
     private final TruckMapper mapper;
     private final PermissionType type = PermissionType.TRUCKS;
+    private final TruckMapper truckMapper;
+    private final TruckRepo truckRepo;
+
     @Override
     public TruckDTO createTruck(TruckDTO truckDTO) {
         checkPermission(type, PermissionKey.WRITE); // check quyền tạo
         Truck truck = mapper.toTruck(truckDTO);
         repository.save(truck);
-        return mapper.toTruckDTO(truck);
+        return repository.getTruckById(truck.getId()).get();
     }
 
     @Override
     public List<TruckDTO> getAllTrucks() {
         checkPermission(type, PermissionKey.VIEW); // Kiểm tra quyền xem
-        List<Truck> trucks = repository.getAllTrucks();
-        return trucks.stream().map(mapper::toTruckDTO).toList();
+        return repository.getAllTrucks();
     }
 
     @Override
     public List<TruckDTO> getTrucksByType(Integer Type) {
-        checkPermission(type, PermissionKey.VIEW);
-        List<Truck> trucks = repository.getTrucksByType(Type);
+//        checkPermission(type, PermissionKey.VIEW);
+        List<TruckDTO> trucks = repository.getTrucksByType(Type);
         if (trucks.isEmpty()) {
             throw new NotFoundException("Không tìm thấy xe với loại: " + Type);
         }
-        return trucks.stream().map(mapper::toTruckDTO).toList();
+        return trucks;
     }
 
     @Override
     public TruckDTO getTruckByLicensePlate(String licensePlate) {
         checkPermission(type, PermissionKey.VIEW);
-        Truck truck = repository.getTruckByLicensePlate(licensePlate)
+        return repository.getTruckByLicensePlate(licensePlate)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy xe với biển số: " + licensePlate));
-        return mapper.toTruckDTO(truck);
     }
 
     @Override
-    public TruckDTO updateTruck(Integer id, TruckDTO truckDTO) {
+    public TruckDTO updateTruck(Integer id, TruckDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
-        Truck truck = repository.getTruckById(id)
+        TruckDTO truckDTO = repository.getTruckById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe cần tìm!"));
 
-        mapper.updateTruck(truck, truckDTO);
+        Truck truck = mapper.toTruck(truckDTO);
+        mapper.updateTruck(truck, dto);
         repository.save(truck);
-        return mapper.toTruckDTO(truck);
+        return repository.getTruckById(id).get();
     }
 
     @Override
     public long deleteTruck(Integer id) {
         checkPermission(type, PermissionKey.DELETE); // Kiểm tra quyền xóa
-        Truck truck = repository.getTruckById(id)
+        TruckDTO truck = repository.getTruckById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe"));
         return repository.delete(id);
+    }
+
+    @Override
+    public List<Truck> importTruckData(MultipartFile importFile) {
+
+        checkPermission(type, PermissionKey.WRITE);
+
+        Workbook workbook = FileFactory.getWorkbookStream(importFile);
+        List<TruckDTO> truckDTOList = ExcelUtils.getImportData(workbook, ImportConfig.truckImport);
+
+        List<Truck> trucks = truckMapper.toTruckList(truckDTOList);
+
+        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
+        return truckRepo.saveAll(trucks);
     }
 
 }

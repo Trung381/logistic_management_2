@@ -57,15 +57,11 @@ public class GoodsReportRepoImpl extends BaseRepo implements GoodsReportRepoCust
                 JPAExpressions.select(goods.name.as("goodsName"))
                         .from(goods)
                         .where(goods.id.eq(goodsReport.goodsId)),
-                goodsReport.beginningInventory.as("beginingInventoryQuantity"),
-                JPAExpressions.select((goods.amount.multiply(goodsReport.beginningInventory)).as("beginingInventoryTotalAmount"))
+                goodsReport.beginningInventory.coalesce(0F).as("beginingInventoryQuantity"),
+                JPAExpressions.select((goods.amount.multiply(goodsReport.beginningInventory)).coalesce(0F).as("beginingInventoryTotalAmount"))
                         .from(goods)
                         .where(goods.id.eq(goodsReport.goodsId)),
-                goodsReport.endingInventory.as("endingInventoryQuantity"),
-                JPAExpressions.select((goods.amount.multiply(goodsReport.endingInventory)).as("endingInventoryTotalAmount"))
-                        .from(goods)
-                        .where(goods.id.eq(goodsReport.goodsId)),
-                JPAExpressions.select((transaction.quantity.sum()).as("inboundTransactionQuantity"))
+                JPAExpressions.select((transaction.quantity.sum()).coalesce(0F).as("inboundTransactionQuantity"))
                         .from(transaction)
                         .where(transaction.origin.eq(true)
                                 .and(transaction.goodsId.eq(goodsReport.goodsId))),
@@ -75,12 +71,12 @@ public class GoodsReportRepoImpl extends BaseRepo implements GoodsReportRepoCust
                                                 JPAExpressions.select(goods.amount)
                                                         .from(goods)
                                                         .where(goods.id.eq(transaction.goodsId))
-                                        ).as("inboundTransactionTotalAmount")
+                                        ).coalesce(0F).as("inboundTransactionTotalAmount")
                         )
                         .from(transaction)
                         .where(transaction.origin.eq(true)
                                 .and(transaction.goodsId.eq(goodsReport.goodsId))),
-                JPAExpressions.select((transaction.quantity.sum()).as("outboundTransactionQuantity"))
+                JPAExpressions.select((transaction.quantity.sum()).coalesce(0F).as("outboundTransactionQuantity"))
                         .from(transaction)
                         .where(transaction.origin.eq(false)
                                 .and(transaction.goodsId.eq(goodsReport.goodsId))),
@@ -90,13 +86,17 @@ public class GoodsReportRepoImpl extends BaseRepo implements GoodsReportRepoCust
                                                 JPAExpressions.select(goods.amount)
                                                         .from(goods)
                                                         .where(goods.id.eq(transaction.goodsId))
-                                        ).as("outboundTransactionTotalAmount")
+                                        ).coalesce(0F).as("outboundTransactionTotalAmount")
                         )
                         .from(transaction)
                         .where(transaction.origin.eq(false)
                                 .and(transaction.goodsId.eq(goodsReport.goodsId)))
                 ,
-                JPAExpressions.select(goods.amount.as("unitAmount"))
+                goodsReport.endingInventory.coalesce(0F).as("endingInventoryQuantity"),
+                JPAExpressions.select((goods.amount.multiply(goodsReport.endingInventory)).coalesce(0F).as("endingInventoryTotalAmount"))
+                        .from(goods)
+                        .where(goods.id.eq(goodsReport.goodsId)),
+                JPAExpressions.select(goods.amount.coalesce(0F).as("unitAmount"))
                         .from(goods)
                         .where(goods.id.eq(goodsReport.goodsId)),
                 goodsReport.createdAt.as("createdAt")

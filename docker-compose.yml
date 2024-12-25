@@ -8,6 +8,7 @@ services:
       - 3307:3306
     networks:
       - spring-boot-network
+    # network_mode: "host"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: logistic_management
@@ -42,3 +43,85 @@ networks:
 
 volumes:
   mysql-data:
+
+
+#version: '3.8'
+#
+#services:
+#  mysql:
+#    image: mysql:8.0.29
+#    container_name: mysql
+#    ports:
+#      - 3307:3306
+#    networks:
+#      - spring-boot-network
+#    environment:
+#      MYSQL_ROOT_PASSWORD: root
+#      MYSQL_DATABASE: logistic_management
+#    volumes:
+#      - mysql-data:/var/lib/mysql
+#    healthcheck:
+#      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+#      timeout: 20s
+#      retries: 10
+#
+#  app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    container_name: spring-boot-app
+#    ports:
+#      - 8080:8080
+#    networks:
+#      - spring-boot-network
+#    environment:
+#      SECRET_KEY: 404E635266556A586e3272357538782F413F4428472B4B6250645367566b5970
+#      UPLOAD_DIR: D:/ITS/logistic_management_2/src/main/resources/uploads
+#      DB_URL: jdbc:mysql://mysql:3306/logistic_management?createDatabaseIfNotExist=true
+#      DB_USERNAME: root
+#      DB_PASSWORD: root
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#
+#networks:
+#  spring-boot-network:
+#
+#volumes:
+#  mysql-data:
+
+
+
+# version: '3.8'
+
+# services:
+#   mysql:
+#     image: mysql:8.0.29
+#     container_name: mysql
+#     ports:
+#       - 3306:3306 # Bạn có thể bỏ ports nếu muốn container chỉ truy cập trên host
+#     network_mode: "host"
+#     environment:
+#       MYSQL_ROOT_PASSWORD: your_mysql_root_password
+#     volumes:
+#       - mysql-data:/var/lib/mysql
+
+#   app:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     container_name: spring-boot-app
+#     ports:
+#       - 8080:8080
+#     network_mode: "host"
+#     environment:
+#       SECRET_KEY: your_secret_key
+#       UPLOAD_DIR: /app/uploads
+#       DB_URL: jdbc:mysql://localhost:3306/logistic_management?createDatabaseIfNotExist=true
+#       DB_USERNAME: your_db_username
+#       DB_PASSWORD: your_db_password
+#     depends_on:
+#       - mysql
+
+# volumes:
+#   mysql-data:
