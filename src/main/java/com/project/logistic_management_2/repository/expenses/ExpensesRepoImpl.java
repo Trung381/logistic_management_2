@@ -5,6 +5,7 @@ import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import static com.project.logistic_management_2.entity.QExpenses.expenses;
 import static com.project.logistic_management_2.entity.QExpensesConfig.expensesConfig;
 import static com.project.logistic_management_2.entity.QSchedule.schedule;
+import static com.project.logistic_management_2.entity.QTransaction.transaction;
 import static com.project.logistic_management_2.entity.QTruck.truck;
 import static com.project.logistic_management_2.entity.QUser.user;
 import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseAdvances;
@@ -26,6 +27,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
@@ -42,8 +44,6 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 expenses.id.as("id"),
                 user.id.as("driverId"),
                 user.fullName.as("driverName"),
-                //Mã lịch trình
-                expenses.scheduleId.as("scheduleId"),
                 //Thông tin cấu hình chi phí: mã, loại chi phí
                 expenses.expensesConfigId.as("expensesConfigId"),
                 JPAExpressions.select(expensesConfig.type.as("expensesConfigType"))
@@ -52,6 +52,8 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 expenses.amount.as("amount"),   //Giá tiền
                 expenses.note.as("note"),       //Ghi chú
                 expenses.imgPath.as("imgPath"), //Đường dẫn ảnh đính kèm
+                //Mã lịch trình
+                expenses.scheduleId.as("scheduleId"),
                 expenses.status.as("status"),   //Trạng thái chi phí
                 expenses.createdAt.as("createdAt"),
                 expenses.updatedAt.as("updatedAt")
@@ -59,7 +61,41 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     @Override
-    public List<ExpensesDTO> getAll(String driverId, YearMonth period) {
+    public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+        //Điều kiện truy vấn: Chưa bị xóa
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(expenses.deleted.eq(false));
+
+        //Tìm theo loại chi phí nếu tham số expensesConfigId hợp lệ
+        if(expensesConfigId != null) {
+            builder.and(expenses.expensesConfigId.eq(expensesConfigId));
+        }
+
+        //Tìm theo biển số xe nếu tham số truckLicense hợp lệ
+        if (truckLicense != null && !truckLicense.isBlank()) {
+            builder.and(schedule.truckLicense.eq(truckLicense));
+        }
+
+        if (fromDate != null && toDate != null) {
+            builder.and(expenses.createdAt.between(fromDate, toDate));
+        } else if (fromDate != null) {
+            builder.and(expenses.createdAt.goe(fromDate));
+        } else if (toDate != null) {
+            builder.and(expenses.createdAt.loe(toDate));
+        }
+
+        //Truy vấn, trả về kết quả
+        return query.from(expenses)
+                .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
+                .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
+                .innerJoin(user).on(truck.driverId.eq(user.id))
+                .where(builder)
+                .select(expensesProjection())
+                .fetch();
+    }
+
+    @Override
+    public List<ExpensesDTO> getByFilter(String driverId, YearMonth period) {
         //Điều kiện truy vấn: Chưa bị xóa
         BooleanBuilder builder = new BooleanBuilder()
                 .and(expenses.deleted.eq(false));

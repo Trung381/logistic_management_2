@@ -1,7 +1,6 @@
 package com.project.logistic_management_2.service.truck;
 
 import com.project.logistic_management_2.dto.truck.TruckDTO;
-import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.entity.Truck;
 import com.project.logistic_management_2.enums.PermissionKey;
 import com.project.logistic_management_2.enums.PermissionType;
@@ -9,8 +8,13 @@ import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.truck.TruckMapper;
 import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.FileFactory;
+import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,6 +25,8 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
     private final TruckRepo repository;
     private final TruckMapper mapper;
     private final PermissionType type = PermissionType.TRUCKS;
+    private final TruckMapper truckMapper;
+    private final TruckRepo truckRepo;
 
     @Override
     public TruckDTO createTruck(TruckDTO truckDTO) {
@@ -71,6 +77,20 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
         TruckDTO truck = repository.getTruckById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe"));
         return repository.delete(id);
+    }
+
+    @Override
+    public List<Truck> importTruckData(MultipartFile importFile) {
+
+        checkPermission(type, PermissionKey.WRITE);
+
+        Workbook workbook = FileFactory.getWorkbookStream(importFile);
+        List<TruckDTO> truckDTOList = ExcelUtils.getImportData(workbook, ImportConfig.truckImport);
+
+        List<Truck> trucks = truckMapper.toTruckList(truckDTOList);
+
+        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
+        return truckRepo.saveAll(trucks);
     }
 
 }

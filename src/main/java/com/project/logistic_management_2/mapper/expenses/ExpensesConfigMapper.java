@@ -6,7 +6,10 @@ import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ExpensesConfigMapper {
@@ -20,6 +23,23 @@ public class ExpensesConfigMapper {
                 .createdAt(new Date())
                 .updatedAt(new Date())
                 .build();
+    }
+
+    public List<ExpensesConfig> toExpensesConfigList(List<ExpensesConfigDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return dtos.stream().map(dto ->
+                ExpensesConfig.builder()
+                        .id(Utils.genID(IDKey.EXPENSES_CONFIG))
+                        .type(dto.getType())
+                        .note(dto.getNote())
+                        .deleted(false)
+                        .createdAt(new Date())
+                        .updatedAt(new Date())
+                        .build()
+        ).collect(Collectors.toList());
     }
 
     public void updateExpensesConfig(ExpensesConfig config, ExpensesConfigDTO dto) {

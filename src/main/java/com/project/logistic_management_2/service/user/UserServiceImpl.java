@@ -9,8 +9,13 @@ import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.user.UserMapper;
 import com.project.logistic_management_2.repository.user.UserRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.FileFactory;
+import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -70,5 +75,31 @@ public class UserServiceImpl extends BaseService implements UserService {
     public User findByUsername(String username) {
         checkPermission(type, PermissionKey.VIEW);
         return userRepo.findByUsername(username);
+    }
+
+    @Override
+    public List<UserDTO> getDriver() {
+        checkPermission(type, PermissionKey.VIEW);
+        return userRepo.getDriver();
+    }
+
+    @Override
+    public List<UserDTO> getAdmin() {
+        checkPermission(type, PermissionKey.VIEW);
+        return userRepo.getAdmin();
+    }
+
+    @Override
+    public List<User> importUserData(MultipartFile importFile) {
+
+        checkPermission(type, PermissionKey.WRITE);
+
+        Workbook workbook = FileFactory.getWorkbookStream(importFile);
+        List<UserDTO> userDTOList = ExcelUtils.getImportData(workbook, ImportConfig.userImport);
+
+        List<User> users = userMapper.toUserList(userDTOList);
+
+        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
+        return userRepo.saveAll(users);
     }
 }

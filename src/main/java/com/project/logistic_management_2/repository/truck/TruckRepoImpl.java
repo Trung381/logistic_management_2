@@ -5,6 +5,7 @@ import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import static com.project.logistic_management_2.entity.QTransaction.transaction;
 import static com.project.logistic_management_2.entity.QTruck.truck;
 import static com.project.logistic_management_2.entity.QUser.user;
 
@@ -31,7 +33,18 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
                 truck.driverId.as("driverId"),
                 user.fullName.as("driverName"),
                 truck.type.as("type"),
+                new CaseBuilder()
+                        .when(truck.type.eq(0)).then("Xe tải")
+                        .when(truck.type.eq(1)).then("Mooc")
+                        .otherwise("Không xác định")
+                        .as("typeDescription"),
                 truck.status.as("status"),
+                new CaseBuilder()
+                        .when(truck.status.eq(0)).then("Đang sử dụng")
+                        .when(truck.status.eq(1)).then("Sẵn sàng")
+                        .when(truck.status.eq(-1)).then("Tạm dừng")
+                        .otherwise("Không xác định")
+                        .as("statusDescription"),
                 truck.note.as("note"),
                 truck.createdAt.as("createdAt"),
                 truck.updatedAt.as("updatedAt")

@@ -1,14 +1,25 @@
 package com.project.logistic_management_2.controller.transaction;
 
+import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.request.TransactionDTO;
 import com.project.logistic_management_2.service.transaction.TransactionService;
+import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.ExportConfig;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -53,6 +64,52 @@ public class TransactionController {
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) {
 
+        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
+
+        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(warehouseId, origin, dateRange.getFirst(), dateRange.getSecond());
+
+        return ResponseEntity.ok(BaseResponse.ok(transactions));
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<Object> exportTransaction(
+            @RequestParam(required = false) String warehouseId,
+            @RequestParam(required = false) Boolean origin,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate) throws Exception {
+        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
+
+        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(warehouseId, origin, dateRange.getFirst(), dateRange.getSecond());
+
+
+        if (!CollectionUtils.isEmpty(transactions)) {
+            String fileName = "Transactions Export" + ".xlsx";
+
+            ByteArrayInputStream in = ExcelUtils.export(transactions, fileName, ExportConfig.transactionExport);
+
+            InputStreamResource inputStreamResource = new InputStreamResource(in);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8)
+                    )
+                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
+                    .body(inputStreamResource);
+        } else {
+            throw new Exception("No data");
+
+        }
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<Object> importTransactionData(@RequestParam("file") MultipartFile importFile) {
+        return new ResponseEntity<>(
+                BaseResponse.ok(transactionService.importTransactionData(importFile)),
+                HttpStatus.CREATED
+        );
+    }
+
+    private Pair<Timestamp, Timestamp> parseAndValidateDates(String fromDate, String toDate) throws IllegalArgumentException {
         Timestamp fromTimestamp = null;
         Timestamp toTimestamp = null;
 
@@ -60,7 +117,7 @@ public class TransactionController {
             try {
                 fromTimestamp = Timestamp.valueOf(fromDate.replace("T", " ") + ".000");
             } catch (Exception e) {
-                return ResponseEntity.badRequest().body("Invalid fromDate format.");
+                throw new IllegalArgumentException("Invalid fromDate format.");
             }
         }
 
@@ -68,12 +125,10 @@ public class TransactionController {
             try {
                 toTimestamp = Timestamp.valueOf(toDate.replace("T", " ") + ".000");
             } catch (Exception e) {
-                return ResponseEntity.badRequest().body("Invalid toDate format.");
+                throw new IllegalArgumentException("Invalid toDate format.");
             }
         }
 
-        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(warehouseId, origin, fromTimestamp, toTimestamp);
-
-        return ResponseEntity.ok(BaseResponse.ok(transactions));
+        return Pair.of(fromTimestamp, toTimestamp);
     }
 }

@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.repository.user;
 
+import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.User;
 
 import java.util.List;
@@ -9,4 +10,6 @@ public interface UserRepoCustom {
     User getUserById(String id);
     long deleteUser(String id);
     User findByUsername(String username);
+    List<UserDTO> getDriver();
+    List<UserDTO> getAdmin();
 }
