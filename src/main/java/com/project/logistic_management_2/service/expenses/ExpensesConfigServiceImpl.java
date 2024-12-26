@@ -92,7 +92,7 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
         checkPermission(type, PermissionKey.WRITE);
 
         Workbook workbook = FileFactory.getWorkbookStream(importFile);
-        List<ExpensesConfigDTO> expensesConfigDTOList = ExcelUtils.getImportData(workbook, ImportConfig.expensesImport);
+        List<ExpensesConfigDTO> expensesConfigDTOList = ExcelUtils.getImportData(workbook, ImportConfig.expensesConfigImport);
 
         List<ExpensesConfig> expensesConfigs = expensesConfigMapper.toExpensesConfigList(expensesConfigDTOList);
 

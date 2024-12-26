@@ -1,6 +1,12 @@
 package com.project.logistic_management_2.utils;
 
+import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
+import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.request.TransactionDTO;
+import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
+import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
+import com.project.logistic_management_2.dto.truck.TruckDTO;
+import com.project.logistic_management_2.dto.user.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -51,7 +57,7 @@ public class ImportConfig {
         expensesImport.setSheetIndex(0);
         expensesImport.setHeaderIndex(0);
         expensesImport.setStartRow(1);
-        expensesImport.setDataClazz(TransactionDTO.class);
+        expensesImport.setDataClazz(ExpensesDTO.class);
         List<CellConfig> expensesImportCellConfigs = new ArrayList<>();
 
         expensesImportCellConfigs.add(new CellConfig(0, "Mã tài xế","driverId"));
@@ -64,13 +70,28 @@ public class ImportConfig {
         expensesImport.setCellImportConfigs(expensesImportCellConfigs);
     }
 
+    public static final ImportConfig expensesConfigImport;
+    static{
+        expensesConfigImport = new ImportConfig();
+        expensesConfigImport.setSheetIndex(0);
+        expensesConfigImport.setHeaderIndex(0);
+        expensesConfigImport.setStartRow(1);
+        expensesConfigImport.setDataClazz(ExpensesConfigDTO.class);
+        List<CellConfig> expensesConfigImportCellConfigs = new ArrayList<>();
+
+        expensesConfigImportCellConfigs.add(new CellConfig(0, "Loại chi phí","type"));
+        expensesConfigImportCellConfigs.add(new CellConfig(1, "Ghi chú","note"));
+
+        expensesConfigImport.setCellImportConfigs(expensesConfigImportCellConfigs);
+    }
+
     public static final ImportConfig scheduleConfigImport;
     static{
         scheduleConfigImport = new ImportConfig();
         scheduleConfigImport.setSheetIndex(0);
         scheduleConfigImport.setHeaderIndex(0);
         scheduleConfigImport.setStartRow(1);
-        scheduleConfigImport.setDataClazz(TransactionDTO.class);
+        scheduleConfigImport.setDataClazz(ScheduleConfigDTO.class);
         List<CellConfig> scheduleConfigImportCellConfigs = new ArrayList<>();
 
         scheduleConfigImportCellConfigs.add(new CellConfig(0, "Điểm đi","placeA"));
@@ -87,19 +108,17 @@ public class ImportConfig {
         scheduleImport.setSheetIndex(0);
         scheduleImport.setHeaderIndex(0);
         scheduleImport.setStartRow(1);
-        scheduleImport.setDataClazz(TransactionDTO.class);
+        scheduleImport.setDataClazz(ScheduleDTO.class);
         List<CellConfig> scheduleImportCellConfigs = new ArrayList<>();
 
-        scheduleImportCellConfigs.add(new CellConfig(0, "Mã hành trình","driverId"));
-        scheduleImportCellConfigs.add(new CellConfig(1, "Mã tài xế","expensesConfigId"));
-        scheduleImportCellConfigs.add(new CellConfig(2, "Số tiền","amount"));
-        scheduleImportCellConfigs.add(new CellConfig(3, "Biển số xe","note"));
-        scheduleImportCellConfigs.add(new CellConfig(4, "Biển số mooc","imgPath"));
-        scheduleImportCellConfigs.add(new CellConfig(5, "Thời gian lấy hàng","scheduleId"));
-        scheduleImportCellConfigs.add(new CellConfig(6, "Thời gian giao hàng","scheduleId"));
-        scheduleImportCellConfigs.add(new CellConfig(7, "Ghi chú","scheduleId"));
-        scheduleImportCellConfigs.add(new CellConfig(8, "Ảnh","scheduleId"));
-        scheduleImportCellConfigs.add(new CellConfig(9, "Loại hành trình","scheduleId"));
+        scheduleImportCellConfigs.add(new CellConfig(0, "Mã hành trình","scheduleConfigId"));
+        scheduleImportCellConfigs.add(new CellConfig(1, "Biển số xe","truckLicense"));
+        scheduleImportCellConfigs.add(new CellConfig(2, "Biển số mooc","moocLicense"));
+        scheduleImportCellConfigs.add(new CellConfig(3, "Ảnh","attachDocument"));
+        scheduleImportCellConfigs.add(new CellConfig(4, "Thời gian lấy hàng","departureTime"));
+        scheduleImportCellConfigs.add(new CellConfig(5, "Thời gian giao hàng","arrivalTime"));
+        scheduleImportCellConfigs.add(new CellConfig(6, "Ghi chú","note"));
+        scheduleImportCellConfigs.add(new CellConfig(7, "Loại hành trình","type"));
 
         scheduleImport.setCellImportConfigs(scheduleImportCellConfigs);
     }
@@ -110,7 +129,7 @@ public class ImportConfig {
         truckImport.setSheetIndex(0);
         truckImport.setHeaderIndex(0);
         truckImport.setStartRow(1);
-        truckImport.setDataClazz(TransactionDTO.class);
+        truckImport.setDataClazz(TruckDTO.class);
         List<CellConfig> truckImportCellConfigs = new ArrayList<>();
 
         truckImportCellConfigs.add(new CellConfig(0, "Biển số","licensePlate"));
@@ -128,7 +147,7 @@ public class ImportConfig {
         userImport.setSheetIndex(0);
         userImport.setHeaderIndex(0);
         userImport.setStartRow(1);
-        userImport.setDataClazz(TransactionDTO.class);
+        userImport.setDataClazz(UserDTO.class);
         List<CellConfig> userImportCellConfigs = new ArrayList<>();
 
         userImportCellConfigs.add(new CellConfig(0, "Họ tên","fullName"));
