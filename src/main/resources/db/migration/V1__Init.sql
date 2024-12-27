@@ -56,8 +56,9 @@ DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
-                                                                                                                                                       (37, 1, 10, 1, 1, 1, 1, NOW(), NOW()),
-                                                                                                                                                       (38, 3, 10, 1, 1, 1, 1, NOW(), NOW());
+    (37, 1, 10, 1, 1, 1, 1, NOW(), NOW()),
+    (38, 3, 10, 1, 1, 1, 1, NOW(), NOW());
+
 
 -- Role ADMIN (role_id = 1)
 INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
@@ -284,32 +285,53 @@ DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 
+-- CREATE TABLE `transactions` (
+--                                 `id` VARCHAR(255) UNIQUE NOT NULL,
+--                                 `ref_user_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Người chịu trách nhiệm",
+--                                 `goods_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến hàng hóa",
+--                                 `quantity` FLOAT NOT NULL DEFAULT 0,
+--                                 `transaction_time` TIMESTAMP NOT NULL,
+--                                 `origin` BIT NOT NULL DEFAULT 0 COMMENT "0 - Giao dịch nhập, 1 - Giao dịch xuất",
+--                                 `destination` VARCHAR(255),
+--                                 `deleted` BIT NOT NULL DEFAULT 0 COMMENT "0 - Chưa xóa, 1 - Đã xóa",
+--                                 `created_at` TIMESTAMP NOT NULL DEFAULT now(),
+--                                 `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
+--                                 `customer_name` VARCHAR(255) NOT NULL COMMENT "Khach hang",
+--                                 PRIMARY KEY (`id`),
+--                                 FOREIGN KEY (`ref_user_id`) REFERENCES `users`(`id`),
+--                                 FOREIGN KEY (`goods_id`) REFERENCES `goods`(`id`)
+-- ) ENGINE = InnoDB
+-- DEFAULT CHARSET = utf8mb4
+-- COLLATE = utf8mb4_0900_ai_ci;
+
 CREATE TABLE `transactions` (
-                                `id` VARCHAR(255) UNIQUE NOT NULL,
-                                `ref_user_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Người chịu trách nhiệm",
-                                `goods_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến hàng hóa",
-                                `quantity` FLOAT NOT NULL DEFAULT 0,
-                                `transaction_time` TIMESTAMP NOT NULL,
-                                `origin` BIT NOT NULL DEFAULT 0 COMMENT "0 - Giao dịch nhập, 1 - Giao dịch xuất",
-                                `destination` VARCHAR(255),
-                                `deleted` BIT NOT NULL DEFAULT 0 COMMENT "0 - Chưa xóa, 1 - Đã xóa",
-                                `created_at` TIMESTAMP NOT NULL DEFAULT now(),
-                                `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
-                                PRIMARY KEY (`id`),
-                                FOREIGN KEY (`ref_user_id`) REFERENCES `users`(`id`),
-                                FOREIGN KEY (`goods_id`) REFERENCES `goods`(`id`)
+    `id` VARCHAR(255) UNIQUE NOT NULL,
+    `ref_user_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Người chịu trách nhiệm",
+    `customer_name` VARCHAR(255) NOT NULL COMMENT "Khach hang",
+    `goods_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến hàng hóa",
+    `quantity` FLOAT NOT NULL DEFAULT 0,
+    `transaction_time` TIMESTAMP NOT NULL,
+    `origin` BIT NOT NULL DEFAULT 0 COMMENT "0 - Giao dịch nhập, 1 - Giao dịch xuất",
+    `destination` VARCHAR(255),
+    `deleted` BIT NOT NULL DEFAULT 0 COMMENT "0 - Chưa xóa, 1 - Đã xóa",
+    `created_at` TIMESTAMP NOT NULL DEFAULT now(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
+    `image` VARCHAR(255),
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`ref_user_id`) REFERENCES `users`(`id`),
+    FOREIGN KEY (`goods_id`) REFERENCES `goods`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 
-
 -- Insert data into `users` table
 INSERT INTO `users` (`id`, `full_name`, `username`, `password`, `phone`, `date_of_birth`, `note`, `role_id`, `status`, `created_at`, `updated_at`) VALUES
-                                                                                                                                                       ('US001', 'Nguyen Van A', 'nguyenvana', '123456', '0901234567', '1990-05-15', 'Admin user', 1, 1, NOW(), NOW()),
-                                                                                                                                                       ('US002', 'Tran Thi B', 'tranthib', '123456', '0912345678', '1992-10-20', 'Accountant user', 2, 1, NOW(), NOW()),
-                                                                                                                                                       ('US003', 'Le Van C', 'levanc', '123456', '0923456789', '1988-03-25', 'Manager user', 3, 1, NOW(), NOW()),
-                                                                                                                                                       ('US004', 'Pham Van D', 'phamvand', '123456', '0934567890', '1995-07-10', 'Driver user', 4, 1, NOW(), NOW());
+('US001', 'Nguyen Van A', 'nguyenvana', '123456', '0901234567', '1990-05-15', 'Admin user', 1, 1, NOW(), NOW()),
+('US002', 'Tran Thi B', 'tranthib', '123456', '0912345678', '1992-10-20', 'Accountant user', 2, 1, NOW(), NOW()),
+('US003', 'Le Van C', 'levanc', '123456', '0923456789', '1988-03-25', 'Manager user', 3, 1, NOW(), NOW()),
+('US005', 'Le Van C', 'admin123', '$2a$10$RjVfmafLNmmjvWKOSYQFI.zcJ7jxjyZYBwtg/fKWSqbtVYqB7pG86', '0923456789', '1988-03-25', 'Manager user', 3, 1, NOW(), NOW()),
+('US004', 'Pham Van D', 'phamvand', '123456', '0934567890', '1995-07-10', 'Driver user', 4, 1, NOW(), NOW());
 
 
 -- Insert data into `salary` table
@@ -377,8 +399,8 @@ INSERT INTO `goods` (`id`, `warehouse_id`, `name`, `quantity`, `amount`, `create
                                                                                                          ('GS004', 'WH002', 'Bột ngọt', 1000, 20000, NOW(), NOW());
 
 -- Insert data into `transactions` table
-INSERT INTO `transactions` (`id`, `ref_user_id`, `goods_id`, `quantity`, `transaction_time`, `origin`, `destination`, `deleted`, `created_at`, `updated_at`) VALUES
-                                                                                                                                                                 ('TRANS001', 'US001', 'GS001', 100, '2024-05-10', b'0', 'Kho A', b'0', NOW(), NOW()),
-                                                                                                                                                                 ('TRANS002', 'US002', 'GS002', 50, '2024-05-10 14:00:00', b'0', 'Kho A', b'0', NOW(), NOW()),
-                                                                                                                                                                 ('TRANS003', 'US003', 'GS003', 200, '2024-05-11 09:00:00', b'1', 'Kho A', b'0', NOW(), NOW()),
-                                                                                                                                                                 ('TRANS004', 'US003', 'GS004', 200, '2024-05-11 10:00:00', b'1', 'Kho B', b'0', NOW(), NOW());
+INSERT INTO `transactions` (`id`, `ref_user_id`, `goods_id`, `quantity`, `transaction_time`, `origin`, `destination`, `deleted`, `created_at`, `updated_at`, `customer_name`,`image`) VALUES
+    ('TRANS001', 'US001', 'GS001', 100, '2024-05-10', b'0', 'Kho A', b'0', NOW(), NOW(),'giang', 'C:\giang'),
+    ('TRANS002', 'US002', 'GS002', 50, '2024-05-10 14:00:00', b'0', 'Kho A', b'0', NOW(), NOW(), 'giang', 'C:\giang'),
+    ('TRANS003', 'US003', 'GS003', 200, '2024-05-11 09:00:00', b'1', 'Kho A', b'0', NOW(), NOW(), 'giang', 'C:\giang'),
+    ('TRANS004', 'US003', 'GS004', 200, '2024-05-11 10:00:00', b'1', 'Kho B', b'0', NOW(), NOW(), 'giang', 'C:\giang');
