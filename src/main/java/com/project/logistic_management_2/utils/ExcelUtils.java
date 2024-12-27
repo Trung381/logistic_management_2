@@ -395,42 +395,40 @@ public class ExcelUtils {
     }
 
     private static Date parseDate(Object value) {
-        String[] formatsDate = {"yyyy-MM-dd HH:mm:ss", "dd/MM/yyyy", "dd/MM/yyyy h:mm:ss a"};
+        String[] formatsDate = {"yyyy-MM-dd HH:mm:ss", "dd/MM/yyyy", "dd/MM/yyyy h:mm:ss a", "yyyy-MM-dd"};
 
         if (ObjectUtils.isEmpty(value)) {
             return null;
         }
 
-        String dateStr = value.toString();
+        String dateStr = value.toString().trim(); // Đảm bảo xóa khoảng trắng thừa
 
         // Xử lý giá trị kiểu số (Excel date)
         if (dateStr.matches("\\d+(\\.\\d+)?")) {
             try {
                 double excelDate = Double.parseDouble(dateStr);
-                return convertExcelDateToJavaDate(excelDate);
+                return convertExcelDateToJavaDate(excelDate); // Hàm chuyển đổi từ số Excel
             } catch (NumberFormatException e) {
                 e.printStackTrace();
                 return null;
             }
         }
 
-        // Thử parse theo các định dạng truyền thống
+        // Thử parse theo các định dạng ngày tháng đã chỉ định
         for (String format : formatsDate) {
             try {
                 DateFormat dateFormat = new SimpleDateFormat(format);
+                dateFormat.setLenient(false); // Bắt buộc định dạng chính xác
                 return dateFormat.parse(dateStr);
             } catch (Exception e) {
-                // Bỏ qua, thử format tiếp theo
+                // Bỏ qua lỗi, thử định dạng tiếp theo
             }
         }
 
-        try {
-            return (Date) value;
-        } catch (ClassCastException e) {
-            e.printStackTrace();
-            return null;
-        }
+        // Không thể parse giá trị chuỗi thành Date
+        return null;
     }
+
 
     private static Object parseInstant(Object value) {
         return ObjectUtils.isEmpty(value) ? null : parseDate(value).toInstant();

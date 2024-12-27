@@ -198,6 +198,11 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
         List<Schedule> schedule = scheduleMapper.toScheduleList(scheduleDTOList);
 
+        for(ScheduleDTO dto : scheduleDTOList) {
+            truckRepo.updateStatus(dto.getTruckLicense(), 0);
+            truckRepo.updateStatus(dto.getMoocLicense(), 0);
+        }
+
         // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return scheduleRepo.saveAll(schedule);
     }
