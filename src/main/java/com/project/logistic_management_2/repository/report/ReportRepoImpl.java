@@ -89,7 +89,8 @@ public class ReportRepoImpl extends BaseRepo implements ReportRepo {
                 .leftJoin(salary).on(u.id.eq(salary.userId).and(salary.period.eq(String.valueOf(ym))))
                 .where(
                         u.id.eq(userId)
-                                .and(s.arrivalTime.between(startDate, endDate))
+//                                .and(s.arrivalTime.between(startDate, endDate))
+                                .and(s.departureTime.between(startDate, endDate))
 //                                .and(s.createdAt.between(startDate, endDate))
                 )
                 .groupBy(
