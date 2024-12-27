@@ -12,7 +12,7 @@ public class GlobalCorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-//        config.addAllowedOriginPattern("http://127.0.0.1:5500"); // Chấp nhận từ origin cụ thể
+//        config.addAllowedOriginPattern("http://localhost:3000"); // Chấp nhận từ origin cụ thể
         config.addAllowedOriginPattern("*"); // Cho phép tất cả origin
         config.addAllowedMethod("*"); // Chấp nhận tất cả các phương thức (GET, POST,...)
         config.addAllowedHeader("*"); // Chấp nhận tất cả các headers

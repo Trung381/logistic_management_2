@@ -12,6 +12,7 @@ import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseA
 
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
+import com.project.logistic_management_2.dto.expenses.ExpensesReportForDriverDTO;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -67,7 +68,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 .and(expenses.deleted.eq(false));
 
         //Tìm theo loại chi phí nếu tham số expensesConfigId hợp lệ
-        if(expensesConfigId != null) {
+        if (expensesConfigId != null) {
             builder.and(expenses.expensesConfigId.eq(expensesConfigId));
         }
 
@@ -95,7 +96,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     @Override
-    public List<ExpensesDTO> getByFilter(String driverId, YearMonth period) {
+    public List<ExpensesReportForDriverDTO> getByFilter(String driverId, YearMonth period) {
         //Điều kiện truy vấn: Chưa bị xóa
         BooleanBuilder builder = new BooleanBuilder()
                 .and(expenses.deleted.eq(false));
@@ -111,13 +112,23 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
             builder.and(expenses.createdAt.between(startDate, endDate));
         }
 
+        ConstructorExpression<ExpensesReportForDriverDTO> filterField = Projections.constructor(ExpensesReportForDriverDTO.class,
+                user.id.as("driverId"),
+                user.fullName.as("driverName"),
+                expenses.expensesConfigId.as("expensesConfigId"),
+                expensesConfig.type.as("expensesConfigType"),
+                expenses.amount.sum().as("amount")
+                );
+
         //Truy vấn, trả về kết quả
         return query.from(expenses)
-                .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
+                .innerJoin(expensesConfig).on(expenses.expensesConfigId.eq(expensesConfig.id))
+                .innerJoin(schedule).on(schedule.id.eq(expenses.scheduleId))
                 .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
                 .innerJoin(user).on(truck.driverId.eq(user.id))
                 .where(builder)
-                .select(expensesProjection())
+                .select(filterField)
+                .groupBy(user.id, user.fullName, expenses.expensesConfigId, expensesConfig.type)
                 .fetch();
     }
 
