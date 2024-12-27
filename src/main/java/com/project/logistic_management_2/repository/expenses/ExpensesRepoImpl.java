@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.repository.expenses;
 
-import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
+import com.project.logistic_management_2.dto.expenses.*;
 
 import static com.project.logistic_management_2.entity.QExpenses.expenses;
 import static com.project.logistic_management_2.entity.QExpensesConfig.expensesConfig;
@@ -10,17 +10,16 @@ import static com.project.logistic_management_2.entity.QTruck.truck;
 import static com.project.logistic_management_2.entity.QUser.user;
 import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseAdvances;
 
-import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
-import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
-import com.project.logistic_management_2.dto.expenses.ExpensesReportForDriverDTO;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Expression;
 import jakarta.transaction.Transactional;
@@ -31,6 +30,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -96,14 +96,14 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     @Override
-    public List<ExpensesReportForDriverDTO> getByFilter(String driverId, YearMonth period) {
+    public List<ExpensesIncurredDTO> getByFilter(String driverId, YearMonth period) {
         //Điều kiện truy vấn: Chưa bị xóa
         BooleanBuilder builder = new BooleanBuilder()
                 .and(expenses.deleted.eq(false));
 
         //Tìm theo mã tài xế nếu tham số driverId hợp lệ
         if (driverId != null && !driverId.isBlank()) {
-            builder.and(user.id.eq(driverId));
+            builder.and(truck.driverId.eq(driverId));
         }
         //Tìm theo chu kỳ nếu period hợp lệ
         if (period != null) {
@@ -112,23 +112,19 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
             builder.and(expenses.createdAt.between(startDate, endDate));
         }
 
-        ConstructorExpression<ExpensesReportForDriverDTO> filterField = Projections.constructor(ExpensesReportForDriverDTO.class,
-                user.id.as("driverId"),
-                user.fullName.as("driverName"),
+        ConstructorExpression<ExpensesIncurredDTO> expensesIncurredExpression = Projections.constructor(
+                ExpensesIncurredDTO.class,
                 expenses.expensesConfigId.as("expensesConfigId"),
-                expensesConfig.type.as("expensesConfigType"),
+                expensesConfig.type.as("type"),
                 expenses.amount.sum().as("amount")
-                );
-
-        //Truy vấn, trả về kết quả
+        );
         return query.from(expenses)
                 .innerJoin(expensesConfig).on(expenses.expensesConfigId.eq(expensesConfig.id))
-                .innerJoin(schedule).on(schedule.id.eq(expenses.scheduleId))
+                .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
                 .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
-                .innerJoin(user).on(truck.driverId.eq(user.id))
                 .where(builder)
-                .select(filterField)
-                .groupBy(user.id, user.fullName, expenses.expensesConfigId, expensesConfig.type)
+                .select(expensesIncurredExpression)
+                .groupBy(expenses.expensesConfigId, expensesConfig.type)
                 .fetch();
     }
 
