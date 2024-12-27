@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.service.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
+import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.enums.PermissionKey;
@@ -103,7 +104,8 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     // thees moiws cos chuwcs nanwg bao cao
     // thang dc xem bao cao la chuc cao nhat roi. quyenn all
 
-    public List<ExpensesDTO> report(String driverId, String period) {
+    @Override
+    public List<ExpensesIncurredDTO> report(String driverId, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
         //Check định dạng chu kỳ: yyyy-MM
         String regex = "^(\\d{4}-(0[1-9]|1[0-2]))$";
