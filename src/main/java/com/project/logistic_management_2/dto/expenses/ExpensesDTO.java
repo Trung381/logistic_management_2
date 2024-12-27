@@ -52,4 +52,12 @@ public class ExpensesDTO {
     private Date createdAt;
     private Date updatedAt;
 
+    public ExpensesDTO(String driverId, String driverName, String expensesConfigId, String expensesConfigType, Float amount) {
+        this.driverId = driverId;
+        this.driverName = driverName;
+        this.expensesConfigId = expensesConfigId;
+        this.expensesConfigType = expensesConfigType;
+        this.amount = amount;
+    }
+
 }

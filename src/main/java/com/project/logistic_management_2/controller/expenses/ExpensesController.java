@@ -3,6 +3,7 @@ package com.project.logistic_management_2.controller.expenses;
 import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.BaseResponse;
+import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.service.expenses.ExpensesService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
@@ -129,13 +130,13 @@ public class ExpensesController {
             @RequestParam(required = false) String driverId,
             @RequestParam(required = false) String period) throws Exception {
 
-        List<ExpensesDTO> expensesReport = expensesService.report(driverId, period);
+        List<ExpensesIncurredDTO> expensesReport = expensesService.report(driverId, period);
 
 
         if (!CollectionUtils.isEmpty(expensesReport)) {
             String fileName = "ExpensesReport Export" + ".xlsx";
 
-            ByteArrayInputStream in = ExcelUtils.export(expensesReport, fileName, ExportConfig.expensesExport);
+            ByteArrayInputStream in = ExcelUtils.export(expensesReport, fileName, ExportConfig.expenseReportByDriverExport);
 
             InputStreamResource inputStreamResource = new InputStreamResource(in);
 
@@ -147,7 +148,6 @@ public class ExpensesController {
                     .body(inputStreamResource);
         } else {
             throw new Exception("No data");
-
         }
     }
 
