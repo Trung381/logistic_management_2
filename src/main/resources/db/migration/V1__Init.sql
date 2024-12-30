@@ -19,7 +19,8 @@ INSERT INTO `permissions` (`id`, `title`, `name`, `created_at`, `updated_at`) VA
     (7, 'Quản lý lương', 'SALARIES', NOW(), NOW()),
     (8, 'Quản lý giao dịch', 'TRANSACTIONS', NOW(), NOW()),
     (9, 'Báo cáo', 'REPORTS', NOW(), NOW()),
-    (10, 'Quản lý hàng hoá', 'GOODS', NOW(), NOW());
+    (10, 'Quản lý hàng hoá', 'GOODS', NOW(), NOW()),
+    (11, 'Quản lý kho hàng', 'WAREHOUSES', NOW(), NOW());
 
 CREATE TABLE `roles` (
                          `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -57,7 +58,9 @@ COLLATE = utf8mb4_0900_ai_ci;
 
 INSERT INTO `role_permission` (`id`, `role_id`, `permission_id`, `can_view`, `can_write`, `can_delete`, `can_approve`, `created_at`, `updated_at`) VALUES
     (37, 1, 10, 1, 1, 1, 1, NOW(), NOW()),
-    (38, 3, 10, 1, 1, 1, 1, NOW(), NOW());
+    (38, 3, 10, 1, 1, 1, 1, NOW(), NOW()),
+    (39, 1, 11, 1, 1, 1, 1, NOW(), NOW()),
+    (40, 3, 11, 1, 1, 1, 1, NOW(), NOW());
 
 
 -- Role ADMIN (role_id = 1)
