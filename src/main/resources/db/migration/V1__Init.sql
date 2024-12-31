@@ -384,7 +384,7 @@
 -- CREATE TABLE `transactions` (
 --     `id` VARCHAR(255) UNIQUE NOT NULL,
 --     `ref_user_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Người chịu trách nhiệm",
---     `customer_name` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Người chịu trách nhiệm",
+--     `customer_name` VARCHAR(255) NOT NULL COMMENT "Khach hang",
 --     `goods_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến hàng hóa",
 --     `quantity` FLOAT NOT NULL DEFAULT 0,
 --     `transaction_time` TIMESTAMP NOT NULL,
@@ -393,6 +393,7 @@
 --     `deleted` BIT NOT NULL DEFAULT 0 COMMENT "0 - Chưa xóa, 1 - Đã xóa",
 --     `created_at` TIMESTAMP NOT NULL DEFAULT now(),
 --     `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
+--     `image` VARCHAR(255),
 --     PRIMARY KEY (`id`),
 --     FOREIGN KEY (`ref_user_id`) REFERENCES `users`(`id`),
 --     FOREIGN KEY (`goods_id`) REFERENCES `goods`(`id`)
@@ -797,7 +798,15 @@ INSERT INTO `goods` (`id`, `warehouse_id`, `name`, `quantity`, `amount`, `create
 
 -- Insert data into `transactions` table
 INSERT INTO `transactions` (`id`, `ref_user_id`, `goods_id`, `quantity`, `transaction_time`, `origin`, `destination`, `deleted`, `created_at`, `updated_at`) VALUES
-                                                                                                                                                                 ('TRANS001', 'US001', 'GS001', 100, '2024-05-10', b'0', 'Kho A', b'0', NOW(), NOW()),
+
+INSERT INTO `expense_advances` (`driver_id`, `period`, `advance`, `remaining_balance`, `note`)
+VALUES
+    ('user_004', '2023-10', 1000000, 200000, 'Ứng tiền đi đường'),
+    ('user_005', '2023-10', 1500000, 0, 'Ứng tiền trước chuyến đi'),
+    ('user_007', '2023-10', 800000, 100000, 'Ứng tiền xăng xe'),
+    ('user_004', '2023-11', 1200000, 0, 'Ứng cho chuyến đi mới'),
+    ('user_005', '2023-11', 1300000, 100000, 'Ứng lương'),
+    ('user_007', '2023-11', 700000, 150000, 'Ứng tiền sửa xe');                                                                                                                                                  ('TRANS001', 'US001', 'GS001', 100, '2024-05-10', b'0', 'Kho A', b'0', NOW(), NOW()),
                                                                                                                                                                  ('TRANS002', 'US002', 'GS002', 50, '2024-05-10 14:00:00', b'0', 'Kho A', b'0', NOW(), NOW()),
                                                                                                                                                                  ('TRANS003', 'US003', 'GS003', 200, '2024-05-11 09:00:00', b'1', 'Kho A', b'0', NOW(), NOW()),
                                                                                                                                                                  ('TRANS004', 'US003', 'GS004', 200, '2024-05-11 10:00:00', b'1', 'Kho B', b'0', NOW(), NOW());

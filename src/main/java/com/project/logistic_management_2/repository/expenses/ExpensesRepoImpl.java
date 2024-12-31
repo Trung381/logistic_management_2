@@ -67,7 +67,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 .and(expenses.deleted.eq(false));
 
         //Tìm theo loại chi phí nếu tham số expensesConfigId hợp lệ
-        if(expensesConfigId != null) {
+        if (expensesConfigId != null) {
             builder.and(expenses.expensesConfigId.eq(expensesConfigId));
         }
 
@@ -117,7 +117,14 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
                 .innerJoin(user).on(truck.driverId.eq(user.id))
                 .where(builder)
-                .select(expensesProjection())
+                .groupBy(expenses.expensesConfigId)
+                .select(Projections.constructor(ExpensesDTO.class,
+                        expenses.expensesConfigId.as("expensesConfigId"),
+                        JPAExpressions.select(expensesConfig.type.as("expensesConfigType"))
+                                .from(expensesConfig)
+                                .where(expensesConfig.id.eq(expenses.expensesConfigId)),
+                        expenses.amount.sum().as("totalAmount") // Tổng giá tiền theo config
+                ))
                 .fetch();
     }
 

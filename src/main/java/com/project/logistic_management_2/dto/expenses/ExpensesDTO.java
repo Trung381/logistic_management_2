@@ -32,6 +32,7 @@ public class ExpensesDTO {
     @NotNull(message = "Số tiền không được để trống!")
     @ExportColumn(name = "Số tiền")
     private Float amount;
+    private Float totalAmount;
 
     //Ghi chú
     @ExportColumn(name = "Ghi chú")
@@ -52,4 +53,10 @@ public class ExpensesDTO {
     private Date createdAt;
     private Date updatedAt;
 
+
+    public ExpensesDTO(String expensesConfigId, String expensesConfigType, Float totalAmount) {
+        this.expensesConfigId = expensesConfigId;
+        this.expensesConfigType = expensesConfigType;
+        this.totalAmount = totalAmount;
+    }
 }
