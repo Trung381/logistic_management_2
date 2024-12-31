@@ -3,6 +3,7 @@ package com.project.logistic_management_2.utils;
 import com.project.logistic_management_2.annotations.ExportColumn;
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
+import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.report.SummarySalaryDTO;
 import com.project.logistic_management_2.dto.request.GoodsDTO;
 import com.project.logistic_management_2.dto.request.GoodsReportDTO;
@@ -87,4 +88,5 @@ public class ExportConfig {
     public static final ExportConfig scheduleExport = createExportConfig(ScheduleDTO.class, 0, 1);
     public static final ExportConfig truckExport = createExportConfig(TruckDTO.class, 0, 1);
     public static final ExportConfig userExport = createExportConfig(UserDTO.class, 0, 1);
+    public static final ExportConfig expenseReportByDriverExport = createExportConfig(ExpensesIncurredDTO.class, 0, 1);
 }

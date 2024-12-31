@@ -32,7 +32,6 @@ public class ExpensesDTO {
     @NotNull(message = "Số tiền không được để trống!")
     @ExportColumn(name = "Số tiền")
     private Float amount;
-    private Float totalAmount;
 
     //Ghi chú
     @ExportColumn(name = "Ghi chú")
@@ -53,10 +52,12 @@ public class ExpensesDTO {
     private Date createdAt;
     private Date updatedAt;
 
-
-    public ExpensesDTO(String expensesConfigId, String expensesConfigType, Float totalAmount) {
+    public ExpensesDTO(String driverId, String driverName, String expensesConfigId, String expensesConfigType, Float amount) {
+        this.driverId = driverId;
+        this.driverName = driverName;
         this.expensesConfigId = expensesConfigId;
         this.expensesConfigType = expensesConfigType;
-        this.totalAmount = totalAmount;
+        this.amount = amount;
     }
+
 }
