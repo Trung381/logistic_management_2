@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -64,13 +65,14 @@ public class TransactionMapper {
 
     public void updateTransaction(Transaction transaction, TransactionDTO dto) {
         if (transaction == null || dto == null) return;
-        transaction.setRefUserId(dto.getRefUserId());
-        transaction.setCustomerName(dto.getCustomerName());
-        transaction.setGoodsId(dto.getGoodsId());
-        transaction.setQuantity(dto.getQuantity());
-        transaction.setTransactionTime(dto.getTransactionTime());
-        transaction.setDestination(dto.getDestination());
-        transaction.setImage(dto.getImage());
+        Optional.ofNullable(dto.getRefUserId()).ifPresent(transaction::setRefUserId);
+        Optional.ofNullable(dto.getCustomerName()).ifPresent(transaction::setCustomerName);
+        Optional.ofNullable(dto.getGoodsId()).ifPresent(transaction::setGoodsId);
+        Optional.ofNullable(dto.getQuantity()).ifPresent(transaction::setQuantity);
+        Optional.ofNullable(dto.getTransactionTime()).ifPresent(transaction::setTransactionTime);
+        Optional.ofNullable(dto.getOrigin()).ifPresent(transaction::setOrigin);
+        Optional.ofNullable(dto.getDestination()).ifPresent(transaction::setDestination);
+        Optional.ofNullable(dto.getImage()).ifPresent(transaction::setImage);
         transaction.setUpdatedAt(new Date());
     }
 
