@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.repository.user;
 
+import com.project.logistic_management_2.dto.user.UpdateUserDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.QUser;
 import com.project.logistic_management_2.entity.User;
@@ -8,11 +9,13 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAUpdateClause;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 import static com.project.logistic_management_2.entity.QGoods.goods;
@@ -64,6 +67,89 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
                 .where(builder)
                 .fetchOne();
     }
+
+//    @Override
+//    @Transactional
+//    public long updateUser(String id, UpdateUserDTO updateUserDTO) {
+//        QUser qUser = QUser.user;
+//
+//        BooleanBuilder whereClause = new BooleanBuilder();
+//        whereClause.and(qUser.id.eq(id));
+//
+//        JPAUpdateClause updateClause = query.update(qUser).where(whereClause);
+//
+//        if (updateUserDTO.getFullName() != null) {
+//            updateClause.set(qUser.fullName, updateUserDTO.getFullName());
+//        }
+//        if (updateUserDTO.getPhone() != null) {
+//            updateClause.set(qUser.phone, updateUserDTO.getPhone());
+//        }
+//        if (updateUserDTO.getDateOfBirth() != null) {
+//            updateClause.set(qUser.dateOfBirth, updateUserDTO.getDateOfBirth());
+//        }
+//        if (updateUserDTO.getNote() != null) {
+//            updateClause.set(qUser.note, updateUserDTO.getNote());
+//        }
+//        if (updateUserDTO.getUsername() != null) {
+//            updateClause.set(qUser.username, updateUserDTO.getUsername());
+//        }
+//        if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
+//            updateClause.set(qUser.password, updateUserDTO.getPassword());
+//        }
+//        if (updateUserDTO.getRoleId() != null) {
+//            updateClause.set(qUser.roleId, updateUserDTO.getRoleId());
+//        }
+//        if (updateUserDTO.getStatus() != null) {
+//            updateClause.set(qUser.status, updateUserDTO.getStatus());
+//        }
+//
+//        updateClause.set(qUser.updatedAt, new Date());
+//
+//        return updateClause.execute();
+//    }
+
+    @Override
+    @Transactional
+    public Boolean updateUser(String id, UpdateUserDTO updateUserDTO) {
+        QUser qUser = QUser.user;
+
+        BooleanBuilder whereClause = new BooleanBuilder();
+        whereClause.and(qUser.id.eq(id));
+
+        JPAUpdateClause updateClause = query.update(qUser).where(whereClause);
+
+        if (updateUserDTO.getFullName() != null) {
+            updateClause.set(qUser.fullName, updateUserDTO.getFullName());
+        }
+        if (updateUserDTO.getPhone() != null) {
+            updateClause.set(qUser.phone, updateUserDTO.getPhone());
+        }
+        if (updateUserDTO.getDateOfBirth() != null) {
+            updateClause.set(qUser.dateOfBirth, updateUserDTO.getDateOfBirth());
+        }
+        if (updateUserDTO.getNote() != null) {
+            updateClause.set(qUser.note, updateUserDTO.getNote());
+        }
+        if (updateUserDTO.getUsername() != null) {
+            updateClause.set(qUser.username, updateUserDTO.getUsername());
+        }
+        if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
+            updateClause.set(qUser.password, updateUserDTO.getPassword());
+        }
+        if (updateUserDTO.getRoleId() != null) {
+            updateClause.set(qUser.roleId, updateUserDTO.getRoleId());
+        }
+        if (updateUserDTO.getStatus() != null) {
+            updateClause.set(qUser.status, updateUserDTO.getStatus());
+        }
+
+        // Fetch lại bản ghi đã được cập nhật
+        return updateClause.set(qUser.updatedAt, new Date()).execute() > 0;
+    }
+
+
+
+
 
     @Modifying
     @Transactional

@@ -65,18 +65,4 @@ public class UserMapper{
         ).collect(Collectors.toList());
     }
 
-    public void updateUserMapper(User user, UserDTO dto) {
-        if (user == null) {
-            return;
-        }
-        user.setNote(dto.getNote());
-        user.setPhone(dto.getPhone());
-        user.setFullName(dto.getFullName());
-        user.setDateOfBirth(dto.getDateOfBirth());
-        user.setUsername(dto.getUsername());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRoleId(dto.getRoleId());
-        user.setStatus(dto.getStatus());
-        user.setUpdatedAt(new Date());
-    }
 }
