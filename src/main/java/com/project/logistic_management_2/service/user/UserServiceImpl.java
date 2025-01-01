@@ -39,87 +39,25 @@ public class UserServiceImpl extends BaseService implements UserService {
         return userRepo.save(user);
     }
 
-//    @Override
-//    public User updateUser(String id, UpdateUserDTO updateUserDTO) {
-//        checkPermission(type, PermissionKey.WRITE);
-//        User user = userRepo.getUserById(id);
-//        if (user == null) {
-//            throw new NotFoundException("User not found with User: " + id);
-//        }
-//
-//        // Mã hóa mật khẩu nếu được cung cấp
-//        if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
-//            updateUserDTO.setPassword(passwordEncoder.encode(updateUserDTO.getPassword()));
-//        }
-//
-//        User userUpdated = null;
-//
-//        if(userRepo.updateUser(id, updateUserDTO) > 0){
-//            entityManager.refresh(user);
-//            userUpdated = userRepo.getUserById(id);
-//        }
-//
-//        return userUpdated;
-//    }
-
-//    @Override
-//    public User updateUser(String id, UpdateUserDTO updateUserDTO) {
-//        checkPermission(type, PermissionKey.WRITE);
-//
-////        // Kiểm tra user tồn tại
-////        User existingUser = userRepo.getUserById(id);
-////        if (existingUser == null) {
-////            throw new NotFoundException("User not found with ID: " + id);
-////        }
-//
-//        // Mã hóa mật khẩu nếu có thay đổi
-//        if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
-//            updateUserDTO.setPassword(passwordEncoder.encode(updateUserDTO.getPassword()));
-//        }
-//
-//        User updated = null;
-//
-//        if(userRepo.updateUser(id, updateUserDTO)){
-//            updated = getUserById(id);
-//        }
-//
-//        assert updated != null;
-//        System.err.println(updated.getFullName());
-//        // Trả về bản ghi đã được cập nhật
-//        return updated;
-//    }
-
     @Override
     public User updateUser(String id, UpdateUserDTO updateUserDTO) {
         checkPermission(type, PermissionKey.WRITE);
 
-        // Check if user exists
         User existingUser = userRepo.getUserById(id);
         if (existingUser == null) {
             throw new NotFoundException("User not found with ID: " + id);
         }
 
-        // Encode password if provided
         if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
             updateUserDTO.setPassword(passwordEncoder.encode(updateUserDTO.getPassword()));
         }
 
-        // Perform the update
-        boolean updated = userRepo.updateUser(id, updateUserDTO);
-        if (!updated) {
+        entityManager.clear();
+        if (!userRepo.updateUser(id, updateUserDTO)) {
             throw new RuntimeException("Failed to update user with ID: " + id);
         }
 
-        // Clear the JPA first-level cache to force a fresh database read
-        entityManager.clear();
-
-        // Fetch the updated user
-        User updatedUser = userRepo.getUserById(id);
-        if (updatedUser == null) {
-            throw new NotFoundException("Updated user not found with ID: " + id);
-        }
-
-        return updatedUser;
+        return userRepo.getUserById(id);
     }
 
 

@@ -68,46 +68,6 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
                 .fetchOne();
     }
 
-//    @Override
-//    @Transactional
-//    public long updateUser(String id, UpdateUserDTO updateUserDTO) {
-//        QUser qUser = QUser.user;
-//
-//        BooleanBuilder whereClause = new BooleanBuilder();
-//        whereClause.and(qUser.id.eq(id));
-//
-//        JPAUpdateClause updateClause = query.update(qUser).where(whereClause);
-//
-//        if (updateUserDTO.getFullName() != null) {
-//            updateClause.set(qUser.fullName, updateUserDTO.getFullName());
-//        }
-//        if (updateUserDTO.getPhone() != null) {
-//            updateClause.set(qUser.phone, updateUserDTO.getPhone());
-//        }
-//        if (updateUserDTO.getDateOfBirth() != null) {
-//            updateClause.set(qUser.dateOfBirth, updateUserDTO.getDateOfBirth());
-//        }
-//        if (updateUserDTO.getNote() != null) {
-//            updateClause.set(qUser.note, updateUserDTO.getNote());
-//        }
-//        if (updateUserDTO.getUsername() != null) {
-//            updateClause.set(qUser.username, updateUserDTO.getUsername());
-//        }
-//        if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
-//            updateClause.set(qUser.password, updateUserDTO.getPassword());
-//        }
-//        if (updateUserDTO.getRoleId() != null) {
-//            updateClause.set(qUser.roleId, updateUserDTO.getRoleId());
-//        }
-//        if (updateUserDTO.getStatus() != null) {
-//            updateClause.set(qUser.status, updateUserDTO.getStatus());
-//        }
-//
-//        updateClause.set(qUser.updatedAt, new Date());
-//
-//        return updateClause.execute();
-//    }
-
     @Override
     @Transactional
     public Boolean updateUser(String id, UpdateUserDTO updateUserDTO) {
@@ -146,10 +106,6 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
         // Fetch lại bản ghi đã được cập nhật
         return updateClause.set(qUser.updatedAt, new Date()).execute() > 0;
     }
-
-
-
-
 
     @Modifying
     @Transactional
