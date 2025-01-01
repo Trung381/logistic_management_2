@@ -7,7 +7,9 @@ import com.project.logistic_management_2.entity.QSalary;
 import com.project.logistic_management_2.entity.QUser;
 import com.project.logistic_management_2.entity.Salary;
 import com.project.logistic_management_2.repository.BaseRepo;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAUpdateClause;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
@@ -85,28 +87,77 @@ public class SalaryRepoCustomImpl extends BaseRepo implements SalaryRepoCustom {
                 .fetchOne();
     }
 
+//    @Transactional
+//    public Boolean updateSalary(Integer id, UpdateSalaryDTO updateSalaryDTO){
+//        QSalary s = QSalary.salary;
+//        long rowsAffected = query.update(s)
+//                .where(s.id.eq(id))
+//                .set(s.phoneAllowance, updateSalaryDTO.getPhoneAllowance())
+//                .set( s.basicSalary, updateSalaryDTO.getBasicSalary())
+//                .set(s.jobAllowance, updateSalaryDTO.getJobAllowance())
+//                .set(s.bonus, updateSalaryDTO.getBonus())
+//                .set(s.monthlyPaidLeave,  updateSalaryDTO.getMonthlyPaidLeave())
+//                .set(s.ot, updateSalaryDTO.getOt())
+//                .set(s.receivedSnn, updateSalaryDTO.getReceivedSnn())
+//                .set(s.unionContribution, updateSalaryDTO.getUnionContribution())
+//                .set(s.travelExpensesReimbursement, updateSalaryDTO.getTravelExpensesReimbursement())
+//                .set(s.mandatoryInsurance, updateSalaryDTO.getBasicSalary()*0.105F)
+//                .set(s.tradeUnion, updateSalaryDTO.getBasicSalary()*0.01F)
+//                .set(s.advance, updateSalaryDTO.getAdvance())
+//                .set(s.errorOfDriver, updateSalaryDTO.getErrorOfDriver())
+//                .set(s.deductionSnn, updateSalaryDTO.getDeductionSnn())
+//                .execute();
+//
+//        return (rowsAffected > 0) ? true : false;
+//    }
     @Transactional
-    public Boolean updateSalary(Integer id, UpdateSalaryDTO updateSalaryDTO){
+    public Boolean updateSalary(Integer id, UpdateSalaryDTO updateSalaryDTO) {
         QSalary s = QSalary.salary;
-        long rowsAffected = query.update(s)
-                .where(s.id.eq(id))
-                .set(s.phoneAllowance, updateSalaryDTO.getPhoneAllowance())
-                .set( s.basicSalary, updateSalaryDTO.getBasicSalary())
-                .set(s.jobAllowance, updateSalaryDTO.getJobAllowance())
-                .set(s.bonus, updateSalaryDTO.getBonus())
-                .set(s.monthlyPaidLeave,  updateSalaryDTO.getMonthlyPaidLeave())
-                .set(s.ot, updateSalaryDTO.getOt())
-                .set(s.receivedSnn, updateSalaryDTO.getReceivedSnn())
-                .set(s.unionContribution, updateSalaryDTO.getUnionContribution())
-                .set(s.travelExpensesReimbursement, updateSalaryDTO.getTravelExpensesReimbursement())
-                .set(s.mandatoryInsurance, updateSalaryDTO.getBasicSalary()*0.105F)
-                .set(s.tradeUnion, updateSalaryDTO.getBasicSalary()*0.01F)
-                .set(s.advance, updateSalaryDTO.getAdvance())
-                .set(s.errorOfDriver, updateSalaryDTO.getErrorOfDriver())
-                .set(s.deductionSnn, updateSalaryDTO.getDeductionSnn())
-                .execute();
+        BooleanBuilder whereClause = new BooleanBuilder();
+        whereClause.and(s.id.eq(id));
 
-        return (rowsAffected > 0) ? true : false;
+        JPAUpdateClause updateClause = query.update(s).where(whereClause);
+
+        if (updateSalaryDTO.getPhoneAllowance() != null) {
+            updateClause.set(s.phoneAllowance, updateSalaryDTO.getPhoneAllowance());
+        }
+        if (updateSalaryDTO.getBasicSalary() != null) {
+            updateClause.set(s.basicSalary, updateSalaryDTO.getBasicSalary());
+            updateClause.set(s.mandatoryInsurance, updateSalaryDTO.getBasicSalary() * 0.105F);
+            updateClause.set(s.tradeUnion, updateSalaryDTO.getBasicSalary() * 0.01F);
+        }
+        if (updateSalaryDTO.getJobAllowance() != null) {
+            updateClause.set(s.jobAllowance, updateSalaryDTO.getJobAllowance());
+        }
+        if (updateSalaryDTO.getBonus() != null) {
+            updateClause.set(s.bonus, updateSalaryDTO.getBonus());
+        }
+        if (updateSalaryDTO.getMonthlyPaidLeave() != null) {
+            updateClause.set(s.monthlyPaidLeave, updateSalaryDTO.getMonthlyPaidLeave());
+        }
+        if (updateSalaryDTO.getOt() != null) {
+            updateClause.set(s.ot, updateSalaryDTO.getOt());
+        }
+        if (updateSalaryDTO.getReceivedSnn() != null) {
+            updateClause.set(s.receivedSnn, updateSalaryDTO.getReceivedSnn());
+        }
+        if (updateSalaryDTO.getUnionContribution() != null) {
+            updateClause.set(s.unionContribution, updateSalaryDTO.getUnionContribution());
+        }
+        if (updateSalaryDTO.getTravelExpensesReimbursement() != null) {
+            updateClause.set(s.travelExpensesReimbursement, updateSalaryDTO.getTravelExpensesReimbursement());
+        }
+        if (updateSalaryDTO.getAdvance() != null) {
+            updateClause.set(s.advance, updateSalaryDTO.getAdvance());
+        }
+        if (updateSalaryDTO.getErrorOfDriver() != null) {
+            updateClause.set(s.errorOfDriver, updateSalaryDTO.getErrorOfDriver());
+        }
+        if (updateSalaryDTO.getDeductionSnn() != null) {
+            updateClause.set(s.deductionSnn, updateSalaryDTO.getDeductionSnn());
+        }
+
+        return updateClause.execute() > 0;
     }
 
     public void deleteSalary(Integer salaryId) {
