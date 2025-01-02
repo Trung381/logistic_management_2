@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.service.expenses;
+package com.project.logistic_management_2.service.expenses.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
@@ -9,7 +9,7 @@ import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
-import com.project.logistic_management_2.repository.expenses.ExpensesRepo;
+import com.project.logistic_management_2.repository.expenses.expenses.ExpensesRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.notification.NotificationService;
 import com.project.logistic_management_2.utils.ExcelUtils;

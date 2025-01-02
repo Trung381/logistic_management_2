@@ -2,7 +2,7 @@ package com.project.logistic_management_2.controller.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.dto.BaseResponse;
-import com.project.logistic_management_2.service.expenses.ExpensesConfigService;
+import com.project.logistic_management_2.service.expenses.expensesconfig.ExpensesConfigService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
 import jakarta.validation.Valid;

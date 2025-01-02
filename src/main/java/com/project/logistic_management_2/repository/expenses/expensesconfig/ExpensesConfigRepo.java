@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.repository.expenses;
+package com.project.logistic_management_2.repository.expenses.expensesconfig;
 
 import com.project.logistic_management_2.entity.ExpensesConfig;
 import org.springframework.data.jpa.repository.JpaRepository;

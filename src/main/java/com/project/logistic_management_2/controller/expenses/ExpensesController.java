@@ -4,7 +4,7 @@ import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
-import com.project.logistic_management_2.service.expenses.ExpensesService;
+import com.project.logistic_management_2.service.expenses.expenses.ExpensesService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
 import jakarta.validation.Valid;
