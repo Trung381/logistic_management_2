@@ -6,6 +6,7 @@ import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.enums.PermissionKey;
 import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
@@ -71,6 +72,12 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
         // Return not found message if expenses does not exist
         Expenses expenses = expensesRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Chi phí cần cập nhật không tồn tại!"));
+
+        // approved => error message
+        if (!expensesRepo.checkApproved(id)) {
+            throw new ConflictException("Chi phí đã được duyệt không thể chỉnh sửa!");
+        }
+
         // Update expenses object
         expensesMapper.updateExpenses(expenses, dto);
         // Save to DB
@@ -83,18 +90,24 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     @Override
     public long deleteByID(String id) {
         checkPermission(type, PermissionKey.DELETE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
+        if (expensesRepo.countByID(id) == 0)
+            throw new NotFoundException("Chi phí cần xóa không tồn tại hoặc đã được xóa trước đó!");
+
         return expensesRepo.delete(id);
     }
 
     @Override
     public long approveByID(String id) {
         checkPermission(type, PermissionKey.APPROVE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
+
+        // does not exist
+        if (expensesRepo.countByID(id) == 0)
+            throw new NotFoundException("Chi phí cần duyệt không tồn tại!");
+
+        // not approved yet
+        if (!expensesRepo.checkApproved(id))
+            return -1;
+
         return expensesRepo.approve(id);
     }
 

@@ -208,6 +208,39 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         return reports;
     }
 
+    @Override
+    public long countByID(String id) {
+        //conditions: exist and has not been deleted
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(expenses.id.eq(id))
+                .and(expenses.deleted.eq(false));
+
+        Long res = query.from(expenses)
+                .where(builder)
+                .select(expenses.id.count().coalesce(0L))
+                .fetchOne();
+
+        return res != null ? res : 0;
+    }
+
+    /**
+     * Return true if this expenses has not approved yet
+     */
+    @Override
+    public boolean checkApproved(String id) {
+        // exist, has not been deleted and approved
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(expenses.id.eq(id))
+                .and(expenses.deleted.eq(false))
+                .and(expenses.status.eq(0));
+
+        Long res = query.from(expenses)
+                .where(builder)
+                .select(expenses.id.count().coalesce(0L))
+                .fetchOne();
+        return res != null && res > 0;
+    }
+
     //Tính và trả về chu kỳ trước
     private String prevPeriod(String period) {
         YearMonth yearMonth = YearMonth.parse(period);

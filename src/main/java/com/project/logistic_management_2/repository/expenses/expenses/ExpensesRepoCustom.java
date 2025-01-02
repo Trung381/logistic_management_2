@@ -16,4 +16,6 @@ public interface ExpensesRepoCustom {
     long delete(String id);
     long approve(String id);
     List<ExpensesReportDTO> reportForAll(String period);
+    long countByID(String id);
+    boolean checkApproved(String id);
 }

@@ -68,16 +68,22 @@ public class ExpensesController {
 
     @GetMapping("/delete/{id}")
     public ResponseEntity<Object> deleteExpensesByID(@PathVariable String id) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.deleteByID(id))
-        );
+        long res = expensesService.deleteByID(id);
+        return res != 0
+                ? ResponseEntity.ok(BaseResponse.ok(res, "Đã xóa thành công " + res + " chi phí!"))
+                : new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra khi cố gắng xóa chi phí. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @GetMapping("/approve/{id}")
     public ResponseEntity<Object> approveExpensesByID(@PathVariable String id) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.approveByID(id))
-        );
+        long res = expensesService.approveByID(id);
+        return  res != 0
+                ? (
+                        res != -1
+                        ? ResponseEntity.ok(BaseResponse.ok(res, "Đã duyệt thành công " + res + " chi phí!"))
+                        : ResponseEntity.ok(BaseResponse.ok(null, "Chi phí đã được duyệt trước đó!"))
+                )
+                : new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra khi duyệt chi phí. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @GetMapping("/reports")
