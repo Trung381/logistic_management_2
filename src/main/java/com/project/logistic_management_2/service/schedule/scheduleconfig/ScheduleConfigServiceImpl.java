@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.service.schedule;
+package com.project.logistic_management_2.service.schedule.scheduleconfig;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import com.project.logistic_management_2.entity.ScheduleConfig;
@@ -7,7 +7,7 @@ import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.schedule.ScheduleConfigMapper;
-import com.project.logistic_management_2.repository.schedule.ScheduleConfigRepo;
+import com.project.logistic_management_2.repository.schedule.scheduleconfig.ScheduleConfigRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;

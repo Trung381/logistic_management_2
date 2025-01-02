@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.service.schedule;
+package com.project.logistic_management_2.service.schedule.schedule;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
@@ -9,7 +9,7 @@ import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.schedule.ScheduleMapper;
-import com.project.logistic_management_2.repository.schedule.ScheduleRepo;
+import com.project.logistic_management_2.repository.schedule.schedule.ScheduleRepo;
 import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.notification.NotificationService;

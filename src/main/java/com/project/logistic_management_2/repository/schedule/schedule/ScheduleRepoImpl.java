@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.repository.schedule;
+package com.project.logistic_management_2.repository.schedule.schedule;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
@@ -15,12 +15,10 @@ import org.springframework.stereotype.Repository;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
-import static com.project.logistic_management_2.entity.QExpenses.expenses;
 import static com.project.logistic_management_2.entity.QSchedule.schedule;
 import static com.project.logistic_management_2.entity.QScheduleConfig.scheduleConfig;
 import static com.project.logistic_management_2.entity.QUser.user;

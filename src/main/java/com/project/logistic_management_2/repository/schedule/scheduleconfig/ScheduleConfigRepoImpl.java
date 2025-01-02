@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.repository.schedule;
+package com.project.logistic_management_2.repository.schedule.scheduleconfig;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import static com.project.logistic_management_2.entity.QScheduleConfig.scheduleConfig;

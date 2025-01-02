@@ -2,7 +2,7 @@ package com.project.logistic_management_2.controller.schedule;
 
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
-import com.project.logistic_management_2.service.schedule.ScheduleConfigService;
+import com.project.logistic_management_2.service.schedule.scheduleconfig.ScheduleConfigService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
 import jakarta.validation.Valid;
