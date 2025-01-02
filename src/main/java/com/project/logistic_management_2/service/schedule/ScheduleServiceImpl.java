@@ -13,22 +13,20 @@ import com.project.logistic_management_2.repository.schedule.ScheduleRepo;
 import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.notification.NotificationService;
+import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.FileFactory;
+import com.project.logistic_management_2.utils.ImportConfig;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.jpa.repository.Modifying;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 @Service
@@ -70,9 +68,9 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     }
 
     @Override
-    public List<ScheduleDTO> getAll() {
+    public List<ScheduleDTO> getAll(String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
         checkPermission(type, PermissionKey.VIEW);
-        return scheduleRepo.getAll(null, null);
+        return scheduleRepo.getAll(driverId, truckLicense, fromDate, toDate);
     }
 
     @Override
@@ -168,7 +166,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     public List<ScheduleDTO> report(String license, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
         YearMonth periodYM = parsePeriod(period);
-//        return scheduleRepo.getAll(license, periodYM);
+//        return scheduleRepo.getByFilter(license, periodYM);
 
         //Báo cáo theo fe (Có cột số chuyến phát sinh)
         return scheduleRepo.exportReport(license, periodYM);
@@ -188,5 +186,24 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             throw new InvalidParameterException("Định dạng chu kỳ không hợp lệ! Dạng đúng: yyyy-MM");
         }
         return YearMonth.parse(period);
+    }
+
+    @Override
+    public List<Schedule> importScheduleData(MultipartFile importFile) {
+
+        checkPermission(type, PermissionKey.WRITE);
+
+        Workbook workbook = FileFactory.getWorkbookStream(importFile);
+        List<ScheduleDTO> scheduleDTOList = ExcelUtils.getImportData(workbook, ImportConfig.scheduleImport);
+
+        List<Schedule> schedule = scheduleMapper.toScheduleList(scheduleDTOList);
+
+        for(ScheduleDTO dto : scheduleDTOList) {
+            truckRepo.updateStatus(dto.getTruckLicense(), 0);
+            truckRepo.updateStatus(dto.getMoocLicense(), 0);
+        }
+
+        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
+        return scheduleRepo.saveAll(schedule);
     }
 }

@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.service.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
+import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.enums.PermissionKey;
@@ -11,9 +12,15 @@ import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
 import com.project.logistic_management_2.repository.expenses.ExpensesRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.notification.NotificationService;
+import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.FileFactory;
+import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
@@ -28,9 +35,9 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     private final PermissionType type = PermissionType.EXPENSES;
 
     @Override
-    public List<ExpensesDTO> getAll() {
+    public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
         checkPermission(type, PermissionKey.VIEW);
-        return expensesRepo.getAll(null, null);
+        return expensesRepo.getAll(expensesConfigId, truckLicense, fromDate, toDate);
     }
 
     @Override
@@ -97,7 +104,8 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     // thees moiws cos chuwcs nanwg bao cao
     // thang dc xem bao cao la chuc cao nhat roi. quyenn all
 
-    public List<ExpensesDTO> report(String driverId, String period) {
+    @Override
+    public List<ExpensesIncurredDTO> report(String driverId, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
         //Check định dạng chu kỳ: yyyy-MM
         String regex = "^(\\d{4}-(0[1-9]|1[0-2]))$";
@@ -107,12 +115,26 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
 
         YearMonth periodYM = YearMonth.parse(period);
 
-        return expensesRepo.getAll(driverId, periodYM);
+        return expensesRepo.getByFilter(driverId, periodYM);
     }
 
     @Override
     public List<ExpensesReportDTO> reportForAll(String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
         return expensesRepo.reportForAll(period);
+    }
+
+    @Override
+    public List<Expenses> importExpensesData(MultipartFile importFile) {
+
+        checkPermission(type, PermissionKey.WRITE);
+
+        Workbook workbook = FileFactory.getWorkbookStream(importFile);
+        List<ExpensesDTO> expensesDTOList = ExcelUtils.getImportData(workbook, ImportConfig.expensesImport);
+
+        List<Expenses> expenses = expensesMapper.toExpensesList(expensesDTOList);
+
+        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
+        return expensesRepo.saveAll(expenses);
     }
 }

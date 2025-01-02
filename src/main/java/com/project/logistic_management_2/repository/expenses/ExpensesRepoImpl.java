@@ -1,24 +1,25 @@
 package com.project.logistic_management_2.repository.expenses;
 
-import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
+import com.project.logistic_management_2.dto.expenses.*;
 
 import static com.project.logistic_management_2.entity.QExpenses.expenses;
 import static com.project.logistic_management_2.entity.QExpensesConfig.expensesConfig;
 import static com.project.logistic_management_2.entity.QSchedule.schedule;
+import static com.project.logistic_management_2.entity.QTransaction.transaction;
 import static com.project.logistic_management_2.entity.QTruck.truck;
 import static com.project.logistic_management_2.entity.QUser.user;
 import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseAdvances;
 
-import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
-import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Expression;
 import jakarta.transaction.Transactional;
@@ -26,8 +27,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,8 +45,6 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 expenses.id.as("id"),
                 user.id.as("driverId"),
                 user.fullName.as("driverName"),
-                //Mã lịch trình
-                expenses.scheduleId.as("scheduleId"),
                 //Thông tin cấu hình chi phí: mã, loại chi phí
                 expenses.expensesConfigId.as("expensesConfigId"),
                 JPAExpressions.select(expensesConfig.type.as("expensesConfigType"))
@@ -52,6 +53,8 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 expenses.amount.as("amount"),   //Giá tiền
                 expenses.note.as("note"),       //Ghi chú
                 expenses.imgPath.as("imgPath"), //Đường dẫn ảnh đính kèm
+                //Mã lịch trình
+                expenses.scheduleId.as("scheduleId"),
                 expenses.status.as("status"),   //Trạng thái chi phí
                 expenses.createdAt.as("createdAt"),
                 expenses.updatedAt.as("updatedAt")
@@ -59,20 +62,27 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     @Override
-    public List<ExpensesDTO> getAll(String driverId, YearMonth period) {
+    public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
         //Điều kiện truy vấn: Chưa bị xóa
         BooleanBuilder builder = new BooleanBuilder()
                 .and(expenses.deleted.eq(false));
 
-        //Tìm theo mã tài xế nếu tham số driverId hợp lệ
-        if (driverId != null && !driverId.isBlank()) {
-            builder.and(user.id.eq(driverId));
+        //Tìm theo loại chi phí nếu tham số expensesConfigId hợp lệ
+        if (expensesConfigId != null) {
+            builder.and(expenses.expensesConfigId.eq(expensesConfigId));
         }
-        //Tìm theo chu kỳ nếu period hợp lệ
-        if (period != null) {
-            Date startDate = Date.valueOf(period.atDay(1).atStartOfDay().toLocalDate());
-            Date endDate = Date.valueOf(period.plusMonths(1).atDay(1).atStartOfDay().toLocalDate());
-            builder.and(expenses.createdAt.between(startDate, endDate));
+
+        //Tìm theo biển số xe nếu tham số truckLicense hợp lệ
+        if (truckLicense != null && !truckLicense.isBlank()) {
+            builder.and(schedule.truckLicense.eq(truckLicense));
+        }
+
+        if (fromDate != null && toDate != null) {
+            builder.and(expenses.createdAt.between(fromDate, toDate));
+        } else if (fromDate != null) {
+            builder.and(expenses.createdAt.goe(fromDate));
+        } else if (toDate != null) {
+            builder.and(expenses.createdAt.loe(toDate));
         }
 
         //Truy vấn, trả về kết quả
@@ -82,6 +92,39 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 .innerJoin(user).on(truck.driverId.eq(user.id))
                 .where(builder)
                 .select(expensesProjection())
+                .fetch();
+    }
+
+    @Override
+    public List<ExpensesIncurredDTO> getByFilter(String driverId, YearMonth period) {
+        //Điều kiện truy vấn: Chưa bị xóa
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(expenses.deleted.eq(false));
+
+        //Tìm theo mã tài xế nếu tham số driverId hợp lệ
+        if (driverId != null && !driverId.isBlank()) {
+            builder.and(truck.driverId.eq(driverId));
+        }
+        //Tìm theo chu kỳ nếu period hợp lệ
+        if (period != null) {
+            Date startDate = Date.valueOf(period.atDay(1).atStartOfDay().toLocalDate());
+            Date endDate = Date.valueOf(period.plusMonths(1).atDay(1).atStartOfDay().toLocalDate());
+            builder.and(expenses.createdAt.between(startDate, endDate));
+        }
+
+        ConstructorExpression<ExpensesIncurredDTO> expensesIncurredExpression = Projections.constructor(
+                ExpensesIncurredDTO.class,
+                expenses.expensesConfigId.as("expensesConfigId"),
+                expensesConfig.type.as("type"),
+                expenses.amount.sum().as("amount")
+        );
+        return query.from(expenses)
+                .innerJoin(expensesConfig).on(expenses.expensesConfigId.eq(expensesConfig.id))
+                .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
+                .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
+                .where(builder)
+                .select(expensesIncurredExpression)
+                .groupBy(expenses.expensesConfigId, expensesConfig.type)
                 .fetch();
     }
 

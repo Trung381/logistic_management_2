@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.repository.transaction;
 
 import com.project.logistic_management_2.dto.request.TransactionDTO;
+import com.project.logistic_management_2.dto.transaction.UpdateTransactionDTO;
 import com.project.logistic_management_2.entity.Transaction;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
@@ -8,10 +9,12 @@ import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAUpdateClause;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
+
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -35,25 +38,65 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
         return Projections.constructor(TransactionDTO.class,
                 transaction.id.as("id"),
                 transaction.refUserId.as("refUserId"),
-                JPAExpressions.select(user.fullName.as("fullNameUser"))
+                JPAExpressions.select(user.fullName.as("fullNameRefUser"))
                         .from(user)
                         .where(user.id.eq(transaction.refUserId)),
-                transaction.customerName.as("customerName"),
                 transaction.goodsId.as("goodsId"),
                 JPAExpressions.select(goods.name.as("goodsName"))
                         .from(goods)
                         .where(goods.id.eq(transaction.goodsId)),
                 transaction.quantity.as("quantity"),
+                transaction.destination.as("destination"),
+                transaction.customerName.as("customerName"),
                 transaction.transactionTime.as("transactionTime"),
                 transaction.origin.as("origin"),
                 new CaseBuilder()
-                        .when(transaction.origin.eq(true)).then("nhập hàng")
-                        .otherwise("xuất hàng").as("originDescription"),
-                transaction.destination.as("destination"),
+                        .when(transaction.origin.eq(true)).then("Nhập hàng")
+                        .otherwise("Xuất hàng").as("originDescription"),
                 transaction.image.as("image"),
                 transaction.createdAt.as("createdAt"),
                 transaction.updatedAt.as("updatedAt")
         );
+    }
+
+    @Override
+    @Modifying
+    @Transactional
+    public long updateTransaction(String id, UpdateTransactionDTO dto) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(transaction.id.eq(id))
+                .and(transaction.deleted.eq(false));
+
+        JPAUpdateClause updateClause = new JPAUpdateClause(entityManager, transaction);
+
+        if (dto.getRefUserId() != null) {
+            updateClause.set(transaction.refUserId, dto.getRefUserId());
+        }
+        if (dto.getCustomerName() != null) {
+            updateClause.set(transaction.customerName, dto.getCustomerName());
+        }
+        if (dto.getGoodsId() != null) {
+            updateClause.set(transaction.goodsId, dto.getGoodsId());
+        }
+        if (dto.getQuantity() != null) {
+            updateClause.set(transaction.quantity, dto.getQuantity());
+        }
+        if (dto.getDestination() != null) {
+            updateClause.set(transaction.destination, dto.getDestination());
+        }
+        if (dto.getImage() != null) {
+            updateClause.set(transaction.image, dto.getImage());
+        }
+        if (dto.getOrigin() != null) {
+            updateClause.set(transaction.origin, dto.getOrigin());
+        }
+        if (dto.getTransactionTime() != null) {
+            updateClause.set(transaction.transactionTime, dto.getTransactionTime());
+        }
+
+        updateClause.set(transaction.updatedAt, new java.util.Date());
+
+        return updateClause.where(builder).execute();
     }
 
     @Override

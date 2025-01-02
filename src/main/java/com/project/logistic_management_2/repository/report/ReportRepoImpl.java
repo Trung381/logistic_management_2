@@ -39,7 +39,7 @@ public class ReportRepoImpl extends BaseRepo implements ReportRepo {
     @Override
     public ReportDetailSalaryDTO getReport(String userId, String period) {
         // Chuyển đổi period thành YearMonth
-        YearMonth ym = YearMonth.parse(period); // Ví dụ: "2024-12"
+        YearMonth ym = YearMonth.parse(period);
         Date startDate = Date.from(ym.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endDate = Date.from(ym.atEndOfMonth().atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
 
@@ -89,7 +89,9 @@ public class ReportRepoImpl extends BaseRepo implements ReportRepo {
                 .leftJoin(salary).on(u.id.eq(salary.userId).and(salary.period.eq(String.valueOf(ym))))
                 .where(
                         u.id.eq(userId)
-                                .and(s.createdAt.between(startDate, endDate))
+//                                .and(s.arrivalTime.between(startDate, endDate))
+                                .and(s.departureTime.between(startDate, endDate))
+//                                .and(s.createdAt.between(startDate, endDate))
                 )
                 .groupBy(
 //                        u.id, // Thêm driverId vào groupBy
