@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.controller.user;
 
 
+import com.project.logistic_management_2.dto.user.UpdateUserDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.entity.User;
@@ -41,8 +42,8 @@ public class UserController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<BaseResponse<User>> updateUser(@PathVariable String id, @Valid @RequestBody UserDTO userDto) {
-        User updatedUser = userService.updateUser(id,userDto);
+    public ResponseEntity<BaseResponse<User>> updateUser(@PathVariable String id, @Valid @RequestBody UpdateUserDTO updateUserDTO) {
+        User updatedUser = userService.updateUser(id, updateUserDTO);
         return ResponseEntity.ok(BaseResponse.ok(updatedUser));
     }
 

@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.service.user;
 
 
+import com.project.logistic_management_2.dto.user.UpdateUserDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.User;
 import com.project.logistic_management_2.enums.PermissionKey;
@@ -12,8 +13,10 @@ import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,7 +26,9 @@ import java.util.List;
 @Service
 public class UserServiceImpl extends BaseService implements UserService {
 
+    private final EntityManager entityManager;
     private final UserRepo userRepo;
+    private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final PermissionType type = PermissionType.USERS;
 
@@ -35,18 +40,27 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public User updateUser(String id, UserDTO userDto) {
+    public User updateUser(String id, UpdateUserDTO updateUserDTO) {
         checkPermission(type, PermissionKey.WRITE);
-        if (userDto.getId() == null) {
-            throw new IllegalArgumentException("User ID must be provided for updating.");
+
+        User existingUser = userRepo.getUserById(id);
+        if (existingUser == null) {
+            throw new NotFoundException("User not found with ID: " + id);
         }
-        User user = userRepo.getUserById(id);
-        if(user == null){
-            throw new NotFoundException("User not found with User: "+id);
+
+        if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
+            updateUserDTO.setPassword(passwordEncoder.encode(updateUserDTO.getPassword()));
         }
-        userMapper.updateUserMapper(user,userDto);
-        return userRepo.save(user);
+
+        entityManager.clear();
+        if (!userRepo.updateUser(id, updateUserDTO)) {
+            throw new RuntimeException("Failed to update user with ID: " + id);
+        }
+
+        return userRepo.getUserById(id);
     }
+
+
 
     @Override
     public List<User> getAllUsers() {
