@@ -51,14 +51,31 @@ public class ExpensesMapper {
         ).collect(Collectors.toList());
     }
 
-    public void updateExpenses(String id, Expenses expenses, ExpensesDTO dto) {
+    /**
+     * Update the fields that need to be updated of the expenses
+     *
+     * @param expenses: object to be updated
+     * @param dto: object contain the values to be updated
+     */
+    public void updateExpenses(Expenses expenses, ExpensesDTO dto) {
         if (dto == null) return;
-        expenses.setId(id);
-        expenses.setScheduleId(dto.getScheduleId());
-        expenses.setExpensesConfigId(dto.getExpensesConfigId());
-        expenses.setAmount(dto.getAmount());
-        expenses.setNote(dto.getNote());
-        expenses.setImgPath(dto.getImgPath());
+
+        // Update schedule
+        if (dto.getScheduleId() != null)
+            expenses.setScheduleId(dto.getScheduleId());
+        // Update expenses config
+        if (dto.getExpensesConfigId() != null)
+            expenses.setExpensesConfigId(dto.getExpensesConfigId());
+        // Update amount
+        if (dto.getAmount() != null)
+            expenses.setAmount(dto.getAmount());
+        // Update note
+        if (dto.getNote() != null)
+            expenses.setNote(dto.getNote());
+        // Update references image
+        if (dto.getImgPath() != null)
+            expenses.setImgPath(dto.getImgPath());
+        // Update last modified
         expenses.setUpdatedAt(new Date());
     }
 }

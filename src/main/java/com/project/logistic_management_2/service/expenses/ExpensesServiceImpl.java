@@ -24,6 +24,7 @@ import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -60,27 +61,23 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
         String notifyMsg = "Có một chi phí được tạo mới cần được phê duyệt lúc " + new Date();
         notificationService.sendNotification("{\"message\":\"" + notifyMsg + "\"}");
 
-        return expensesRepo.getByID(expenses.getId()).get();
+        return expensesRepo.getByID(expenses.getId()).orElse(null);
     }
 
     @Override
     public ExpensesDTO update(String id, ExpensesDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
 
-        ExpensesDTO expensesDTO = expensesRepo.getByID(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin chi phí!"));
-
-        //Ánh xạ từ DTO sang đối tượng kiểu Expenses để cập nhật
-        Expenses expenses = expensesMapper.toExpenses(expensesDTO);
-        expensesMapper.updateExpenses(id, expenses, dto);
-
-        //Lưu kết quả
+        // Return not found message if expenses does not exist
+        Expenses expenses = expensesRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Chi phí cần cập nhật không tồn tại!"));
+        // Update expenses object
+        expensesMapper.updateExpenses(expenses, dto);
+        // Save to DB
         expensesRepo.save(expenses);
 
-        return expensesRepo.getByID(expenses.getId()).get();
+        Optional<ExpensesDTO> res = expensesRepo.getByID(expenses.getId());
+        return res.orElse(null);
     }
 
     @Override

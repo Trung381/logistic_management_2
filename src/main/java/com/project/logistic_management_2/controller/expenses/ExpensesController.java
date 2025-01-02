@@ -60,7 +60,7 @@ public class ExpensesController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> updateExpenses(@PathVariable String id, @Valid @RequestBody ExpensesDTO dto) {
+    public ResponseEntity<Object> updateExpenses(@PathVariable String id, @RequestBody ExpensesDTO dto) {
         return ResponseEntity.ok(
                 BaseResponse.ok(expensesService.update(id, dto))
         );
