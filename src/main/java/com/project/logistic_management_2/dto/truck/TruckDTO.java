@@ -24,7 +24,7 @@ public class TruckDTO {
 
     @NotNull(message = "Dung tích xe không được để trống")
     @ExportColumn(name = "Dung tích")
-    private float capacity;
+    private Float capacity;
 
     //Thong tin tai xe
     @NotNull(message = "ID tài xế không được để trống")

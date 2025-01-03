@@ -67,18 +67,42 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
         return repository.getTruckByLicensePlate(licensePlate)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy xe với biển số: " + licensePlate));
     }
+//
+//    @Override
+//    public TruckDTO updateTruck(Integer id, TruckDTO dto) {
+//        checkPermission(type, PermissionKey.WRITE);
+//        TruckDTO truckDTO = repository.getTruckById(id)
+//                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe cần tìm!"));
+//        Truck truck = mapper.toTruck(truckDTO);
+//        mapper.updateTruck(truck, dto);
+//        repository.save(truck);
+//        return repository.getTruckById(id).get();
+//    }
+
 
     @Override
     public TruckDTO updateTruck(Integer id, TruckDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
-        TruckDTO truckDTO = repository.getTruckById(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe cần tìm!"));
-
-        Truck truck = mapper.toTruck(truckDTO);
-        mapper.updateTruck(truck, dto);
-        repository.save(truck);
-        return repository.getTruckById(id).get();
+        // Lấy thông tin xe hiện tại
+        Truck existingTruck = mapper.toTruck(repository.getTruckById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe cần tìm!")));
+        // Chỉ cập nhật những trường có trên body (không null)
+        if (dto.getLicensePlate() != null) {
+            existingTruck.setLicensePlate(dto.getLicensePlate());
+        }
+        if (dto.getType() != null) {
+            existingTruck.setType(dto.getType());
+        }
+        if (dto.getCapacity() != null) {
+            existingTruck.setCapacity(dto.getCapacity());
+        }
+        if (dto.getStatus() != null) {
+            existingTruck.setStatus(dto.getStatus());
+        }
+        repository.save(existingTruck);
+        return mapper.toTruckDTO(existingTruck);
     }
+
 
     @Override
     public long deleteTruck(Integer id) {
