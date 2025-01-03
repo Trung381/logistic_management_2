@@ -2,9 +2,8 @@ package com.project.logistic_management_2.controller.schedule;
 
 import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.BaseResponse;
-import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
-import com.project.logistic_management_2.service.schedule.ScheduleService;
+import com.project.logistic_management_2.service.schedule.schedule.ScheduleService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
 import jakarta.validation.Valid;
@@ -60,7 +59,7 @@ public class ScheduleController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> updateSchedule(@PathVariable String id, @Valid @RequestBody ScheduleDTO dto) {
+    public ResponseEntity<Object> updateSchedule(@PathVariable String id, @RequestBody ScheduleDTO dto) {
         return ResponseEntity.ok(
                 BaseResponse.ok(scheduleService.update(id, dto))
         );
@@ -68,23 +67,32 @@ public class ScheduleController {
 
     @GetMapping("/delete/{id}")
     public ResponseEntity<Object> deleteScheduleByID(@PathVariable String id) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.deleteByID(id))
-        );
+        long res = scheduleService.deleteByID(id);
+        return res != 0
+                ? ResponseEntity.ok(BaseResponse.ok(res, "Đã xóa thành công " + res + " lịch trình!"))
+                : new ResponseEntity<>("Đã có lỗi xảy ra. Vui lòng thử lại sau!", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @GetMapping("/approve/{id}")
     public ResponseEntity<Object> approveScheduleByID(@PathVariable String id) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.approveByID(id))
-        );
+        long res = scheduleService.approveByID(id);
+        return res != 0
+                ? (
+                        res != -1 ? ResponseEntity.ok(BaseResponse.ok(res, "Đã duyệt thành công " + res + " lịch trình!"))
+                                : ResponseEntity.ok(BaseResponse.ok(null, "Lịch trình đã được duyệt trước đó!"))
+                ) : new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra trong quá trình duyệt. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @GetMapping("/mark_complete/{id}")
     public ResponseEntity<Object> markComplete(@PathVariable String id) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.markComplete(id))
-        );
+        int rowUpdated = (int) scheduleService.markComplete(id);
+        ResponseEntity<Object> response;
+        switch (rowUpdated) {
+            case 0 -> response = new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
+            case 2 -> response = ResponseEntity.ok(BaseResponse.ok(null, "Chuyến đi đã được đánh dấu là hoàn thành trước đó!"));
+            default -> response = ResponseEntity.ok(BaseResponse.ok(rowUpdated, rowUpdated + " lịch trình đã được đánh dấu là hoàn thành!"));
+        }
+        return response;
     }
 
     @GetMapping("/reports")

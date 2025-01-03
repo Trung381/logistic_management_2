@@ -2,7 +2,7 @@ package com.project.logistic_management_2.controller.expenses;
 
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.expenses.ExpenseAdvancesDTO;
-import com.project.logistic_management_2.service.expenses.ExpenseAdvancesService;
+import com.project.logistic_management_2.service.expenses.expenseadvances.ExpenseAdvancesService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

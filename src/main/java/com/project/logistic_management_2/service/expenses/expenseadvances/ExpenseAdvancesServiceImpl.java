@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.service.expenses;
+package com.project.logistic_management_2.service.expenses.expenseadvances;
 
 import com.project.logistic_management_2.dto.expenses.ExpenseAdvancesDTO;
 import com.project.logistic_management_2.entity.ExpenseAdvances;
@@ -7,7 +7,7 @@ import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.expenses.ExpenseAdvancesMapper;
-import com.project.logistic_management_2.repository.expenses.ExpenseAdvancesRepo;
+import com.project.logistic_management_2.repository.expenses.expenseadvances.ExpenseAdvancesRepo;
 import com.project.logistic_management_2.service.BaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

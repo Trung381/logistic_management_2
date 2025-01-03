@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.repository.schedule;
+package com.project.logistic_management_2.repository.schedule.schedule;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
@@ -17,4 +17,11 @@ public interface ScheduleRepoCustom {
     long markComplete(String id);
     List<ScheduleSalaryDTO> exportScheduleSalary(String driverId, YearMonth period);
     List<ScheduleDTO> exportReport(String license, YearMonth period);
+    long countByID(String id);
+
+    /**
+     *
+     * @return true if not approved yet, otherwise false
+     */
+    Optional<Integer> getStatusByID(String id);
 }
