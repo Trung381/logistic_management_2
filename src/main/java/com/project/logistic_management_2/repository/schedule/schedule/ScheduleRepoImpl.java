@@ -252,12 +252,12 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
                 .and(schedule.id.eq(id))
                 .and(schedule.deleted.eq(false));
 
-        Long rowUpdated = query.from(schedule)
+        Long res = query.from(schedule)
                 .where(builder)
                 .select(schedule.id.count().coalesce(0L))
                 .fetchOne();
 
-        return rowUpdated != null ? rowUpdated : 0;
+        return res != null ? res : 0;
     }
 
     @Override

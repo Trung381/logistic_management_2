@@ -65,4 +65,18 @@ public class ScheduleConfigRepoImpl extends BaseRepo implements ScheduleConfigRe
                 .set(scheduleConfig.deleted, true)
                 .execute();
     }
+
+    @Override
+    public long countByID(String id) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(scheduleConfig.id.eq(id))
+                .and(scheduleConfig.deleted.eq(false));
+
+        Long res = query.from(scheduleConfig)
+                .where(builder)
+                .select(scheduleConfig.id.count().coalesce(0L))
+                .fetchOne();
+
+        return res == null ? 0 : res;
+    }
 }

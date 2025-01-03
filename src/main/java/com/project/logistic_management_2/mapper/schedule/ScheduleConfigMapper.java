@@ -48,10 +48,22 @@ public class ScheduleConfigMapper {
 
     public void updateScheduleConfig(ScheduleConfig config, ScheduleConfigDTO dto) {
         if (dto == null) return;
-        config.setPlaceA(dto.getPlaceA());
-        config.setPlaceB(dto.getPlaceB());
-        config.setAmount(dto.getAmount());
-        config.setNote(dto.getNote());
+        //Update place A
+        if (dto.getPlaceA() != null)
+            config.setPlaceA(dto.getPlaceA());
+
+        //Update place B
+        if (dto.getPlaceB() != null)
+            config.setPlaceB(dto.getPlaceB());
+
+        // Update amount per schedule
+        if (dto.getAmount() != null)
+            config.setAmount(dto.getAmount());
+
+        // Update note
+        if (dto.getNote() != null)
+            config.setNote(dto.getNote());
+
         config.setUpdatedAt(new Date());
     }
 

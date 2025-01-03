@@ -86,7 +86,7 @@ public class ScheduleController {
     @GetMapping("/mark_complete/{id}")
     public ResponseEntity<Object> markComplete(@PathVariable String id) {
         int rowUpdated = (int) scheduleService.markComplete(id);
-        ResponseEntity<Object> response = null;
+        ResponseEntity<Object> response;
         switch (rowUpdated) {
             case 0 -> response = new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
             case 2 -> response = ResponseEntity.ok(BaseResponse.ok(null, "Chuyến đi đã được đánh dấu là hoàn thành trước đó!"));

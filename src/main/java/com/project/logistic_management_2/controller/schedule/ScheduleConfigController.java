@@ -50,7 +50,7 @@ public class ScheduleConfigController {
     }
 
     @PostMapping("/configs/update/{id}")
-    public ResponseEntity<Object> updateScheduleConfig(@PathVariable String id, @Valid @RequestBody ScheduleConfigDTO dto) {
+    public ResponseEntity<Object> updateScheduleConfig(@PathVariable String id, @RequestBody ScheduleConfigDTO dto) {
         return ResponseEntity.ok(
                 BaseResponse.ok(scheduleConfigService.update(id, dto))
         );
@@ -58,9 +58,10 @@ public class ScheduleConfigController {
 
     @GetMapping("/configs/delete/{id}")
     public ResponseEntity<Object> deleteScheduleConfigByID(@PathVariable String id) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(scheduleConfigService.deleteByID(id))
-        );
+        long res = scheduleConfigService.deleteByID(id);
+        return res != 0
+                ? ResponseEntity.ok(BaseResponse.ok(res, "Đã xóa thành công " + res + " cấu hình lịch trình"))
+                : new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @GetMapping("/configs/export")
