@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.service.expenses;
+package com.project.logistic_management_2.service.expenses.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
@@ -6,10 +6,11 @@ import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.enums.PermissionKey;
 import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
-import com.project.logistic_management_2.repository.expenses.ExpensesRepo;
+import com.project.logistic_management_2.repository.expenses.expenses.ExpensesRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.notification.NotificationService;
 import com.project.logistic_management_2.utils.ExcelUtils;
@@ -24,6 +25,7 @@ import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -60,44 +62,52 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
         String notifyMsg = "Có một chi phí được tạo mới cần được phê duyệt lúc " + new Date();
         notificationService.sendNotification("{\"message\":\"" + notifyMsg + "\"}");
 
-        return expensesRepo.getByID(expenses.getId()).get();
+        return expensesRepo.getByID(expenses.getId()).orElse(null);
     }
 
     @Override
     public ExpensesDTO update(String id, ExpensesDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
+
+        // Return not found message if expenses does not exist
+        Expenses expenses = expensesRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Chi phí cần cập nhật không tồn tại!"));
+
+        // approved => error message
+        if (!expensesRepo.checkApproved(id)) {
+            throw new ConflictException("Chi phí đã được duyệt không thể chỉnh sửa!");
         }
 
-        ExpensesDTO expensesDTO = expensesRepo.getByID(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin chi phí!"));
-
-        //Ánh xạ từ DTO sang đối tượng kiểu Expenses để cập nhật
-        Expenses expenses = expensesMapper.toExpenses(expensesDTO);
-        expensesMapper.updateExpenses(id, expenses, dto);
-
-        //Lưu kết quả
+        // Update expenses object
+        expensesMapper.updateExpenses(expenses, dto);
+        // Save to DB
         expensesRepo.save(expenses);
 
-        return expensesRepo.getByID(expenses.getId()).get();
+        Optional<ExpensesDTO> res = expensesRepo.getByID(expenses.getId());
+        return res.orElse(null);
     }
 
     @Override
     public long deleteByID(String id) {
         checkPermission(type, PermissionKey.DELETE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
+        if (expensesRepo.countByID(id) == 0)
+            throw new NotFoundException("Chi phí cần xóa không tồn tại hoặc đã được xóa trước đó!");
+
         return expensesRepo.delete(id);
     }
 
     @Override
     public long approveByID(String id) {
         checkPermission(type, PermissionKey.APPROVE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
+
+        // does not exist
+        if (expensesRepo.countByID(id) == 0)
+            throw new NotFoundException("Chi phí cần duyệt không tồn tại!");
+
+        // not approved yet
+        if (!expensesRepo.checkApproved(id))
+            return -1;
+
         return expensesRepo.approve(id);
     }
 

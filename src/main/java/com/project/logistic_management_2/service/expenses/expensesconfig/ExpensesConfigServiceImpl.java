@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.service.expenses;
+package com.project.logistic_management_2.service.expenses.expensesconfig;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.entity.ExpensesConfig;
@@ -7,7 +7,7 @@ import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesConfigMapper;
-import com.project.logistic_management_2.repository.expenses.ExpensesConfigRepo;
+import com.project.logistic_management_2.repository.expenses.expensesconfig.ExpensesConfigRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;
@@ -65,25 +65,25 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
     @Override
     public ExpensesConfigDTO update(String id, ExpensesConfigDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
 
         ExpensesConfig config = expensesConfigRepo.getByID(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin cấu hình chi phí!"));
+                .orElseThrow(() -> new NotFoundException("Cấu hình chi phí không tồn tại!"));
+
         expensesConfigMapper.updateExpensesConfig(config, dto);
 
-        //Lưu lại cập nhật vào db và trả về dto từ mapper
+        //save to DB
         return expensesConfigMapper.toExpensesConfigDTO(dto, expensesConfigRepo.save(config));
     }
 
     @Override
     public long deleteByID(String id) {
         checkPermission(type, PermissionKey.DELETE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
+
+        long numOfRowDeleted = expensesConfigRepo.delete(id);
+        if (numOfRowDeleted == 0) {
+            throw new NotFoundException("Cấu hình chi phí không tồn tại!");
         }
-        return expensesConfigRepo.delete(id);
+        return numOfRowDeleted;
     }
 
     @Override
