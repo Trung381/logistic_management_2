@@ -50,7 +50,7 @@ public class ExpensesConfigController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> updateExpensesConfig(@PathVariable String id, @Valid @RequestBody ExpensesConfigDTO dto) {
+    public ResponseEntity<Object> updateExpensesConfig(@PathVariable String id, @RequestBody ExpensesConfigDTO dto) {
         return ResponseEntity.ok(
                 BaseResponse.ok(expensesConfigService.update(id, dto))
         );
@@ -58,8 +58,9 @@ public class ExpensesConfigController {
 
     @GetMapping("/delete/{id}")
     public ResponseEntity<Object> deleteExpensesConfigByID(@PathVariable String id) {
+        long res = expensesConfigService.deleteByID(id);
         return ResponseEntity.ok(
-                BaseResponse.ok(expensesConfigService.deleteByID(id))
+                BaseResponse.ok(res, "Đã xóa thành công " + res + " cấu hình chi phí")
         );
     }
 
