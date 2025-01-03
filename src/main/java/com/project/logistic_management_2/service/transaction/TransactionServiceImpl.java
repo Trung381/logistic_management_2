@@ -75,13 +75,14 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
             throw new ConflictException("Không được cập nhật kiểu giao dịch");
         }
 
-        if (transaction.getOrigin()) {
-            goods.setQuantity(goods.getQuantity() - transaction.getQuantity() + dto.getQuantity());
-        } else {
-            if (goods.getQuantity() < dto.getQuantity()) {
+        if (dto.getQuantity() != null) {
+            if (transaction.getOrigin()) {
+                goods.setQuantity(goods.getQuantity() - transaction.getQuantity() + dto.getQuantity());
+            } else if (goods.getQuantity() < dto.getQuantity()) {
                 throw new ConflictException("Không đủ hàng trong kho");
+            } else {
+                goods.setQuantity(goods.getQuantity() - transaction.getQuantity() + dto.getQuantity());
             }
-            goods.setQuantity(goods.getQuantity() + transaction.getQuantity() - dto.getQuantity());
         }
 
         goodsRepo.save(goods);
