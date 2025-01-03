@@ -18,6 +18,14 @@ public class BaseResponse<T> {
                 .build();
     }
 
+    public static <T> BaseResponse<T> ok(T data, String message) {
+        return BaseResponse.<T>builder()
+                .data(data)
+                .success(true)
+                .message(message)
+                .build();
+    }
+
     public static <T> BaseResponse<T> fail(String msg) {
         return BaseResponse.<T>builder()
                 .success(false)

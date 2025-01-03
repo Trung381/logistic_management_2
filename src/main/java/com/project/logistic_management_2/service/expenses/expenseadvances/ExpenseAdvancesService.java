@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.service.expenses;
+package com.project.logistic_management_2.service.expenses.expenseadvances;
 
 import com.project.logistic_management_2.dto.expenses.ExpenseAdvancesDTO;
 

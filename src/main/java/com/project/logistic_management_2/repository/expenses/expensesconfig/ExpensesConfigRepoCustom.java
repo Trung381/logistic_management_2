@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.repository.expenses;
+package com.project.logistic_management_2.repository.expenses.expensesconfig;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.entity.ExpensesConfig;

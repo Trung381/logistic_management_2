@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.service.schedule;
+package com.project.logistic_management_2.service.schedule.schedule;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;

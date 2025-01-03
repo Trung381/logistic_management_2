@@ -1,27 +1,21 @@
-package com.project.logistic_management_2.repository.expenses;
+package com.project.logistic_management_2.repository.expenses.expenses;
 
 import com.project.logistic_management_2.dto.expenses.*;
 
 import static com.project.logistic_management_2.entity.QExpenses.expenses;
 import static com.project.logistic_management_2.entity.QExpensesConfig.expensesConfig;
 import static com.project.logistic_management_2.entity.QSchedule.schedule;
-import static com.project.logistic_management_2.entity.QTransaction.transaction;
 import static com.project.logistic_management_2.entity.QTruck.truck;
 import static com.project.logistic_management_2.entity.QUser.user;
 import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseAdvances;
 
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ConstructorExpression;
-import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
-import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.Expression;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
@@ -30,9 +24,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
@@ -214,6 +206,39 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         }
 
         return reports;
+    }
+
+    @Override
+    public long countByID(String id) {
+        //conditions: exist and has not been deleted
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(expenses.id.eq(id))
+                .and(expenses.deleted.eq(false));
+
+        Long res = query.from(expenses)
+                .where(builder)
+                .select(expenses.id.count().coalesce(0L))
+                .fetchOne();
+
+        return res != null ? res : 0;
+    }
+
+    /**
+     * Return true if this expenses has not approved yet
+     */
+    @Override
+    public boolean checkApproved(String id) {
+        // exist, has not been deleted and approved
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(expenses.id.eq(id))
+                .and(expenses.deleted.eq(false))
+                .and(expenses.status.eq(0));
+
+        Long res = query.from(expenses)
+                .where(builder)
+                .select(expenses.id.count().coalesce(0L))
+                .fetchOne();
+        return res != null && res > 0;
     }
 
     //Tính và trả về chu kỳ trước
