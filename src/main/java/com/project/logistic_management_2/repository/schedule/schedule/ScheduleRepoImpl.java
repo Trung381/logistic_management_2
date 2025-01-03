@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.repository.schedule;
+package com.project.logistic_management_2.repository.schedule.schedule;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
@@ -15,12 +15,10 @@ import org.springframework.stereotype.Repository;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
-import static com.project.logistic_management_2.entity.QExpenses.expenses;
 import static com.project.logistic_management_2.entity.QSchedule.schedule;
 import static com.project.logistic_management_2.entity.QScheduleConfig.scheduleConfig;
 import static com.project.logistic_management_2.entity.QUser.user;
@@ -246,5 +244,34 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
                 .groupBy(schedule.truckLicense, schedule.moocLicense, schedule.departureTime, schedule.arrivalTime, schedule.scheduleConfigId)
                 .select(expression)
                 .fetch();
+    }
+
+    @Override
+    public long countByID(String id) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(schedule.id.eq(id))
+                .and(schedule.deleted.eq(false));
+
+        Long res = query.from(schedule)
+                .where(builder)
+                .select(schedule.id.count().coalesce(0L))
+                .fetchOne();
+
+        return res != null ? res : 0;
+    }
+
+    @Override
+    public Optional<Integer> getStatusByID(String id) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(schedule.id.eq(id))
+                .and(schedule.deleted.eq(false));
+
+        //-1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
+        return Optional.ofNullable(
+                query.from(schedule)
+                        .where(builder)
+                        .select(schedule.status)
+                        .fetchOne()
+        );
     }
 }

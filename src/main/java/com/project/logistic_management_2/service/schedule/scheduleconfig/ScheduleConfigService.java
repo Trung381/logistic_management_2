@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.service.schedule;
+package com.project.logistic_management_2.service.schedule.scheduleconfig;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import com.project.logistic_management_2.entity.ScheduleConfig;

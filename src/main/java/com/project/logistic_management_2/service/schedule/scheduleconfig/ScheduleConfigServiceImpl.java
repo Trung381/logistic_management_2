@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.service.schedule;
+package com.project.logistic_management_2.service.schedule.scheduleconfig;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import com.project.logistic_management_2.entity.ScheduleConfig;
@@ -7,7 +7,7 @@ import com.project.logistic_management_2.enums.PermissionType;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.schedule.ScheduleConfigMapper;
-import com.project.logistic_management_2.repository.schedule.ScheduleConfigRepo;
+import com.project.logistic_management_2.repository.schedule.scheduleconfig.ScheduleConfigRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;
@@ -35,11 +35,8 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
     @Override
     public ScheduleConfigDTO getByID(String id) {
         checkPermission(type, PermissionKey.VIEW);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
         ScheduleConfig config = scheduleConfigRepo.getByID(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin cấu hình lịch trình!"));
+                .orElseThrow(() -> new NotFoundException("Cấu hình lịch trình không tồn tại!"));
         return scheduleConfigMapper.toScheduleConfigDTO(null, config);
     }
 
@@ -54,23 +51,21 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
     @Override
     public ScheduleConfigDTO update(String id, ScheduleConfigDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
 
         ScheduleConfig config = scheduleConfigRepo.getByID(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin cấu hình lịch trình!"));
+                .orElseThrow(() -> new NotFoundException("Cấu hình lịch trình không tồn tại hoặc đã bị xóa trước đó!"));
+
         scheduleConfigMapper.updateScheduleConfig(config, dto);
 
-        //Lưu lại cập nhật vào db và trả về dto từ mapper
+        //Save to DB
         return scheduleConfigMapper.toScheduleConfigDTO(dto, scheduleConfigRepo.save(config));
     }
 
     @Override
     public long deleteByID(String id) {
         checkPermission(type, PermissionKey.DELETE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
+        if (scheduleConfigRepo.countByID(id) == 0) {
+            throw new NotFoundException("Cấu hình lịch trình không tồn tại!");
         }
         return scheduleConfigRepo.delete(id);
     }

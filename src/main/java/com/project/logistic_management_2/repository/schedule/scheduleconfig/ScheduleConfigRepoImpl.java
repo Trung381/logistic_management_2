@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.repository.schedule;
+package com.project.logistic_management_2.repository.schedule.scheduleconfig;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import static com.project.logistic_management_2.entity.QScheduleConfig.scheduleConfig;
@@ -64,5 +64,19 @@ public class ScheduleConfigRepoImpl extends BaseRepo implements ScheduleConfigRe
                 .where(builder)
                 .set(scheduleConfig.deleted, true)
                 .execute();
+    }
+
+    @Override
+    public long countByID(String id) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(scheduleConfig.id.eq(id))
+                .and(scheduleConfig.deleted.eq(false));
+
+        Long res = query.from(scheduleConfig)
+                .where(builder)
+                .select(scheduleConfig.id.count().coalesce(0L))
+                .fetchOne();
+
+        return res == null ? 0 : res;
     }
 }
