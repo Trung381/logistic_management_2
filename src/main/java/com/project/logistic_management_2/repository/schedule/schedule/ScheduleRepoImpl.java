@@ -245,4 +245,33 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
                 .select(expression)
                 .fetch();
     }
+
+    @Override
+    public long countByID(String id) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(schedule.id.eq(id))
+                .and(schedule.deleted.eq(false));
+
+        Long rowUpdated = query.from(schedule)
+                .where(builder)
+                .select(schedule.id.count().coalesce(0L))
+                .fetchOne();
+
+        return rowUpdated != null ? rowUpdated : 0;
+    }
+
+    @Override
+    public Optional<Integer> getStatusByID(String id) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(schedule.id.eq(id))
+                .and(schedule.deleted.eq(false));
+
+        //-1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
+        return Optional.ofNullable(
+                query.from(schedule)
+                        .where(builder)
+                        .select(schedule.status)
+                        .fetchOne()
+        );
+    }
 }
