@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.service.transaction;
 
 import com.project.logistic_management_2.dto.request.TransactionDTO;
+import com.project.logistic_management_2.dto.transaction.UpdateTransactionDTO;
 import com.project.logistic_management_2.entity.Goods;
 import com.project.logistic_management_2.entity.Transaction;
 import com.project.logistic_management_2.enums.PermissionKey;
@@ -20,10 +21,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.security.InvalidParameterException;
 import java.sql.Timestamp;
-import java.time.YearMonth;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -60,54 +60,48 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
         return repository.getTransactionsById(transaction.getId()).get();
     }
 
-    @Override
-    public TransactionDTO updateTransaction(String id, TransactionDTO transactionDTO) {
 
+    @Override
+    public Optional<TransactionDTO> updateTransaction(String id, UpdateTransactionDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
 
         Transaction transaction = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin giao dịch"));
 
-        if(transaction.getOrigin() == transactionDTO.getOrigin()){
-            Goods goodsOld = goodsRepo.findById(transaction.getGoodsId())
-                    .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng hóa"));
+        Goods goods = goodsRepo.findById(transaction.getGoodsId())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng hóa"));
 
-            if(transaction.getOrigin()) {
-                goodsOld.setQuantity(goodsOld.getQuantity() - transaction.getQuantity());
-                goodsRepo.save(goodsOld);
-                Goods goodsNew = goodsRepo.findById(transactionDTO.getGoodsId())
-                        .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng hóa"));
-                goodsNew.setQuantity(goodsNew.getQuantity() + transaction.getQuantity());
-                goodsRepo.save(goodsNew);
-            }else {
-                goodsOld.setQuantity(goodsOld.getQuantity() + transaction.getQuantity());
-                goodsRepo.save(goodsOld);
-                Goods goodsNew = goodsRepo.findById(transactionDTO.getGoodsId())
-                        .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng hóa"));
-                if(goodsNew.getQuantity() < transactionDTO.getQuantity()) {
-                    throw new ConflictException("Không đủ " + goodsNew.getName() + "trong kho");
-                }
-                goodsNew.setQuantity(goodsNew.getQuantity() - transaction.getQuantity());
-                goodsRepo.save(goodsNew);
-            }
-        } else {
+        if (dto.getOrigin() != null & !transaction.getOrigin().equals(dto.getOrigin())) {
             throw new ConflictException("Không được cập nhật kiểu giao dịch");
         }
 
-        mapper.updateTransaction(transaction,transactionDTO);
-        repository.save(transaction);
+        if (transaction.getOrigin()) {
+            goods.setQuantity(goods.getQuantity() - transaction.getQuantity() + dto.getQuantity());
+        } else {
+            if (goods.getQuantity() < dto.getQuantity()) {
+                throw new ConflictException("Không đủ hàng trong kho");
+            }
+            goods.setQuantity(goods.getQuantity() + transaction.getQuantity() - dto.getQuantity());
+        }
 
-        return repository.getTransactionsById(id).get();
+        goodsRepo.save(goods);
+
+        long updatedCount = repository.updateTransaction(id, dto);
+        if (updatedCount == 0) {
+            throw new NotFoundException("Transaction update failed");
+        }
+
+        return repository.getTransactionsById(id);
     }
 
     @Override
-    public long deleteTransaction(String id) {
+    public String deleteTransaction(String id) {
 
         checkPermission(type, PermissionKey.DELETE);
 
         repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy giao dịch"));
-        return repository.deleteTransaction(id);
+        return repository.deleteTransaction(id) > 0 ? "Xoá thành công" : "Xoá thất bại";
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.project.logistic_management_2.controller.transaction;
 import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.request.TransactionDTO;
+import com.project.logistic_management_2.dto.transaction.UpdateTransactionDTO;
 import com.project.logistic_management_2.service.transaction.TransactionService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
@@ -38,23 +39,18 @@ public class TransactionController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> updateTransaction(
-            @PathVariable String id,
-            @Valid @RequestBody TransactionDTO dto) {
-
-        return ResponseEntity.ok(
-                BaseResponse.ok(transactionService.updateTransaction(id, dto))
-        );
+    public ResponseEntity<Object> updateTransaction(@PathVariable String id, @Valid @RequestBody UpdateTransactionDTO dto) {
+        return ResponseEntity.ok(BaseResponse.ok(transactionService.updateTransaction(id, dto)));
     }
 
     @PostMapping("/delete/{id}")
     public ResponseEntity<Object> deleteTransaction(@PathVariable String id) {
-        return ResponseEntity.ok(transactionService.deleteTransaction(id));
+        return ResponseEntity.ok(BaseResponse.ok(transactionService.deleteTransaction(id)));
     }
 
     @GetMapping("/getById/{id}")
     public ResponseEntity<Object> getTransactionById(@PathVariable String id) {
-        return ResponseEntity.ok(transactionService.getTransactionById(id));
+        return ResponseEntity.ok(BaseResponse.ok(transactionService.getTransactionById(id)));
     }
 
     @GetMapping("/filter")

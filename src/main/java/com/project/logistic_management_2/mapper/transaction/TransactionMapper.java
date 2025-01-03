@@ -20,7 +20,7 @@ public class TransactionMapper {
         if (dto == null) return null;
 
         return Transaction.builder()
-                .id(Utils.genID(IDKey.EXPENSES))
+                .id(Utils.genID(IDKey.TRANSACTION))
                 .refUserId(dto.getRefUserId())
                 .customerName(dto.getCustomerName())
                 .goodsId(dto.getGoodsId())
