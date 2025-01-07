@@ -200,7 +200,7 @@ CREATE TABLE `schedules` (
  `mooc_license` VARCHAR(255) NOT NULL,
  `attach_document` VARCHAR(255) COMMENT "Đường dẫn lưu tài liệu bổ sung",
  `departure_time` TIMESTAMP NOT NULL COMMENT "Thời gian khởi hành",
- `arrival_time` TIMESTAMP NOT NULL COMMENT "Thời gian hoàn thành",
+ `arrival_time` TIMESTAMP COMMENT "Thời gian hoàn thành",
  `note` TEXT COMMENT "Ghi chú của mỗi hành trình",
  `type` INT NOT NULL DEFAULT 1 COMMENT "Loại lịch trình: 0 - Chạy nội bộ, 1 - Tính lương",
  `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành",
@@ -406,6 +406,7 @@ BEGIN
 							WHEN NEW.status IN (-1, 2) THEN 1
 							WHEN NEW.status = 1 THEN 0
                         END;
+		-- Cập nhật trạng thái xe
 		UPDATE `trucks` SET `status` = newStatus WHERE `license_plate` = OLD.truck_license OR `license_plate` = OLD.mooc_license;
 	END IF;
 END;//

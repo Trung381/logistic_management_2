@@ -55,9 +55,6 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             if (scheduleDTO.getDepartureTime() == null) {
                 throw new InvalidParameterException("Thời gian lấy hàng không được để trống!");
             }
-            if (scheduleDTO.getArrivalTime() == null) {
-                throw new InvalidParameterException("Thời gian giao hàng không được để trống!");
-            }
         }
         if (truckRepo.getTruckByLicensePlate(scheduleDTO.getTruckLicense()).isEmpty()) {
             throw new InvalidParameterException("Xe tải có biển số " + scheduleDTO.getTruckLicense() + " không tồn tại!");

@@ -171,7 +171,8 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
                 .and(schedule.deleted.eq(false));
         return query.update(schedule)
                 .where(builder)
-                .set(schedule.status, 2) //đã hoàn thành:
+                .set(schedule.status, 2) //đã hoàn thành
+                .set(schedule.arrivalTime, new java.util.Date())
                 .execute();
     }
 

@@ -46,7 +46,6 @@ public class ScheduleDTO {
     @ExportColumn(name = "Ngày lấy hàng")
     private Date departureTime;
 
-//    @NotNull(message = "Thời gian giao hàng không được để trống!")
     @ExportColumn(name = "Ngày giao hàng")
     private Date arrivalTime;
 

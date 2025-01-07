@@ -22,7 +22,6 @@ public class ScheduleMapper {
                 .moocLicense(dto.getMoocLicense())
                 .attachDocument(dto.getAttachDocument())
                 .departureTime(dto.getDepartureTime())
-                .arrivalTime(dto.getDepartureTime())
                 .note(dto.getNote())
                 .type(dto.getType())
                 .status(0)
