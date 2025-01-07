@@ -31,6 +31,7 @@ public class ScheduleController {
 
     @GetMapping()
     public ResponseEntity<Object> getSchedule(
+            @RequestParam int page,
             @RequestParam(required = false) String driverId,
             @RequestParam(required = false) String truckLicense,
             @RequestParam(required = false) String fromDate,
@@ -39,7 +40,7 @@ public class ScheduleController {
         Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
 
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.getAll(driverId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
+                BaseResponse.ok(scheduleService.getAll(page, driverId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
         );
     }
 
@@ -135,7 +136,6 @@ public class ScheduleController {
                     .body(inputStreamResource);
         } else {
             throw new Exception("No data");
-
         }
     }
 

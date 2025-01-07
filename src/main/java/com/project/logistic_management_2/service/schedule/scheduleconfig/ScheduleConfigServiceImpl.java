@@ -27,6 +27,15 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
     private final PermissionType type = PermissionType.CONFIGS;
 
     @Override
+    public List<ScheduleConfigDTO> getAll(int page) {
+        checkPermission(type, PermissionKey.VIEW);
+        if (page <= 0) {
+            throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
+        }
+        return scheduleConfigRepo.getAll(page);
+    }
+
+    @Override
     public List<ScheduleConfigDTO> getAll() {
         checkPermission(type, PermissionKey.VIEW);
         return scheduleConfigRepo.getAll();
@@ -80,7 +89,6 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
 
         List<ScheduleConfig> scheduleConfig = scheduleConfigMapper.toScheduleConfigList(scheduleConfigDTOList);
 
-        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return scheduleConfigRepo.saveAll(scheduleConfig);
     }
 }

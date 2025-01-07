@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface ScheduleConfigService {
+    List<ScheduleConfigDTO> getAll(int page);
     List<ScheduleConfigDTO> getAll();
     ScheduleConfigDTO getByID(String id);
     ScheduleConfigDTO create(ScheduleConfigDTO dto);

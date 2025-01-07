@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ScheduleConfigRepoCustom {
+    List<ScheduleConfigDTO> getAll(int page);
     List<ScheduleConfigDTO> getAll();
     Optional<ScheduleConfig> getByID(String id);
     long delete(String id);

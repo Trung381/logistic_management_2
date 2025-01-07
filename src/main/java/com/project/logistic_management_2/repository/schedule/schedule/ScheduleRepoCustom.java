@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ScheduleRepoCustom {
+    List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate);
     List<ScheduleDTO> getAll(String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate);
     List<ScheduleDTO> getByFilter(String license, YearMonth period);
     Optional<ScheduleDTO> getByID(String id);

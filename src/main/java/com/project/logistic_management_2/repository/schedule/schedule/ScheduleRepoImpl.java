@@ -2,6 +2,7 @@ package com.project.logistic_management_2.repository.schedule.schedule;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
+import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -62,6 +63,41 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     }
 
     @Override
+    public List<ScheduleDTO> getAll(int page, String driverid, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(schedule.deleted.eq(false));
+
+        if (driverid != null && !driverid.isBlank()) {
+            builder.and(user.id.eq(driverid));
+        }
+
+        if (truckLicense != null && !truckLicense.isBlank()) {
+            builder.and(schedule.truckLicense.eq(truckLicense));
+        }
+
+        if (fromDate != null && toDate != null) {
+            builder.and(schedule.createdAt.between(fromDate, toDate));
+        } else if (fromDate != null) {
+            builder.and(schedule.createdAt.goe(fromDate));
+        } else if (toDate != null) {
+            builder.and(schedule.createdAt.loe(toDate));
+        }
+
+        long offset = (long) (page - 1) * Pagination.TEN.getSize();
+
+        return query.from(schedule)
+                .innerJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
+                .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
+                .innerJoin(user).on(truck.driverId.eq(user.id))
+                .where(builder)
+                .select(scheduleProjection())
+                .orderBy(schedule.updatedAt.desc())
+                .offset(offset)
+                .limit(Pagination.TEN.getSize())
+                .fetch();
+    }
+
+    @Override
     public List<ScheduleDTO> getAll(String driverid, String truckLicense, Timestamp fromDate, Timestamp toDate) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(schedule.deleted.eq(false));
@@ -70,7 +106,6 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
             builder.and(user.id.eq(driverid));
         }
 
-        //Tìm theo biển số xe nếu tham số truckLicense hợp lệ
         if (truckLicense != null && !truckLicense.isBlank()) {
             builder.and(schedule.truckLicense.eq(truckLicense));
         }

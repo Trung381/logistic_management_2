@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public interface ScheduleService {
+    List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate);
     List<ScheduleDTO> getAll(String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate);
     ScheduleDTO getByID(String id);
     ScheduleDTO create(ScheduleDTO dto);

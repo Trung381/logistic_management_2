@@ -58,35 +58,27 @@ public class ScheduleMapper {
     public void updateSchedule(Schedule schedule, ScheduleDTO dto) {
         if (dto == null) return;
 
-        // update schedule config
         if (dto.getScheduleConfigId() != null)
             schedule.setScheduleConfigId(dto.getScheduleConfigId());
 
-        //update truck
         if (dto.getTruckLicense() != null)
             schedule.setTruckLicense(dto.getTruckLicense());
 
-        // update mooc
         if (dto.getMoocLicense() != null)
             schedule.setMoocLicense(dto.getMoocLicense());
 
-        // update attach doc
         if (dto.getAttachDocument() != null)
             schedule.setAttachDocument(dto.getAttachDocument());
 
-        //update departure time
         if (dto.getDepartureTime() != null)
             schedule.setDepartureTime(dto.getDepartureTime());
 
-        //update arrival time
         if (dto.getArrivalTime() != null)
             schedule.setArrivalTime(dto.getArrivalTime());
 
-        //Update note
         if (dto.getNote() != null)
             schedule.setNote(dto.getNote());
 
-        //Update type
         if (dto.getType() != null)
             schedule.setType(dto.getType());
 

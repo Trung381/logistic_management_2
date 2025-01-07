@@ -56,7 +56,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
                 throw new InvalidParameterException("Thời gian lấy hàng không được để trống!");
             } else {
                 if (scheduleDTO.getDepartureTime().before(new Date())) {
-                    throw new InvalidParameterException("Thời gian lấy hàng không hợp lệ. Thời gian chỉ được tính sau thời điểm lịch trình được tạo!");
+                    throw new InvalidParameterException("Thời gian khởi hành không hợp lệ. Thời gian chỉ được tính sau thời điểm lịch trình được tạo!");
                 }
             }
         }
@@ -66,6 +66,15 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         if (truckRepo.getTruckByLicensePlate(scheduleDTO.getMoocLicense()).isEmpty()) {
             throw new InvalidParameterException("Rơ-mooc có biển số " + scheduleDTO.getMoocLicense() + " không tồn tại!");
         }
+    }
+
+    @Override
+    public List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+        checkPermission(type, PermissionKey.VIEW);
+        if (page <= 0) {
+            throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
+        }
+        return scheduleRepo.getAll(page, driverId, truckLicense, fromDate, toDate);
     }
 
     @Override
@@ -89,8 +98,6 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     public ScheduleDTO create(ScheduleDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
         validateDTO(dto);
-        //Cập nhật trạng thái xe
-        //đầu xe + mooc
 
         Schedule schedule = scheduleMapper.toSchedule(dto);
         scheduleRepo.save(schedule);
@@ -115,9 +122,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             throw new ConflictException("Lịch trình đã hết thời gian được phép chỉnh sửa!");
         }
 
-        // Update object
         scheduleMapper.updateSchedule(schedule, dto);
-        // Save to DB
         scheduleRepo.save(schedule);
 
         Optional<ScheduleDTO> res = scheduleRepo.getByID(id);
@@ -136,10 +141,6 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     @Override
     public long approveByID(String id) {
         checkPermission(type, PermissionKey.APPROVE);
-        // Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
-//        if (scheduleRepo.countByID(id) == 0) {
-//            throw new NotFoundException("Lịch trình cần duyệt không tồn tại!");
-//        }
 
         Optional<Integer> status = scheduleRepo.getStatusByID(id);
         if (status.isEmpty()) {
@@ -160,14 +161,13 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             throw new NotFoundException("Lịch trình không tồn tại!");
         }
         switch (status.get()) {
-            case 0, -1 -> throw new ConflictException("Lịch trình chưa/không được duyệt để di chuyển!"); //Lịch trình chưa/không được duyệt
+            case 0, -1 -> throw new ConflictException("Lịch trình chưa/không được duyệt để di chuyển!");
             case 2 -> { return 2; } //Đã duyệt
         }
 
         return scheduleRepo.markComplete(id);
     }
 
-    //Báo cáo lịch trình theo xe: biển số xe, tháng nào
     @Override
     public List<ScheduleDTO> report(String license, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
@@ -178,7 +178,6 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         return scheduleRepo.exportReport(license, periodYM);
     }
 
-    //Xuất lương lịch trình của một tài xế trong một chu kỳ (tháng)
     @Override
     public List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, String period) {
         YearMonth periodYM = parsePeriod(period);
@@ -204,7 +203,6 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
         List<Schedule> schedule = scheduleMapper.toScheduleList(scheduleDTOList);
 
-        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return scheduleRepo.saveAll(schedule);
     }
 }
