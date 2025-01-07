@@ -38,7 +38,6 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     private final ScheduleMapper scheduleMapper;
     private final NotificationService notificationService;
     private final PermissionType type = PermissionType.SCHEDULES;
-    private final Validator validator;
 
     /**
      *
@@ -94,8 +93,6 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
         Schedule schedule = scheduleMapper.toSchedule(dto);
         scheduleRepo.save(schedule);
-        truckRepo.updateStatus(dto.getTruckLicense(), 0);
-        truckRepo.updateStatus(dto.getMoocLicense(), 0);
 
         // Gửi notification qua WebSocket
         String notifyMsg = "Lịch trình mới được khởi tạo cần được phê duyệt lúc " + new Date();
@@ -166,15 +163,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             case 2 -> { return 2; } //Đã duyệt
         }
 
-        long numOfRowUpdated = scheduleRepo.markComplete(id);
-        if (numOfRowUpdated != 0) {
-            Optional<Schedule> schedule = scheduleRepo.findById(id);
-            if (schedule.isEmpty()) return 0;
-
-            truckRepo.updateStatus(schedule.get().getTruckLicense(), 1);
-            truckRepo.updateStatus(schedule.get().getMoocLicense(), 1);
-        }
-        return numOfRowUpdated;
+        return scheduleRepo.markComplete(id);
     }
 
     //Báo cáo lịch trình theo xe: biển số xe, tháng nào
@@ -213,11 +202,6 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         List<ScheduleDTO> scheduleDTOList = ExcelUtils.getImportData(workbook, ImportConfig.scheduleImport);
 
         List<Schedule> schedule = scheduleMapper.toScheduleList(scheduleDTOList);
-
-        for(ScheduleDTO dto : scheduleDTOList) {
-            truckRepo.updateStatus(dto.getTruckLicense(), 0);
-            truckRepo.updateStatus(dto.getMoocLicense(), 0);
-        }
 
         // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return scheduleRepo.saveAll(schedule);
