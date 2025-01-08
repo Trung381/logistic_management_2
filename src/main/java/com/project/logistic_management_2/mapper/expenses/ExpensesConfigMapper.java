@@ -44,8 +44,15 @@ public class ExpensesConfigMapper {
 
     public void updateExpensesConfig(ExpensesConfig config, ExpensesConfigDTO dto) {
         if (dto == null) return;
-        config.setType(dto.getType());
-        config.setNote(dto.getNote());
+
+        //update type
+        if (dto.getType() != null)
+            config.setType(dto.getType());
+
+        //Update note
+        if (dto.getNote() != null)
+            config.setNote(dto.getNote());
+
         config.setUpdatedAt(new Date());
     }
 

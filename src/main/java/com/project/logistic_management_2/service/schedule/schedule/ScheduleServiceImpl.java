@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.service.schedule;
+package com.project.logistic_management_2.service.schedule.schedule;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
@@ -9,7 +9,7 @@ import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.schedule.ScheduleMapper;
-import com.project.logistic_management_2.repository.schedule.ScheduleRepo;
+import com.project.logistic_management_2.repository.schedule.schedule.ScheduleRepo;
 import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.notification.NotificationService;
@@ -27,6 +27,7 @@ import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -106,33 +107,30 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     @Override
     public ScheduleDTO update(String id, ScheduleDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
-        validateDTO(dto);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
 
-        ScheduleDTO scheduleDTO = scheduleRepo.getByID(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin lịch trình!"));
+        Schedule schedule = scheduleRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Lịch trình cần cập nhật không tồn tại!"));
 
         //Chỉ sửa được trước ngày bắt đầu (departure time) hoặc chưa duyệt
         Date currentTime = new Date(System.currentTimeMillis());
-        if (scheduleDTO.getStatus() != 0 || (scheduleDTO.getDepartureTime() != null && scheduleDTO.getDepartureTime().before(currentTime))) {
-            throw new ConflictException("Lịch trình này không thể chỉnh sửa!");
+        if (schedule.getStatus() != 0 || (schedule.getDepartureTime() != null && schedule.getDepartureTime().before(currentTime))) {
+            throw new ConflictException("Lịch trình đã hết thời gian được phép chỉnh sửa!");
         }
 
-        Schedule schedule = scheduleMapper.toSchedule(scheduleDTO);
-        scheduleMapper.updateSchedule(id, schedule, dto);
-
+        // Update object
+        scheduleMapper.updateSchedule(schedule, dto);
+        // Save to DB
         scheduleRepo.save(schedule);
 
-        return scheduleRepo.getByID(schedule.getId()).get();
+        Optional<ScheduleDTO> res = scheduleRepo.getByID(id);
+        return res.orElse(null);
     }
 
     @Override
     public long deleteByID(String id) {
         checkPermission(type, PermissionKey.DELETE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
+        if (scheduleRepo.countByID(id) == 0) {
+            throw new NotFoundException("Lịch trình cần duyệt không tồn tại hoặc đã được xóa trước đó!");
         }
         return scheduleRepo.delete(id);
     }
@@ -140,25 +138,43 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     @Override
     public long approveByID(String id) {
         checkPermission(type, PermissionKey.APPROVE);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
+        // Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
+//        if (scheduleRepo.countByID(id) == 0) {
+//            throw new NotFoundException("Lịch trình cần duyệt không tồn tại!");
+//        }
+
+        Optional<Integer> status = scheduleRepo.getStatusByID(id);
+        if (status.isEmpty()) {
+            throw new NotFoundException("Lịch trình cần duyệt không tồn tại!");
+        } else if (status.get() != 0) {
+            return -1; //Thông báo đã duyệt
         }
+
         return scheduleRepo.approve(id);
     }
 
     @Override
     @Transactional
     public long markComplete(String id) {
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
+        //-1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
+        Optional<Integer> status = scheduleRepo.getStatusByID(id);
+        if (status.isEmpty()) {
+            throw new NotFoundException("Lịch trình không tồn tại!");
         }
-        long res = scheduleRepo.markComplete(id);
-        if (res != 0) {
-            Schedule schedule = scheduleRepo.findById(id).get();
-            truckRepo.updateStatus(schedule.getTruckLicense(), 1);
-            truckRepo.updateStatus(schedule.getMoocLicense(), 1);
+        switch (status.get()) {
+            case 0, -1 -> throw new ConflictException("Lịch trình chưa/không được duyệt để di chuyển!"); //Lịch trình chưa/không được duyệt
+            case 2 -> { return 2; } //Đã duyệt
         }
-        return res;
+
+        long numOfRowUpdated = scheduleRepo.markComplete(id);
+        if (numOfRowUpdated != 0) {
+            Optional<Schedule> schedule = scheduleRepo.findById(id);
+            if (schedule.isEmpty()) return 0;
+
+            truckRepo.updateStatus(schedule.get().getTruckLicense(), 1);
+            truckRepo.updateStatus(schedule.get().getMoocLicense(), 1);
+        }
+        return numOfRowUpdated;
     }
 
     //Báo cáo lịch trình theo xe: biển số xe, tháng nào
