@@ -26,7 +26,6 @@ public class TruckMapper {
                 .updatedAt(new Date())
                 .build();
     }
-
     public List<Truck> toTruckList(List<TruckDTO> dtos) {
         if(dtos == null || dtos.isEmpty()) {
             return Collections.emptyList();

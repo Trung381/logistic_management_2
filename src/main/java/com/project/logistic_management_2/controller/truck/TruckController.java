@@ -57,7 +57,7 @@ public class TruckController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> updateTruck(@PathVariable Integer id, @Valid @RequestBody TruckDTO truckDTO) {
+    public ResponseEntity<Object> updateTruck(@PathVariable Integer id,  @RequestBody TruckDTO truckDTO) {
         return ResponseEntity.ok(
                 BaseResponse.ok(truckService.updateTruck(id, truckDTO))
         );

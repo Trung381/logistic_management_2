@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -78,29 +79,46 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
 //        return repository.getTruckById(id).get();
 //    }
 
+@Override
+public TruckDTO updateTruck(Integer id, TruckDTO dto) {
+    checkPermission(type, PermissionKey.WRITE);
 
-    @Override
-    public TruckDTO updateTruck(Integer id, TruckDTO dto) {
-        checkPermission(type, PermissionKey.WRITE);
-        // Lấy thông tin xe hiện tại
-        Truck existingTruck = mapper.toTruck(repository.getTruckById(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe cần tìm!")));
-        // Chỉ cập nhật những trường có trên body (không null)
-        if (dto.getLicensePlate() != null) {
-            existingTruck.setLicensePlate(dto.getLicensePlate());
-        }
-        if (dto.getType() != null) {
-            existingTruck.setType(dto.getType());
-        }
-        if (dto.getCapacity() != null) {
-            existingTruck.setCapacity(dto.getCapacity());
-        }
-        if (dto.getStatus() != null) {
-            existingTruck.setStatus(dto.getStatus());
-        }
-        repository.save(existingTruck);
-        return mapper.toTruckDTO(existingTruck);
+    // Lấy thông tin xe hiện tại
+    Truck existingTruck = mapper.toTruck(repository.getTruckById(id)
+            .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe cần tìm!")));
+    // Cập nhật các trường từ body (chỉ cập nhật nếu không null)
+    if (dto.getDriverId() != null) {
+        existingTruck.setDriverId(dto.getDriverId());
     }
+    if (dto.getLicensePlate() != null) {
+        // Kiểm tra xem license_plate có bị trùng không
+        if (repository.existsByLicensePlate(dto.getLicensePlate()) &&
+                !existingTruck.getLicensePlate().equals(dto.getLicensePlate())) {
+            throw new IllegalArgumentException("Biển số xe đã tồn tại!");
+        }
+        existingTruck.setLicensePlate(dto.getLicensePlate());
+    }
+    if (dto.getCapacity() != null) {
+        existingTruck.setCapacity(dto.getCapacity());
+    }
+    if (dto.getNote() != null) {
+        existingTruck.setNote(dto.getNote());
+    }
+    if (dto.getType() != null) {
+        existingTruck.setType(dto.getType());
+    }
+    if (dto.getStatus() != null) {
+        existingTruck.setStatus(dto.getStatus());
+    }
+
+    // Cập nhật timestamp
+    existingTruck.setUpdatedAt(new Date());
+
+    // Lưu lại thông tin
+    repository.save(existingTruck);
+    //TruckDTO truckDTO = mapper.toTruckDTO(existingTruck);
+    return mapper.toTruckDTO(existingTruck);
+}
 
 
     @Override
