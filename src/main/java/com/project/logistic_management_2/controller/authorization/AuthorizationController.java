@@ -3,8 +3,8 @@ package com.project.logistic_management_2.controller.authorization;
 
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.rolepermission.UpdateRolePermissionRequest;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.service.RolePermisson.RolePermissionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

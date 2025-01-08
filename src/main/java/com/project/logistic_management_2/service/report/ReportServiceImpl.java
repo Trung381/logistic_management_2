@@ -2,8 +2,8 @@ package com.project.logistic_management_2.service.report;
 
 import com.project.logistic_management_2.dto.report.ReportDetailSalaryDTO;
 import com.project.logistic_management_2.dto.report.SummarySalaryDTO;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.repository.report.ReportRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.schedule.schedule.ScheduleService;

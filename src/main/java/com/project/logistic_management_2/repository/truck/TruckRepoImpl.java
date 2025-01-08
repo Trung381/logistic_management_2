@@ -107,23 +107,6 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
                 .execute();
     }
 
-    @Override
-    @Modifying
-    @Transactional
-    public long updateStatus(@NotNull String license, int status) {
-        if (status < -1 || status > 1) {
-            return 0;
-        }
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(truck.licensePlate.eq(license))
-                .and(truck.deleted.eq(false));
-
-        return query.update(truck)
-                .where(builder)
-                .set(truck.status, status)
-                .execute();
-    }
-
     public List<TruckDTO> getTrucksByType(Integer type) {
         // Tạo một BooleanBuilder để xây dựng các điều kiện lọc trong truy vấn
         BooleanBuilder builder = new BooleanBuilder();
