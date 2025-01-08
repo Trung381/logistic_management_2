@@ -4,6 +4,7 @@ import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
+import com.project.logistic_management_2.exception.def.InvalidFieldException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -60,23 +61,33 @@ public class ExpensesMapper {
      */
     public void updateExpenses(Expenses expenses, ExpensesDTO dto) {
         if (dto == null) return;
+        boolean isUpdated = false;
 
-        // Update schedule
-        if (dto.getScheduleId() != null)
+        if (dto.getScheduleId() != null) {
             expenses.setScheduleId(dto.getScheduleId());
-        // Update expenses config
-        if (dto.getExpensesConfigId() != null)
+            isUpdated = true;
+        }
+        if (dto.getExpensesConfigId() != null) {
             expenses.setExpensesConfigId(dto.getExpensesConfigId());
-        // Update amount
-        if (dto.getAmount() != null)
+            isUpdated = true;
+        }
+        if (dto.getAmount() != null) {
             expenses.setAmount(dto.getAmount());
-        // Update note
-        if (dto.getNote() != null)
+            isUpdated = true;
+        }
+        if (dto.getNote() != null) {
             expenses.setNote(dto.getNote());
-        // Update references image
-        if (dto.getImgPath() != null)
+            isUpdated = true;
+        }
+        if (dto.getImgPath() != null) {
             expenses.setImgPath(dto.getImgPath());
-        // Update last modified
-        expenses.setUpdatedAt(new Date());
+            isUpdated = true;
+        }
+
+        if (isUpdated) {
+            expenses.setUpdatedAt(new Date());
+        } else {
+            throw new InvalidFieldException("Trường cần cần cập nhật không tồn tại!");
+        }
     }
 }

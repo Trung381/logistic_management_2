@@ -26,11 +26,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.rmi.ServerException;
 import java.sql.Timestamp;
-import java.time.YearMonth;
-import java.util.Date;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +52,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             if (scheduleDTO.getDepartureTime() == null) {
                 throw new InvalidParameterException("Thời gian lấy hàng không được để trống!");
             } else {
-                if (scheduleDTO.getDepartureTime().before(new Date())) {
+                if (scheduleDTO.getDepartureTime().before(new java.util.Date())) {
                     throw new InvalidParameterException("Thời gian khởi hành không hợp lệ. Thời gian chỉ được tính sau thời điểm lịch trình được tạo!");
                 }
             }
@@ -98,7 +98,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         scheduleRepo.save(schedule);
 
         // Gửi notification qua WebSocket
-        String notifyMsg = "Lịch trình mới được khởi tạo cần được phê duyệt lúc " + new Date();
+        String notifyMsg = "Lịch trình mới được khởi tạo cần được phê duyệt lúc " + new java.util.Date();
         notificationService.sendNotification("{\"message\":\"" + notifyMsg + "\"}");
 
         return scheduleRepo.getByID(schedule.getId()).get();
@@ -178,27 +178,28 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     }
 
     @Override
-    public List<ScheduleDTO> report(String license, String period) {
+    public List<ScheduleDTO> report(String license, int year, int month) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        YearMonth periodYM = parsePeriod(period);
-
-        //Báo cáo theo fe (Có cột số chuyến phát sinh)
-        return scheduleRepo.exportReport(license, periodYM);
+        Date fromDate = convertToDate(year, month);
+        Date toDate = convertToDate(year, (month % 12) + 1);
+        return scheduleRepo.exportReport(license, fromDate, toDate);
     }
 
     @Override
-    public List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, String period) {
-        YearMonth periodYM = parsePeriod(period);
-        return scheduleRepo.exportScheduleSalary(driverId, periodYM);
+    public List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, int year, int month) {
+        checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
+        Date fromDate = convertToDate(year, month);
+        Date toDate = convertToDate(year, (month % 12) + 1);
+        return scheduleRepo.exportScheduleSalary(driverId, fromDate, toDate);
     }
 
-    private YearMonth parsePeriod(String period) {
-        //Check định dạng: yyyy-MM
-        String regex = "^(\\d{4}-(0[1-9]|1[0-2]))$";
-        if (!Pattern.matches(regex, period)) {
-            throw new InvalidParameterException("Định dạng chu kỳ không hợp lệ! Dạng đúng: yyyy-MM");
+    private Date convertToDate(int year, int month) {
+        try {
+            LocalDate localDate = LocalDate.of(year, month, 1);
+            return Date.valueOf(localDate);
+        } catch (DateTimeException ex) {
+            throw new InvalidParameterException("Chu kỳ đã chọn không hợp lệ!");
         }
-        return YearMonth.parse(period);
     }
 
     @Override

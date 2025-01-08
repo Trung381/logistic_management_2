@@ -93,17 +93,17 @@ public class ScheduleController {
     }
 
     @GetMapping("/reports")
-    public ResponseEntity<Object> exportReport(@RequestParam String license, @RequestParam String period) {
+    public ResponseEntity<Object> exportReport(@RequestParam String license, @RequestParam int year, @RequestParam int month) {
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.report(license, period))
+                BaseResponse.ok(scheduleService.report(license, year, month))
         );
     }
 
     //Xuất lương lịch trình của một tài xế trong 1 chu kỳ
     @GetMapping("/reports/salary")
-    public ResponseEntity<Object> exportScheduleSalary(@RequestParam String driverId, @RequestParam String period) {
+    public ResponseEntity<Object> exportScheduleSalary(@RequestParam String driverId, @RequestParam int year, @RequestParam int month) {
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.exportScheduleSalary(driverId, period))
+                BaseResponse.ok(scheduleService.exportScheduleSalary(driverId, year, month))
         );
     }
 

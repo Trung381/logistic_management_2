@@ -18,8 +18,8 @@ public interface ScheduleService {
     long deleteByID(String id) throws ServerException;
     long approveByID(String id) throws ServerException;
     long markComplete(String id) throws ServerException;
-    List<ScheduleDTO> report(String license, String period);
-    List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, String period);
+    List<ScheduleDTO> report(String license, int year, int month);
+    List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, int year, int month);
     List<Schedule> importScheduleData(MultipartFile importFile);
 
 }

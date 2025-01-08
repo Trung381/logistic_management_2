@@ -3,6 +3,7 @@ package com.project.logistic_management_2.mapper.expenses;
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.entity.ExpensesConfig;
 import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.exception.def.InvalidFieldException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -44,16 +45,22 @@ public class ExpensesConfigMapper {
 
     public void updateExpensesConfig(ExpensesConfig config, ExpensesConfigDTO dto) {
         if (dto == null) return;
+        boolean isUpdated = false;
 
-        //update type
-        if (dto.getType() != null)
+        if (dto.getType() != null) {
             config.setType(dto.getType());
-
-        //Update note
-        if (dto.getNote() != null)
+            isUpdated = true;
+        }
+        if (dto.getNote() != null) {
             config.setNote(dto.getNote());
+            isUpdated = true;
+        }
 
-        config.setUpdatedAt(new Date());
+        if (isUpdated) {
+            config.setUpdatedAt(new Date());
+        } else {
+            throw new InvalidFieldException("Trường cần cần cập nhật không tồn tại!");
+        }
     }
 
     public ExpensesConfigDTO toExpensesConfigDTO(ExpensesConfigDTO dto, ExpensesConfig config) {
