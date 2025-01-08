@@ -4,6 +4,7 @@ import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 import com.project.logistic_management_2.entity.Expenses;
+import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.def.ConflictException;
@@ -21,6 +22,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.rmi.ServerException;
 import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.Date;
@@ -37,6 +39,14 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     private final PermissionType type = PermissionType.EXPENSES;
 
     @Override
+    public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+        checkPermission(type, PermissionKey.VIEW);
+        if (page <= 0) {
+            throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
+        }
+        return expensesRepo.getAll(page, expensesConfigId, truckLicense, fromDate, toDate);
+    }
+
     public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
         checkPermission(type, PermissionKey.VIEW);
         return expensesRepo.getAll(expensesConfigId, truckLicense, fromDate, toDate);
@@ -45,12 +55,8 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     @Override
     public ExpensesDTO getByID(String id) {
         checkPermission(type, PermissionKey.VIEW);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
-
         return expensesRepo.getByID(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin chi phí!"));
+                .orElseThrow(() -> new NotFoundException("Chi phí không tồn tại!"));
     }
 
     @Override
@@ -69,18 +75,15 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     public ExpensesDTO update(String id, ExpensesDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
 
-        // Return not found message if expenses does not exist
         Expenses expenses = expensesRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Chi phí cần cập nhật không tồn tại!"));
 
-        // approved => error message
-        if (!expensesRepo.checkApproved(id)) {
+        ExpensesStatus status = expensesRepo.getStatusByID(id);
+        if (status == ExpensesStatus.APPROVED) {
             throw new ConflictException("Chi phí đã được duyệt không thể chỉnh sửa!");
         }
 
-        // Update expenses object
         expensesMapper.updateExpenses(expenses, dto);
-        // Save to DB
         expensesRepo.save(expenses);
 
         Optional<ExpensesDTO> res = expensesRepo.getByID(expenses.getId());
@@ -88,27 +91,35 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     }
 
     @Override
-    public long deleteByID(String id) {
+    public long deleteByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.DELETE);
         if (expensesRepo.countByID(id) == 0)
             throw new NotFoundException("Chi phí cần xóa không tồn tại hoặc đã được xóa trước đó!");
 
-        return expensesRepo.delete(id);
+        long numOfRowsDeleted = expensesRepo.delete(id);
+        if (numOfRowsDeleted == 0) {
+            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+        }
+        return numOfRowsDeleted;
     }
 
     @Override
-    public long approveByID(String id) {
+    public long approveByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.APPROVE);
 
-        // does not exist
         if (expensesRepo.countByID(id) == 0)
             throw new NotFoundException("Chi phí cần duyệt không tồn tại!");
 
-        // not approved yet
-        if (!expensesRepo.checkApproved(id))
+        ExpensesStatus status = expensesRepo.getStatusByID(id);
+        if (status == ExpensesStatus.APPROVED) {
             return -1;
+        }
 
-        return expensesRepo.approve(id);
+        long numOfRowsApproved = expensesRepo.approve(id);
+        if (numOfRowsApproved == 0) {
+            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+        }
+        return numOfRowsApproved;
     }
 
     // thees moiws cos chuwcs nanwg bao cao
