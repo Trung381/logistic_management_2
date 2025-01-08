@@ -1,6 +1,6 @@
 # Hướng dẫn tạo docker image : ))
 
-##first note: win chạy cái compose-up bị cmt lại ấy, uncmt đi rồi cmt lại đoạn code ko bị uncmt rồi chạy
+## first note: win chạy cái compose-up bị cmt lại ấy, uncmt đi rồi cmt lại đoạn code ko bị uncmt rồi chạy
 
 ## hehe
 
