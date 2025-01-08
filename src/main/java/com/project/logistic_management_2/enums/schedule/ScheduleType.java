@@ -10,7 +10,6 @@ public enum ScheduleType {
     private final Integer value;
     private final String description;
 
-//    @JsonValue
     public String getNote() {
         return description;
     }

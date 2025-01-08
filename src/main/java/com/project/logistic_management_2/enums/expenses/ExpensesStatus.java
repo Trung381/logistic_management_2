@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.enums.expenses;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 @Getter
@@ -8,6 +9,8 @@ public enum ExpensesStatus {
     APPROVED(1, "Đã duyệt");
 
     private final Integer value;
+
+//    @JsonValue
     private final String description;
 
     ExpensesStatus(int value, String description) {

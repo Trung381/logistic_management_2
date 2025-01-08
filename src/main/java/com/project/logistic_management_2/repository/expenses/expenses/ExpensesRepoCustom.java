@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ExpensesRepoCustom {
+    List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate);
     List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate);
     List<ExpensesIncurredDTO> getByFilter(String driverId, YearMonth period);
     Optional<ExpensesDTO> getByID(String id);

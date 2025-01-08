@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public interface ExpensesService {
+    List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate);
     List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate);
     ExpensesDTO getByID(String id);
     ExpensesDTO create(ExpensesDTO dto);

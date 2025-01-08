@@ -32,6 +32,7 @@ public class ExpensesController {
 
     @GetMapping()
     public ResponseEntity<Object> getExpenses(
+            @RequestParam int page,
             @RequestParam(required = false) String expensesConfigId,
             @RequestParam(required = false) String truckLicense,
             @RequestParam(required = false) String fromDate,
@@ -40,7 +41,7 @@ public class ExpensesController {
         Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
 
         return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.getAll(expensesConfigId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
+                BaseResponse.ok(expensesService.getAll(page, expensesConfigId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
         );
     }
 

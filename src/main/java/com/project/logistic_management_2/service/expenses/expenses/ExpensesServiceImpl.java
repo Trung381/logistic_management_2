@@ -37,6 +37,14 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     private final PermissionType type = PermissionType.EXPENSES;
 
     @Override
+    public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+        checkPermission(type, PermissionKey.VIEW);
+        if (page <= 0) {
+            throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
+        }
+        return expensesRepo.getAll(page, expensesConfigId, truckLicense, fromDate, toDate);
+    }
+
     public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
         checkPermission(type, PermissionKey.VIEW);
         return expensesRepo.getAll(expensesConfigId, truckLicense, fromDate, toDate);

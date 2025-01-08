@@ -9,6 +9,7 @@ import static com.project.logistic_management_2.entity.QTruck.truck;
 import static com.project.logistic_management_2.entity.QUser.user;
 import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseAdvances;
 
+import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -49,6 +50,40 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 expenses.createdAt.as("createdAt"),
                 expenses.updatedAt.as("updatedAt")
         );
+    }
+
+    @Override
+    public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(expenses.deleted.eq(false));
+
+        if (expensesConfigId != null) {
+            builder.and(expenses.expensesConfigId.eq(expensesConfigId));
+        }
+
+        if (truckLicense != null && !truckLicense.isBlank()) {
+            builder.and(schedule.truckLicense.eq(truckLicense));
+        }
+
+        if (fromDate != null && toDate != null) {
+            builder.and(expenses.createdAt.between(fromDate, toDate));
+        } else if (fromDate != null) {
+            builder.and(expenses.createdAt.goe(fromDate));
+        } else if (toDate != null) {
+            builder.and(expenses.createdAt.loe(toDate));
+        }
+
+        long offset = (long) (page - 1) * Pagination.TEN.getSize();
+
+        return query.from(expenses)
+                .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
+                .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
+                .innerJoin(user).on(truck.driverId.eq(user.id))
+                .where(builder)
+                .select(expensesProjection())
+                .offset(offset)
+                .limit(Pagination.TEN.getSize())
+                .fetch();
     }
 
     @Override
