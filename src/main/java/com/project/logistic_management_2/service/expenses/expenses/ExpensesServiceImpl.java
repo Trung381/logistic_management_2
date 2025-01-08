@@ -47,6 +47,7 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
         return expensesRepo.getAll(page, expensesConfigId, truckLicense, fromDate, toDate);
     }
 
+    @Override
     public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
         checkPermission(type, PermissionKey.VIEW);
         return expensesRepo.getAll(expensesConfigId, truckLicense, fromDate, toDate);
