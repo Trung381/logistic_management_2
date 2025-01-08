@@ -14,5 +14,4 @@ public interface ScheduleConfigService {
     ScheduleConfigDTO update(String id, ScheduleConfigDTO dto);
     long deleteByID(String id);
     List<ScheduleConfig> importScheduleConfigData(MultipartFile importFile);
-
 }

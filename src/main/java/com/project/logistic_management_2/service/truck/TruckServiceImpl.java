@@ -2,10 +2,9 @@ package com.project.logistic_management_2.service.truck;
 
 import com.project.logistic_management_2.dto.truck.TruckDTO;
 import com.project.logistic_management_2.entity.Truck;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.def.ConflictException;
-import com.project.logistic_management_2.exception.def.ForbiddenException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.truck.TruckMapper;
 import com.project.logistic_management_2.repository.truck.TruckRepo;

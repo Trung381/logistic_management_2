@@ -3,6 +3,8 @@ package com.project.logistic_management_2.mapper.schedule;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
+import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -23,8 +25,8 @@ public class ScheduleMapper {
                 .attachDocument(dto.getAttachDocument())
                 .departureTime(dto.getDepartureTime())
                 .note(dto.getNote())
-                .type(dto.getType())
-                .status(0)
+                .type(dto.getType().getValue())
+                .status(ScheduleStatus.WAITING_FOR_APPROVAL.getValue())
                 .deleted(false)
                 .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                 .updatedAt(new Date())
@@ -46,8 +48,8 @@ public class ScheduleMapper {
                         .departureTime(dto.getDepartureTime())
                         .arrivalTime(dto.getDepartureTime())
                         .note(dto.getNote())
-                        .type(dto.getType())
-                        .status(0)
+                        .type(dto.getType().getValue())
+                        .status(ScheduleStatus.WAITING_FOR_APPROVAL.getValue())
                         .deleted(false)
                         .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                         .updatedAt(new Date())
@@ -80,7 +82,7 @@ public class ScheduleMapper {
             schedule.setNote(dto.getNote());
 
         if (dto.getType() != null)
-            schedule.setType(dto.getType());
+            schedule.setType(dto.getType().getValue());
 
         schedule.setUpdatedAt(new Date());
     }

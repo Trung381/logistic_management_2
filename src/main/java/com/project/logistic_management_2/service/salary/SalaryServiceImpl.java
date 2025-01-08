@@ -2,10 +2,8 @@ package com.project.logistic_management_2.service.salary;
 
 import com.project.logistic_management_2.dto.salary.SalaryUserDTO;
 import com.project.logistic_management_2.dto.salary.UpdateSalaryDTO;
-import com.project.logistic_management_2.entity.Salary;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
-import com.project.logistic_management_2.repository.report.ReportRepo;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.repository.salary.SalaryRepo;
 import com.project.logistic_management_2.service.BaseService;
 import lombok.RequiredArgsConstructor;

@@ -2,8 +2,8 @@ package com.project.logistic_management_2.service.schedule.scheduleconfig;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import com.project.logistic_management_2.entity.ScheduleConfig;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.schedule.ScheduleConfigMapper;

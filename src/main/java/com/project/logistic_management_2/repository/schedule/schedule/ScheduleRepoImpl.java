@@ -3,6 +3,7 @@ package com.project.logistic_management_2.repository.schedule.schedule;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.enums.Pagination;
+import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -297,17 +298,15 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     }
 
     @Override
-    public Optional<Integer> getStatusByID(String id) {
+    public ScheduleStatus getStatusByID(String id) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(schedule.id.eq(id))
                 .and(schedule.deleted.eq(false));
 
-        //-1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
-        return Optional.ofNullable(
-                query.from(schedule)
-                        .where(builder)
-                        .select(schedule.status)
-                        .fetchOne()
-        );
+        Integer statusNumber = query.from(schedule)
+                .where(builder)
+                .select(schedule.status)
+                .fetchOne();
+        return statusNumber != null ? ScheduleStatus.valueOf(statusNumber) : null;
     }
 }
