@@ -8,7 +8,7 @@ services:
     networks:
       - spring-boot-network
     environment:
-      MYSQL_ROOT_PASSWORD:
+      MYSQL_ROOT_PASSWORD: ""
     volumes:
       - mysql-data:/var/lib/mysql
   app:
@@ -23,10 +23,10 @@ services:
       - spring-boot-network
     environment:
       SECRET_KEY: "404E635266556A586e3272357538782F413F4428472B4B6250645367566b5970"
-      UPLOAD_DIR: C:/Users/giang/intellij-workspace/Logistic_Management_2/src/main/resources/uploads
-      DB_URL: jdbc:mysql://mysql:3306/logistic_management?createDatabaseIfNotExist=true
+      UPLOAD_DIR: /usr/app/uploads
+      DB_URL: jdbc:mysql://mysql:3306/logistic_management_2?createDatabaseIfNotExist=true
       DB_USERNAME: root
-      DB_PASSWORD:
+      DB_PASSWORD: ""
     depends_on:
       - mysql
 networks:

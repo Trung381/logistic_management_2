@@ -1,7 +1,6 @@
 package com.project.logistic_management_2.controller.warehouses;
 
 import com.project.logistic_management_2.dto.BaseResponse;
-import com.project.logistic_management_2.dto.request.GoodsDTO;
 import com.project.logistic_management_2.dto.request.WarehousesDTO;
 import com.project.logistic_management_2.service.warehouses.WarehousesService;
 import com.project.logistic_management_2.utils.ExcelUtils;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.ByteArrayInputStream;
