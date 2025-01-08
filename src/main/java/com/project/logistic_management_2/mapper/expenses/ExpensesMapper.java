@@ -3,6 +3,7 @@ package com.project.logistic_management_2.mapper.expenses;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +24,7 @@ public class ExpensesMapper {
                 .amount(dto.getAmount())
                 .note(dto.getNote())
                 .imgPath(dto.getImgPath())
-                .status(0)
+                .status(ExpensesStatus.WAITING_FOR_APPROVAL.getValue())
                 .deleted(false)
                 .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                 .updatedAt(new Date())
@@ -43,7 +44,7 @@ public class ExpensesMapper {
                         .amount(dto.getAmount())
                         .note(dto.getNote())
                         .imgPath(dto.getImgPath())
-                        .status(0)
+                        .status(ExpensesStatus.WAITING_FOR_APPROVAL.getValue())
                         .deleted(false)
                         .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                         .updatedAt(new Date())
