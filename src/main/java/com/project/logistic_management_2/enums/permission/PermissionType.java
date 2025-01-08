@@ -16,7 +16,6 @@ public enum PermissionType {
     WAREHOUSES("Quản lý kho", "WAREHOUSES"),
     GOODS("Quản lý hàng hóa", "GOODS"),
     TRANSACTION("Quản lý giao dịch", "TRANSACTION");
-    ;
 
     private final String title;
     private final String name;

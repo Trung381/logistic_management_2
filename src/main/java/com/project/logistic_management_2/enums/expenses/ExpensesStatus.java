@@ -9,8 +9,6 @@ public enum ExpensesStatus {
     APPROVED(1, "Đã duyệt");
 
     private final Integer value;
-
-//    @JsonValue
     private final String description;
 
     ExpensesStatus(int value, String description) {

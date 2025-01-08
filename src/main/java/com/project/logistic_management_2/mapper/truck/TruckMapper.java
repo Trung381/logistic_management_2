@@ -2,6 +2,8 @@ package com.project.logistic_management_2.mapper.truck;
 
 import com.project.logistic_management_2.dto.truck.TruckDTO;
 import com.project.logistic_management_2.entity.Truck;
+import com.project.logistic_management_2.enums.truck.TruckStatus;
+import com.project.logistic_management_2.enums.truck.TruckType;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -18,9 +20,9 @@ public class TruckMapper {
                 .driverId(truckDTO.getDriverId())
                 .licensePlate(truckDTO.getLicensePlate())
                 .capacity(truckDTO.getCapacity())
-                .type(truckDTO.getType())
+                .type(truckDTO.getType().getValue())
                 .note(truckDTO.getNote())
-                .status(1)
+                .status(TruckStatus.AVAILABLE.getValue())
                 .deleted(false)
                 .createdAt(new Date())
                 .updatedAt(new Date())
@@ -38,9 +40,9 @@ public class TruckMapper {
                         .driverId(truckDTO.getDriverId())
                         .licensePlate(truckDTO.getLicensePlate())
                         .capacity(truckDTO.getCapacity())
-                        .type(truckDTO.getType())
+                        .type(truckDTO.getType().getValue())
                         .note(truckDTO.getNote())
-                        .status(1)
+                        .status(TruckStatus.AVAILABLE.getValue())
                         .deleted(false)
                         .createdAt(new Date())
                         .updatedAt(new Date())
@@ -53,7 +55,7 @@ public class TruckMapper {
         truck.setLicensePlate(truckDTO.getLicensePlate());
         truck.setCapacity(truckDTO.getCapacity());
         truck.setNote(truckDTO.getNote());
-        truck.setType(truckDTO.getType());
+        truck.setType(truckDTO.getType().getValue());
         truck.setStatus(truck.getStatus());
         truck.setUpdatedAt(new Date());
     }
@@ -65,9 +67,9 @@ public class TruckMapper {
         truckDTO.setDriverId(truck.getDriverId());
         truckDTO.setLicensePlate(truck.getLicensePlate());
         truckDTO.setCapacity(truck.getCapacity());
-        truckDTO.setType(truck.getType());
+        truckDTO.setType(TruckType.valueOf(truck.getType()));
         truckDTO.setNote(truck.getNote());
-        truckDTO.setStatus(truck.getStatus());
+        truckDTO.setStatus(TruckStatus.valueOf(truck.getStatus()));
         truckDTO.setCreatedAt(truck.getCreatedAt());
         truckDTO.setUpdatedAt(truck.getUpdatedAt());
         return truckDTO;
