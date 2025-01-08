@@ -33,8 +33,8 @@ public class TruckDTO {
     private String driverName;
 
     @NotNull(message = "Loại xe không được để trống")
-//    @Min(value = 1, message = "Loại xe chỉ có thể là 1 hoặc 2")
-//    @Max(value = 2, message = "Loại xe chỉ có thể là 1 hoặc 2")
+//    @Min(value = 1, message = "Loại xe chỉ có thể là 1 hoặc 0")
+//    @Max(value = 0, message = "Loại xe chỉ có thể là 1 hoặc 0")
     private Integer type; //loai xe: 0 - xe tai, 1 - mooc
     @ExportColumn(name = "Loại")
     private String typeDescription;
