@@ -2,7 +2,8 @@ package com.project.logistic_management_2.controller.schedule;
 
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
-import com.project.logistic_management_2.service.schedule.ScheduleConfigService;
+import com.project.logistic_management_2.repository.schedule.scheduleconfig.ScheduleConfigRepo;
+import com.project.logistic_management_2.service.schedule.scheduleconfig.ScheduleConfigService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
 import jakarta.validation.Valid;
@@ -28,9 +29,9 @@ public class ScheduleConfigController {
     private final ScheduleConfigService scheduleConfigService;
 
     @GetMapping("/configs")
-    public ResponseEntity<Object> getScheduleConfigs() {
+    public ResponseEntity<Object> getScheduleConfigs(@RequestParam int page) {
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleConfigService.getAll())
+                BaseResponse.ok(scheduleConfigService.getAll(page))
         );
     }
 
@@ -50,7 +51,7 @@ public class ScheduleConfigController {
     }
 
     @PostMapping("/configs/update/{id}")
-    public ResponseEntity<Object> updateScheduleConfig(@PathVariable String id, @Valid @RequestBody ScheduleConfigDTO dto) {
+    public ResponseEntity<Object> updateScheduleConfig(@PathVariable String id, @RequestBody ScheduleConfigDTO dto) {
         return ResponseEntity.ok(
                 BaseResponse.ok(scheduleConfigService.update(id, dto))
         );
@@ -58,9 +59,10 @@ public class ScheduleConfigController {
 
     @GetMapping("/configs/delete/{id}")
     public ResponseEntity<Object> deleteScheduleConfigByID(@PathVariable String id) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(scheduleConfigService.deleteByID(id))
-        );
+        long res = scheduleConfigService.deleteByID(id);
+        return res != 0
+                ? ResponseEntity.ok(BaseResponse.ok(res, "Đã xóa thành công " + res + " cấu hình lịch trình"))
+                : new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @GetMapping("/configs/export")

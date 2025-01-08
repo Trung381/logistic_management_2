@@ -1,8 +1,8 @@
 package com.project.logistic_management_2.service;
 
 import com.project.logistic_management_2.entity.User;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.def.ForbiddenException;
 import com.project.logistic_management_2.repository.rolePermission.RolePermissionRepo;
 import com.project.logistic_management_2.repository.user.UserRepo;

@@ -2,9 +2,9 @@ package com.project.logistic_management_2.controller.schedule;
 
 import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.BaseResponse;
-import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
-import com.project.logistic_management_2.service.schedule.ScheduleService;
+import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
+import com.project.logistic_management_2.service.schedule.schedule.ScheduleService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
 import jakarta.validation.Valid;
@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.rmi.ServerException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class ScheduleController {
 
     @GetMapping()
     public ResponseEntity<Object> getSchedule(
+            @RequestParam int page,
             @RequestParam(required = false) String driverId,
             @RequestParam(required = false) String truckLicense,
             @RequestParam(required = false) String fromDate,
@@ -40,7 +42,7 @@ public class ScheduleController {
         Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
 
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.getAll(driverId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
+                BaseResponse.ok(scheduleService.getAll(page, driverId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
         );
     }
 
@@ -60,31 +62,34 @@ public class ScheduleController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> updateSchedule(@PathVariable String id, @Valid @RequestBody ScheduleDTO dto) {
+    public ResponseEntity<Object> updateSchedule(@PathVariable String id, @RequestBody ScheduleDTO dto) {
         return ResponseEntity.ok(
                 BaseResponse.ok(scheduleService.update(id, dto))
         );
     }
 
     @GetMapping("/delete/{id}")
-    public ResponseEntity<Object> deleteScheduleByID(@PathVariable String id) {
+    public ResponseEntity<Object> deleteScheduleByID(@PathVariable String id) throws ServerException {
+        long numOfRows = scheduleService.deleteByID(id);
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.deleteByID(id))
+                BaseResponse.ok(numOfRows, "Đã xóa thành công " + numOfRows + " lịch trình!")
         );
     }
 
     @GetMapping("/approve/{id}")
-    public ResponseEntity<Object> approveScheduleByID(@PathVariable String id) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.approveByID(id))
-        );
+    public ResponseEntity<Object> approveScheduleByID(@PathVariable String id) throws ServerException {
+        long numOfRows = scheduleService.approveByID(id);
+        return numOfRows != -1 ? ResponseEntity.ok(BaseResponse.ok(numOfRows, "Đã duyệt thành công " + numOfRows + " lịch trình!"))
+                                : ResponseEntity.ok(BaseResponse.ok(null, "Lịch trình đã được duyệt trước đó!"));
     }
 
     @GetMapping("/mark_complete/{id}")
-    public ResponseEntity<Object> markComplete(@PathVariable String id) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.markComplete(id))
-        );
+    public ResponseEntity<Object> markComplete(@PathVariable String id) throws ServerException {
+        long numOfRows = scheduleService.markComplete(id);
+        return
+                numOfRows == ScheduleStatus.COMPLETED.getValue()
+                ? ResponseEntity.ok(BaseResponse.ok(null, "Chuyến đi đã được đánh dấu là hoàn thành trước đó!"))
+                : ResponseEntity.ok(BaseResponse.ok(numOfRows, numOfRows + " lịch trình đã được đánh dấu là hoàn thành!"));
     }
 
     @GetMapping("/reports")
@@ -127,7 +132,6 @@ public class ScheduleController {
                     .body(inputStreamResource);
         } else {
             throw new Exception("No data");
-
         }
     }
 

@@ -1,20 +1,16 @@
 package com.project.logistic_management_2.service.report;
 
 import com.project.logistic_management_2.dto.report.ReportDetailSalaryDTO;
-import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.dto.report.SummarySalaryDTO;
-import com.project.logistic_management_2.entity.*;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
-import com.project.logistic_management_2.mapper.user.UserReportMapper;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.repository.report.ReportRepo;
 import com.project.logistic_management_2.service.BaseService;
-import com.project.logistic_management_2.service.schedule.ScheduleService;
+import com.project.logistic_management_2.service.schedule.schedule.ScheduleService;
 import com.project.logistic_management_2.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 

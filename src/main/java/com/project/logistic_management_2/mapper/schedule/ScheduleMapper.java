@@ -3,6 +3,8 @@ package com.project.logistic_management_2.mapper.schedule;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
+import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +24,9 @@ public class ScheduleMapper {
                 .moocLicense(dto.getMoocLicense())
                 .attachDocument(dto.getAttachDocument())
                 .departureTime(dto.getDepartureTime())
-                .arrivalTime(dto.getDepartureTime())
                 .note(dto.getNote())
-                .type(dto.getType())
-                .status(0)
+                .type(dto.getType().getValue())
+                .status(ScheduleStatus.WAITING_FOR_APPROVAL.getValue())
                 .deleted(false)
                 .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                 .updatedAt(new Date())
@@ -47,8 +48,8 @@ public class ScheduleMapper {
                         .departureTime(dto.getDepartureTime())
                         .arrivalTime(dto.getDepartureTime())
                         .note(dto.getNote())
-                        .type(dto.getType())
-                        .status(0)
+                        .type(dto.getType().getValue())
+                        .status(ScheduleStatus.WAITING_FOR_APPROVAL.getValue())
                         .deleted(false)
                         .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                         .updatedAt(new Date())
@@ -56,17 +57,33 @@ public class ScheduleMapper {
         ).collect(Collectors.toList());
     }
 
-    public void updateSchedule(String id, Schedule schedule, ScheduleDTO dto) {
+    public void updateSchedule(Schedule schedule, ScheduleDTO dto) {
         if (dto == null) return;
-        schedule.setId(id);
-        schedule.setScheduleConfigId(dto.getScheduleConfigId());
-        schedule.setTruckLicense(dto.getTruckLicense());
-        schedule.setMoocLicense(dto.getMoocLicense());
-        schedule.setAttachDocument(dto.getAttachDocument());
-        schedule.setDepartureTime(dto.getDepartureTime());
-        schedule.setArrivalTime(dto.getArrivalTime());
-        schedule.setNote(dto.getNote());
-        schedule.setType(dto.getType());
+
+        if (dto.getScheduleConfigId() != null)
+            schedule.setScheduleConfigId(dto.getScheduleConfigId());
+
+        if (dto.getTruckLicense() != null)
+            schedule.setTruckLicense(dto.getTruckLicense());
+
+        if (dto.getMoocLicense() != null)
+            schedule.setMoocLicense(dto.getMoocLicense());
+
+        if (dto.getAttachDocument() != null)
+            schedule.setAttachDocument(dto.getAttachDocument());
+
+        if (dto.getDepartureTime() != null)
+            schedule.setDepartureTime(dto.getDepartureTime());
+
+        if (dto.getArrivalTime() != null)
+            schedule.setArrivalTime(dto.getArrivalTime());
+
+        if (dto.getNote() != null)
+            schedule.setNote(dto.getNote());
+
+        if (dto.getType() != null)
+            schedule.setType(dto.getType().getValue());
+
         schedule.setUpdatedAt(new Date());
     }
 }
