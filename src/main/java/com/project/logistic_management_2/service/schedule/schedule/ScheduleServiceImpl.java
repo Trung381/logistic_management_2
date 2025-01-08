@@ -3,8 +3,10 @@ package com.project.logistic_management_2.service.schedule.schedule;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.entity.Schedule;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
+import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
+import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
@@ -17,12 +19,12 @@ import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.rmi.ServerException;
 import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.Date;
@@ -38,26 +40,21 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     private final ScheduleMapper scheduleMapper;
     private final NotificationService notificationService;
     private final PermissionType type = PermissionType.SCHEDULES;
-    private final Validator validator;
 
-    /**
-     *
-     * @param dto: object needs validation
-     * @param <T>: Object type of dto
-     */
     private <T> void validateDTO(T dto) {
         if (!(dto instanceof ScheduleDTO scheduleDTO)) {
             return;
         }
-        if (scheduleDTO.getType() == 1) {
+        if (scheduleDTO.getType() == ScheduleType.PAYROLL) {
             if (scheduleDTO.getScheduleConfigId().isBlank()) {
                 throw new InvalidParameterException("Cấu hình lịch trình không được để trống!");
             }
             if (scheduleDTO.getDepartureTime() == null) {
                 throw new InvalidParameterException("Thời gian lấy hàng không được để trống!");
-            }
-            if (scheduleDTO.getArrivalTime() == null) {
-                throw new InvalidParameterException("Thời gian giao hàng không được để trống!");
+            } else {
+                if (scheduleDTO.getDepartureTime().before(new Date())) {
+                    throw new InvalidParameterException("Thời gian khởi hành không hợp lệ. Thời gian chỉ được tính sau thời điểm lịch trình được tạo!");
+                }
             }
         }
         if (truckRepo.getTruckByLicensePlate(scheduleDTO.getTruckLicense()).isEmpty()) {
@@ -66,6 +63,16 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         if (truckRepo.getTruckByLicensePlate(scheduleDTO.getMoocLicense()).isEmpty()) {
             throw new InvalidParameterException("Rơ-mooc có biển số " + scheduleDTO.getMoocLicense() + " không tồn tại!");
         }
+    }
+
+    // Pagination
+    @Override
+    public List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+        checkPermission(type, PermissionKey.VIEW);
+        if (page <= 0) {
+            throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
+        }
+        return scheduleRepo.getAll(page, driverId, truckLicense, fromDate, toDate);
     }
 
     @Override
@@ -77,11 +84,8 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     @Override
     public ScheduleDTO getByID(String id) {
         checkPermission(type, PermissionKey.VIEW);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
         return scheduleRepo.getByID(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin lịch trình!"));
+                .orElseThrow(() -> new NotFoundException("Lịch trình cần tìm không tồn tại!"));
     }
 
     @Override
@@ -89,13 +93,9 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     public ScheduleDTO create(ScheduleDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
         validateDTO(dto);
-        //Cập nhật trạng thái xe
-        //đầu xe + mooc
 
         Schedule schedule = scheduleMapper.toSchedule(dto);
         scheduleRepo.save(schedule);
-        truckRepo.updateStatus(dto.getTruckLicense(), 0);
-        truckRepo.updateStatus(dto.getMoocLicense(), 0);
 
         // Gửi notification qua WebSocket
         String notifyMsg = "Lịch trình mới được khởi tạo cần được phê duyệt lúc " + new Date();
@@ -113,13 +113,13 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
         //Chỉ sửa được trước ngày bắt đầu (departure time) hoặc chưa duyệt
         Date currentTime = new Date(System.currentTimeMillis());
-        if (schedule.getStatus() != 0 || (schedule.getDepartureTime() != null && schedule.getDepartureTime().before(currentTime))) {
+        if (
+                ScheduleStatus.valueOf(schedule.getStatus()) != ScheduleStatus.WAITING_FOR_APPROVAL
+                        || (schedule.getDepartureTime() != null && schedule.getDepartureTime().before(currentTime))) {
             throw new ConflictException("Lịch trình đã hết thời gian được phép chỉnh sửa!");
         }
 
-        // Update object
         scheduleMapper.updateSchedule(schedule, dto);
-        // Save to DB
         scheduleRepo.save(schedule);
 
         Optional<ScheduleDTO> res = scheduleRepo.getByID(id);
@@ -127,68 +127,65 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     }
 
     @Override
-    public long deleteByID(String id) {
+    public long deleteByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.DELETE);
         if (scheduleRepo.countByID(id) == 0) {
-            throw new NotFoundException("Lịch trình cần duyệt không tồn tại hoặc đã được xóa trước đó!");
+            throw new NotFoundException("Lịch trình cần duyệt không tồn tại hoặc đã bị xóa!");
         }
-        return scheduleRepo.delete(id);
+        long numOfRowsDeleted = scheduleRepo.delete(id);
+        if (numOfRowsDeleted == 0) {
+            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+        }
+        return numOfRowsDeleted;
     }
 
     @Override
-    public long approveByID(String id) {
+    public long approveByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.APPROVE);
-        // Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
-//        if (scheduleRepo.countByID(id) == 0) {
-//            throw new NotFoundException("Lịch trình cần duyệt không tồn tại!");
-//        }
 
-        Optional<Integer> status = scheduleRepo.getStatusByID(id);
-        if (status.isEmpty()) {
+        ScheduleStatus status = scheduleRepo.getStatusByID(id);
+        if (status == null) {
             throw new NotFoundException("Lịch trình cần duyệt không tồn tại!");
-        } else if (status.get() != 0) {
+        } else if (status != ScheduleStatus.WAITING_FOR_APPROVAL) {
             return -1; //Thông báo đã duyệt
         }
 
-        return scheduleRepo.approve(id);
+        long numOfRowsApproved = scheduleRepo.approve(id);
+        if (numOfRowsApproved == 0) {
+            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+        }
+        return numOfRowsApproved;
     }
 
     @Override
     @Transactional
-    public long markComplete(String id) {
-        //-1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
-        Optional<Integer> status = scheduleRepo.getStatusByID(id);
-        if (status.isEmpty()) {
+    public long markComplete(String id) throws ServerException {
+        ScheduleStatus status = scheduleRepo.getStatusByID(id);
+        if (status == null) {
             throw new NotFoundException("Lịch trình không tồn tại!");
         }
-        switch (status.get()) {
-            case 0, -1 -> throw new ConflictException("Lịch trình chưa/không được duyệt để di chuyển!"); //Lịch trình chưa/không được duyệt
-            case 2 -> { return 2; } //Đã duyệt
+        switch (status) {
+            case ScheduleStatus.WAITING_FOR_APPROVAL, ScheduleStatus.NOT_APPROVED
+                    -> throw new ConflictException("Lịch trình chưa/không được duyệt để di chuyển!");
+            case ScheduleStatus.COMPLETED -> { return ScheduleStatus.COMPLETED.getValue(); }
         }
 
-        long numOfRowUpdated = scheduleRepo.markComplete(id);
-        if (numOfRowUpdated != 0) {
-            Optional<Schedule> schedule = scheduleRepo.findById(id);
-            if (schedule.isEmpty()) return 0;
-
-            truckRepo.updateStatus(schedule.get().getTruckLicense(), 1);
-            truckRepo.updateStatus(schedule.get().getMoocLicense(), 1);
+        long numOfRowsMarked = scheduleRepo.markComplete(id);
+        if (numOfRowsMarked == 0) {
+            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
         }
-        return numOfRowUpdated;
+        return scheduleRepo.markComplete(id);
     }
 
-    //Báo cáo lịch trình theo xe: biển số xe, tháng nào
     @Override
     public List<ScheduleDTO> report(String license, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
         YearMonth periodYM = parsePeriod(period);
-//        return scheduleRepo.getByFilter(license, periodYM);
 
         //Báo cáo theo fe (Có cột số chuyến phát sinh)
         return scheduleRepo.exportReport(license, periodYM);
     }
 
-    //Xuất lương lịch trình của một tài xế trong một chu kỳ (tháng)
     @Override
     public List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, String period) {
         YearMonth periodYM = parsePeriod(period);
@@ -214,12 +211,6 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
         List<Schedule> schedule = scheduleMapper.toScheduleList(scheduleDTOList);
 
-        for(ScheduleDTO dto : scheduleDTOList) {
-            truckRepo.updateStatus(dto.getTruckLicense(), 0);
-            truckRepo.updateStatus(dto.getMoocLicense(), 0);
-        }
-
-        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return scheduleRepo.saveAll(schedule);
     }
 }

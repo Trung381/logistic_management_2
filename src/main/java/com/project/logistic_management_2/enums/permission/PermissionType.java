@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.enums;
+package com.project.logistic_management_2.enums.permission;
 
 import lombok.Getter;
 

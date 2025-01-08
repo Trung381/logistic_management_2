@@ -3,6 +3,8 @@ package com.project.logistic_management_2.mapper.schedule;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
+import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +24,9 @@ public class ScheduleMapper {
                 .moocLicense(dto.getMoocLicense())
                 .attachDocument(dto.getAttachDocument())
                 .departureTime(dto.getDepartureTime())
-                .arrivalTime(dto.getDepartureTime())
                 .note(dto.getNote())
-                .type(dto.getType())
-                .status(0)
+                .type(dto.getType().getValue())
+                .status(ScheduleStatus.WAITING_FOR_APPROVAL.getValue())
                 .deleted(false)
                 .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                 .updatedAt(new Date())
@@ -47,8 +48,8 @@ public class ScheduleMapper {
                         .departureTime(dto.getDepartureTime())
                         .arrivalTime(dto.getDepartureTime())
                         .note(dto.getNote())
-                        .type(dto.getType())
-                        .status(0)
+                        .type(dto.getType().getValue())
+                        .status(ScheduleStatus.WAITING_FOR_APPROVAL.getValue())
                         .deleted(false)
                         .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                         .updatedAt(new Date())
@@ -59,37 +60,29 @@ public class ScheduleMapper {
     public void updateSchedule(Schedule schedule, ScheduleDTO dto) {
         if (dto == null) return;
 
-        // update schedule config
         if (dto.getScheduleConfigId() != null)
             schedule.setScheduleConfigId(dto.getScheduleConfigId());
 
-        //update truck
         if (dto.getTruckLicense() != null)
             schedule.setTruckLicense(dto.getTruckLicense());
 
-        // update mooc
         if (dto.getMoocLicense() != null)
             schedule.setMoocLicense(dto.getMoocLicense());
 
-        // update attach doc
         if (dto.getAttachDocument() != null)
             schedule.setAttachDocument(dto.getAttachDocument());
 
-        //update departure time
         if (dto.getDepartureTime() != null)
             schedule.setDepartureTime(dto.getDepartureTime());
 
-        //update arrival time
         if (dto.getArrivalTime() != null)
             schedule.setArrivalTime(dto.getArrivalTime());
 
-        //Update note
         if (dto.getNote() != null)
             schedule.setNote(dto.getNote());
 
-        //Update type
         if (dto.getType() != null)
-            schedule.setType(dto.getType());
+            schedule.setType(dto.getType().getValue());
 
         schedule.setUpdatedAt(new Date());
     }

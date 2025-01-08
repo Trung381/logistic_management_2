@@ -2,8 +2,8 @@ package com.project.logistic_management_2.repository.rolePermission;
 
 
 import com.project.logistic_management_2.dto.rolepermission.RolePermissionResponse;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.querydsl.core.types.Path;
 
 import java.util.List;
