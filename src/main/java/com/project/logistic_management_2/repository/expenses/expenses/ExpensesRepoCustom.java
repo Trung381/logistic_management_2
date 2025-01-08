@@ -3,6 +3,7 @@ package com.project.logistic_management_2.repository.expenses.expenses;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
+import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
 
 import java.sql.Timestamp;
 import java.time.YearMonth;
@@ -18,5 +19,5 @@ public interface ExpensesRepoCustom {
     long approve(String id);
     List<ExpensesReportDTO> reportForAll(String period);
     long countByID(String id);
-    boolean checkApproved(String id);
+    ExpensesStatus getStatusByID(String id);
 }

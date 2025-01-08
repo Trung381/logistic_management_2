@@ -6,6 +6,7 @@ import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 import com.project.logistic_management_2.entity.Expenses;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.rmi.ServerException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -15,8 +16,8 @@ public interface ExpensesService {
     ExpensesDTO getByID(String id);
     ExpensesDTO create(ExpensesDTO dto);
     ExpensesDTO update(String id, ExpensesDTO dto);
-    long deleteByID(String id);
-    long approveByID(String id);
+    long deleteByID(String id) throws ServerException;
+    long approveByID(String id) throws ServerException;
     List<ExpensesIncurredDTO> report(String driverId, String period);
     List<ExpensesReportDTO> reportForAll(String period);
     List<Expenses> importExpensesData(MultipartFile importFile);

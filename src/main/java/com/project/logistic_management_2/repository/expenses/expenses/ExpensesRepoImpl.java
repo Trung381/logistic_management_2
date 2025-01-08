@@ -10,6 +10,8 @@ import static com.project.logistic_management_2.entity.QUser.user;
 import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseAdvances;
 
 import com.project.logistic_management_2.enums.Pagination;
+import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
+import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -242,22 +244,17 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         return res != null ? res : 0;
     }
 
-    /**
-     * Return true if this expenses has not approved yet
-     */
     @Override
-    public boolean checkApproved(String id) {
-        // exist, has not been deleted and approved
+    public ExpensesStatus getStatusByID(String id) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(expenses.id.eq(id))
-                .and(expenses.deleted.eq(false))
-                .and(expenses.status.eq(0));
+                .and(expenses.deleted.eq(false));
 
-        Long res = query.from(expenses)
+        Integer statusNumber = query.from(expenses)
                 .where(builder)
-                .select(expenses.id.count().coalesce(0L))
+                .select(expenses.status)
                 .fetchOne();
-        return res != null && res > 0;
+        return statusNumber != null ? ExpensesStatus.valueOf(statusNumber) : null;
     }
 
     private String prevPeriod(String period) {
