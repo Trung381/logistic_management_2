@@ -110,6 +110,17 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
                 .execute();
     }
 
+    @Override
+    public Integer getTypeByLicensePlate(String licensePlate) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(truck.licensePlate.eq(licensePlate))
+                .and(truck.deleted.eq(false));
+        return query.from(truck)
+                .where(builder)
+                .select(truck.type)
+                .fetchOne();
+    }
+
     public List<TruckDTO> getTrucksByType(Integer type) {
         BooleanBuilder builder = new BooleanBuilder();
 

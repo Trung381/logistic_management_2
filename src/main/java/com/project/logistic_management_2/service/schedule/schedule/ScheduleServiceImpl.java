@@ -7,7 +7,9 @@ import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.enums.schedule.ScheduleType;
+import com.project.logistic_management_2.enums.truck.TruckType;
 import com.project.logistic_management_2.exception.def.ConflictException;
+import com.project.logistic_management_2.exception.def.InvalidFieldException;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.schedule.ScheduleMapper;
@@ -47,21 +49,30 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         }
         if (scheduleDTO.getType() == ScheduleType.PAYROLL) {
             if (scheduleDTO.getScheduleConfigId().isBlank()) {
-                throw new InvalidParameterException("Cấu hình lịch trình không được để trống!");
+                throw new InvalidFieldException("Cấu hình lịch trình không được để trống!");
             }
             if (scheduleDTO.getDepartureTime() == null) {
-                throw new InvalidParameterException("Thời gian lấy hàng không được để trống!");
+                throw new InvalidFieldException("Thời gian lấy hàng không được để trống!");
             } else {
                 if (scheduleDTO.getDepartureTime().before(new java.util.Date())) {
-                    throw new InvalidParameterException("Thời gian khởi hành không hợp lệ. Thời gian chỉ được tính sau thời điểm lịch trình được tạo!");
+                    throw new InvalidFieldException("Thời gian khởi hành không hợp lệ. Thời gian chỉ được tính sau thời điểm lịch trình được tạo!");
                 }
             }
         }
-        if (truckRepo.getTruckByLicensePlate(scheduleDTO.getTruckLicense()).isEmpty()) {
-            throw new InvalidParameterException("Xe tải có biển số " + scheduleDTO.getTruckLicense() + " không tồn tại!");
+        validateTruck(scheduleDTO.getTruckLicense(), TruckType.TRUCK_HEAD);
+        validateTruck(scheduleDTO.getMoocLicense(), TruckType.MOOC);
+    }
+
+    private void validateTruck(String license, TruckType type) {
+        String message = null;
+        Integer typeNumberOfTruck = truckRepo.getTypeByLicensePlate(license);
+        if (typeNumberOfTruck == null) {
+            message = String.format("Xe tải có biển số %s không tồn tại!", license);
+        } else if (!typeNumberOfTruck.equals(type.getValue())) {
+            message = String.format("Loại xe đang chọn không hợp lệ. Vui lòng chọn %s!", type.getDescription());
         }
-        if (truckRepo.getTruckByLicensePlate(scheduleDTO.getMoocLicense()).isEmpty()) {
-            throw new InvalidParameterException("Rơ-mooc có biển số " + scheduleDTO.getMoocLicense() + " không tồn tại!");
+        if (message != null) {
+            throw new InvalidFieldException(message);
         }
     }
 
@@ -119,6 +130,12 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             throw new ConflictException("Lịch trình đã hết thời gian được phép chỉnh sửa!");
         }
 
+        if (dto.getTruckLicense() != null) {
+            validateTruck(dto.getTruckLicense(), TruckType.TRUCK_HEAD);
+        }
+        if (dto.getMoocLicense() != null) {
+            validateTruck(dto.getMoocLicense(), TruckType.MOOC);
+        }
         scheduleMapper.updateSchedule(schedule, dto);
         scheduleRepo.save(schedule);
 
