@@ -24,6 +24,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.rmi.ServerException;
 import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.Date;
@@ -126,16 +127,20 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     }
 
     @Override
-    public long deleteByID(String id) {
+    public long deleteByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.DELETE);
         if (scheduleRepo.countByID(id) == 0) {
-            throw new NotFoundException("Lịch trình cần duyệt không tồn tại hoặc đã bị xóa trước đó!");
+            throw new NotFoundException("Lịch trình cần duyệt không tồn tại hoặc đã bị xóa!");
         }
-        return scheduleRepo.delete(id);
+        long numOfRowsDeleted = scheduleRepo.delete(id);
+        if (numOfRowsDeleted == 0) {
+            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+        }
+        return numOfRowsDeleted;
     }
 
     @Override
-    public long approveByID(String id) {
+    public long approveByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.APPROVE);
 
         ScheduleStatus status = scheduleRepo.getStatusByID(id);
@@ -145,21 +150,30 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             return -1; //Thông báo đã duyệt
         }
 
-        return scheduleRepo.approve(id);
+        long numOfRowsApproved = scheduleRepo.approve(id);
+        if (numOfRowsApproved == 0) {
+            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+        }
+        return numOfRowsApproved;
     }
 
     @Override
     @Transactional
-    public long markComplete(String id) {
+    public long markComplete(String id) throws ServerException {
         ScheduleStatus status = scheduleRepo.getStatusByID(id);
         if (status == null) {
             throw new NotFoundException("Lịch trình không tồn tại!");
         }
         switch (status) {
-            case ScheduleStatus.WAITING_FOR_APPROVAL, ScheduleStatus.NOT_APPROVED -> throw new ConflictException("Lịch trình chưa/không được duyệt để di chuyển!");
-            case ScheduleStatus.COMPLETED -> { return 2; } //Đã hoàn thành
+            case ScheduleStatus.WAITING_FOR_APPROVAL, ScheduleStatus.NOT_APPROVED
+                    -> throw new ConflictException("Lịch trình chưa/không được duyệt để di chuyển!");
+            case ScheduleStatus.COMPLETED -> { return ScheduleStatus.COMPLETED.getValue(); }
         }
 
+        long numOfRowsMarked = scheduleRepo.markComplete(id);
+        if (numOfRowsMarked == 0) {
+            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+        }
         return scheduleRepo.markComplete(id);
     }
 
