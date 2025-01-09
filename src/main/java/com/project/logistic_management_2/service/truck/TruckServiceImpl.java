@@ -64,7 +64,7 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
     @Override
     public TruckDTO getTruckByLicensePlate(String licensePlate) {
         checkPermission(type, PermissionKey.VIEW);
-        return repository.getTruckByLicensePlate(licensePlate)
+        return repository.getTruckByLicense(licensePlate)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy xe với biển số: " + licensePlate));
     }
 

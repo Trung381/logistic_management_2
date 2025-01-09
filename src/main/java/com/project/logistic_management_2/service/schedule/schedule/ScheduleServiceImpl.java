@@ -3,10 +3,12 @@ package com.project.logistic_management_2.service.schedule.schedule;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.entity.Schedule;
+import com.project.logistic_management_2.entity.Truck;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.enums.schedule.ScheduleType;
+import com.project.logistic_management_2.enums.truck.TruckStatus;
 import com.project.logistic_management_2.enums.truck.TruckType;
 import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.InvalidFieldException;
@@ -65,11 +67,12 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
     private void validateTruck(String license, TruckType type) {
         String message = null;
-        Integer typeNumberOfTruck = truckRepo.getTypeByLicensePlate(license);
-        if (typeNumberOfTruck == null) {
-            message = String.format("Xe tải có biển số %s không tồn tại!", license);
-        } else if (!typeNumberOfTruck.equals(type.getValue())) {
+        Truck truck = truckRepo.findByLicensePlate(license)
+                .orElseThrow(() -> new NotFoundException("Xe có biển số " + license + " không tồn tại!"));
+        if (!truck.getType().equals(type.getValue())) {
             message = String.format("Loại xe đang chọn không hợp lệ. Vui lòng chọn %s!", type.getDescription());
+        } else if (!truck.getStatus().equals(TruckStatus.AVAILABLE.getValue())) { //Check trang thai xe neu sung loai xe
+            message = type.getDescription() + " được chọn không có sẵn để lên lịch. Vui lòng chọn xe khác!";
         }
         if (message != null) {
             throw new InvalidFieldException(message);

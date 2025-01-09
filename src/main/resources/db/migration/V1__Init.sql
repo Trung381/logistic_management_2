@@ -203,7 +203,7 @@ CREATE TABLE `schedules` (
  `arrival_time` TIMESTAMP COMMENT "Thời gian hoàn thành",
  `note` TEXT COMMENT "Ghi chú của mỗi hành trình",
  `type` INT NOT NULL DEFAULT 1 COMMENT "Loại lịch trình: 0 - Chạy nội bộ, 1 - Tính lương",
- `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành",
+ `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái lịch trình: -1 - Bị từ chối, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành",
  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Đã xóa: 0 - false, 1 - true",
  `created_at` TIMESTAMP NOT NULL DEFAULT now(),
  `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
@@ -390,7 +390,6 @@ INSERT INTO `transactions` (`id`, `ref_user_id`, `goods_id`, `quantity`, `transa
  ('TRANS003', 'US003', 'GS003', 200, '2024-05-11 09:00:00', b'1', 'Kho A', b'0', NOW(), NOW(), 'giang', 'C:\giang'),
  ('TRANS004', 'US003', 'GS004', 200, '2024-05-11 10:00:00', b'1', 'Kho B', b'0', NOW(), NOW(), 'giang', 'C:\giang');
  
--- Triger trên bảng schedules - UPDATE
 DELIMITER //
 -- Cập nhật trạng thái của xe tải hoặc mooc khi trạng thái lịch trình thay đổi
 CREATE TRIGGER UD_schedules_after_update_trigger
@@ -398,15 +397,39 @@ AFTER UPDATE ON schedules
 FOR EACH ROW
 BEGIN
 	-- Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
-	-- Trạng thái xe: `status`: -1: Bảo trì, 0 - Không có sẵn, 1 - Có sẵn
+	-- Trạng thái xe: `status`: -1: Bảo trì, 0 - Không có sẵn, 1 - Có sẵn, 2 - chờ xử lý lịch trình
     DECLARE newStatus INT;
-    -- Khi status của lịch trình thay đổi
     IF OLD.status != NEW.status THEN
 		SET newStatus = CASE 
 							WHEN NEW.status IN (-1, 2) THEN 1
 							WHEN NEW.status = 1 THEN 0
                         END;
-		-- Cập nhật trạng thái xe
+		UPDATE `trucks` SET `status` = newStatus WHERE `license_plate` = OLD.truck_license OR `license_plate` = OLD.mooc_license;
+	END IF;
+END;//
+DELIMITER ;
+
+DELIMITER //
+-- Cập nhật trạng thái của xe tải hoặc mooc thành chờ duyệt (2) khi lịch trình được tạo
+CREATE TRIGGER UD_schedules_after_insert_trigger
+AFTER INSERT ON schedules
+FOR EACH ROW
+BEGIN
+	-- Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
+	-- Trạng thái xe: `status`: -1: Bảo trì, 0 - Không có sẵn, 1 - Có sẵn, 2 - chờ xử lý lịch trình
+    UPDATE `trucks` SET `status` = 2 WHERE `license_plate` = NEW.truck_license OR `license_plate` = NEW.mooc_license;
+END;//
+DELIMITER ;
+
+DELIMITER //
+-- Cập nhật trạng thái của xe tải hoặc mooc khi trạng thái lịch trình thay đổi
+CREATE TRIGGER UD_schedules_after_update_trigger
+AFTER UPDATE ON users
+FOR EACH ROW
+BEGIN
+    DECLARE newStatus INT;
+    -- Khi status của lịch trình thay đổi
+    IF OLD.username != NEW.username THEN
 		UPDATE `trucks` SET `status` = newStatus WHERE `license_plate` = OLD.truck_license OR `license_plate` = OLD.mooc_license;
 	END IF;
 END;//
