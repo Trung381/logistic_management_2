@@ -125,7 +125,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         //Chỉ sửa được trước ngày bắt đầu (departure time) hoặc chưa duyệt
         Date currentTime = new Date(System.currentTimeMillis());
         if (
-                ScheduleStatus.valueOf(schedule.getStatus()) != ScheduleStatus.WAITING_FOR_APPROVAL
+                ScheduleStatus.valueOf(schedule.getStatus()) != ScheduleStatus.PENDING
                         || (schedule.getDepartureTime() != null && schedule.getDepartureTime().before(currentTime))) {
             throw new ConflictException("Lịch trình đã hết thời gian được phép chỉnh sửa!");
         }
@@ -157,17 +157,17 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     }
 
     @Override
-    public long approveByID(String id) throws ServerException {
+    public long approveByID(String id, boolean approved) throws ServerException {
         checkPermission(type, PermissionKey.APPROVE);
 
         ScheduleStatus status = scheduleRepo.getStatusByID(id);
         if (status == null) {
             throw new NotFoundException("Lịch trình cần duyệt không tồn tại!");
-        } else if (status != ScheduleStatus.WAITING_FOR_APPROVAL) {
+        } else if (status != ScheduleStatus.PENDING) {
             return -1; //Thông báo đã duyệt
         }
 
-        long numOfRowsApproved = scheduleRepo.approve(id);
+        long numOfRowsApproved = scheduleRepo.approve(id, approved);
         if (numOfRowsApproved == 0) {
             throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
         }
@@ -182,7 +182,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             throw new NotFoundException("Lịch trình không tồn tại!");
         }
         switch (status) {
-            case ScheduleStatus.WAITING_FOR_APPROVAL, ScheduleStatus.NOT_APPROVED
+            case ScheduleStatus.PENDING, ScheduleStatus.REJECTED
                     -> throw new ConflictException("Lịch trình chưa/không được duyệt để di chuyển!");
             case ScheduleStatus.COMPLETED -> { return ScheduleStatus.COMPLETED.getValue(); }
         }

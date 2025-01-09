@@ -77,10 +77,10 @@ public class ScheduleController {
     }
 
     @GetMapping("/approve/{id}")
-    public ResponseEntity<Object> approveScheduleByID(@PathVariable String id) throws ServerException {
-        long numOfRows = scheduleService.approveByID(id);
-        return numOfRows != -1 ? ResponseEntity.ok(BaseResponse.ok(numOfRows, "Đã duyệt thành công " + numOfRows + " lịch trình!"))
-                                : ResponseEntity.ok(BaseResponse.ok(null, "Lịch trình đã được duyệt trước đó!"));
+    public ResponseEntity<Object> approveScheduleByID(@PathVariable String id, @RequestParam boolean approved) throws ServerException {
+        long numOfRows = scheduleService.approveByID(id, approved);
+        return numOfRows != -1 ? ResponseEntity.ok(BaseResponse.ok(numOfRows, "Đã xử lý thành công " + numOfRows + " lịch trình!"))
+                                : ResponseEntity.ok(BaseResponse.ok(null, "Lịch trình đã được xử lý trước đó!"));
     }
 
     @GetMapping("/mark_complete/{id}")

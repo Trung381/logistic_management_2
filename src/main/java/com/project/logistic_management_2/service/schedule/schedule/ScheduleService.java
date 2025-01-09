@@ -16,7 +16,7 @@ public interface ScheduleService {
     ScheduleDTO create(ScheduleDTO dto);
     ScheduleDTO update(String id, ScheduleDTO dto);
     long deleteByID(String id) throws ServerException;
-    long approveByID(String id) throws ServerException;
+    long approveByID(String id, boolean approved) throws ServerException;
     long markComplete(String id) throws ServerException;
     List<ScheduleDTO> report(String license, int year, int month);
     List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, int year, int month);

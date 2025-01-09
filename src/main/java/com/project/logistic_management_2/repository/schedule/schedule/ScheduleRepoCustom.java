@@ -14,7 +14,7 @@ public interface ScheduleRepoCustom {
     List<ScheduleDTO> getAll(String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate);
     Optional<ScheduleDTO> getByID(String id);
     long delete(String id);
-    long approve(String id);
+    long approve(String id, boolean approved);
     long markComplete(String id);
     List<ScheduleSalaryDTO> exportScheduleSalary(String driverId, Date fromDate, Date toDate);
     List<ScheduleDTO> exportReport(String license, Date fromDate, Date toDate);

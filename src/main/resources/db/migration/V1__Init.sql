@@ -21,8 +21,6 @@ INSERT INTO `permissions` (`id`, `title`, `name`, `created_at`, `updated_at`) VA
     (9, 'Báo cáo', 'REPORTS', NOW(), NOW()),
     (10, 'Quản lý hàng hoá', 'GOODS', NOW(), NOW()),
     (11, 'Quản lý kho hàng', 'WAREHOUSES', NOW(), NOW());
-    
-select * from permissions where name = "SCHEDULE";
 
 CREATE TABLE `roles` (
  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,

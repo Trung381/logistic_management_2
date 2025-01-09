@@ -161,15 +161,16 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     @Override
     @Modifying
     @Transactional
-    public long approve(String id) {
+    public long approve(String id, boolean approved) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(schedule.id.eq(id))
                 .and(schedule.deleted.eq(false))
-                .and(schedule.status.eq(ScheduleStatus.WAITING_FOR_APPROVAL.getValue()));
+                .and(schedule.status.eq(ScheduleStatus.PENDING.getValue()));
 
+        ScheduleStatus status = approved ? ScheduleStatus.APPROVED : ScheduleStatus.REJECTED;
         return query.update(schedule)
                 .where(builder)
-                .set(schedule.status, ScheduleStatus.APPROVED.getValue())
+                .set(schedule.status, status.getValue())
                 .execute();
     }
 
