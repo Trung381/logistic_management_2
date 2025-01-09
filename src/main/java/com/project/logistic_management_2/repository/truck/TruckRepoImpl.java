@@ -1,6 +1,8 @@
 package com.project.logistic_management_2.repository.truck;
 
 import com.project.logistic_management_2.dto.truck.TruckDTO;
+import com.project.logistic_management_2.enums.truck.TruckStatus;
+import com.project.logistic_management_2.enums.truck.TruckType;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -34,15 +36,16 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
                 user.fullName.as("driverName"),
                 truck.type.as("type"),
                 new CaseBuilder()
-                        .when(truck.type.eq(0)).then("Xe tải")
-                        .when(truck.type.eq(1)).then("Mooc")
+                        .when(truck.type.eq(TruckType.TRUCK_HEAD.getValue())).then(TruckType.TRUCK_HEAD.getDescription())
+                        .when(truck.type.eq(TruckType.MOOC.getValue())).then(TruckType.MOOC.getDescription())
                         .otherwise("Không xác định")
                         .as("typeDescription"),
                 truck.status.as("status"),
                 new CaseBuilder()
-                        .when(truck.status.eq(0)).then("Đang sử dụng")
-                        .when(truck.status.eq(1)).then("Sẵn sàng")
-                        .when(truck.status.eq(-1)).then("Tạm dừng")
+                        .when(truck.status.eq(TruckStatus.APPROVED_SCHEDULE.getValue())).then(TruckStatus.APPROVED_SCHEDULE.getDescription())
+                        .when(truck.status.eq(TruckStatus.AVAILABLE.getValue())).then(TruckStatus.AVAILABLE.getDescription())
+                        .when(truck.status.eq(TruckStatus.MAINTENANCE.getValue())).then(TruckStatus.MAINTENANCE.getDescription())
+                        .when(truck.status.eq(TruckStatus.PENDING_SCHEDULE.getValue())).then(TruckStatus.PENDING_SCHEDULE.getDescription())
                         .otherwise("Không xác định")
                         .as("statusDescription"),
                 truck.note.as("note"),
@@ -55,7 +58,7 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
     public Optional<TruckDTO> getTruckById(Integer id) {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(truck.id.eq(id));
-        builder.and(truck.deleted.eq(false));// Chỉ lấy bản ghi chưa bị xóa
+        builder.and(truck.deleted.eq(false));
 
         return Optional.ofNullable(
                 query.from(truck)
@@ -107,17 +110,24 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
                 .execute();
     }
 
+    @Override
+    public Integer getTypeByLicensePlate(String licensePlate) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(truck.licensePlate.eq(licensePlate))
+                .and(truck.deleted.eq(false));
+        return query.from(truck)
+                .where(builder)
+                .select(truck.type)
+                .fetchOne();
+    }
+
     public List<TruckDTO> getTrucksByType(Integer type) {
-        // Tạo một BooleanBuilder để xây dựng các điều kiện lọc trong truy vấn
         BooleanBuilder builder = new BooleanBuilder();
 
-        // Thêm điều kiện lọc: cột "type" phải bằng giá trị "type" được truyền vào
-        builder.and(truck.type.eq(type)); // Lọc theo giá trị của type (ví dụ: 0 hoặc 1)
+        builder.and(truck.type.eq(type));
 
-        // Thêm điều kiện lọc: chỉ lấy các bản ghi chưa bị xóa (cột "deleted" = 1)
-        builder.and(truck.deleted.eq(false)); // Lọc các bản ghi chưa bị xóa (deleted = false)
+        builder.and(truck.deleted.eq(false));
 
-        // Sử dụng QueryDSL để thực hiện truy vấn
         return query.from(truck)
                 .innerJoin(user).on(truck.driverId.eq(user.id))
                 .where(builder)

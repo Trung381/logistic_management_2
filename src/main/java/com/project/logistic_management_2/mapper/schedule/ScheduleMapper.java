@@ -5,6 +5,8 @@ import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.enums.schedule.ScheduleType;
+import com.project.logistic_management_2.exception.def.InvalidFieldException;
+import com.project.logistic_management_2.service.schedule.schedule.ScheduleServiceImpl;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +28,7 @@ public class ScheduleMapper {
                 .departureTime(dto.getDepartureTime())
                 .note(dto.getNote())
                 .type(dto.getType().getValue())
-                .status(ScheduleStatus.WAITING_FOR_APPROVAL.getValue())
+                .status(ScheduleStatus.PENDING.getValue())
                 .deleted(false)
                 .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                 .updatedAt(new Date())
@@ -49,7 +51,7 @@ public class ScheduleMapper {
                         .arrivalTime(dto.getDepartureTime())
                         .note(dto.getNote())
                         .type(dto.getType().getValue())
-                        .status(ScheduleStatus.WAITING_FOR_APPROVAL.getValue())
+                        .status(ScheduleStatus.PENDING.getValue())
                         .deleted(false)
                         .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                         .updatedAt(new Date())
@@ -59,31 +61,45 @@ public class ScheduleMapper {
 
     public void updateSchedule(Schedule schedule, ScheduleDTO dto) {
         if (dto == null) return;
+        boolean isUpdated = false;
 
-        if (dto.getScheduleConfigId() != null)
+        if (dto.getScheduleConfigId() != null) {
             schedule.setScheduleConfigId(dto.getScheduleConfigId());
-
-        if (dto.getTruckLicense() != null)
+            isUpdated = true;
+        }
+        if (dto.getTruckLicense() != null) {
             schedule.setTruckLicense(dto.getTruckLicense());
-
-        if (dto.getMoocLicense() != null)
+            isUpdated = true;
+        }
+        if (dto.getMoocLicense() != null) {
             schedule.setMoocLicense(dto.getMoocLicense());
-
-        if (dto.getAttachDocument() != null)
+            isUpdated = true;
+        }
+        if (dto.getAttachDocument() != null) {
             schedule.setAttachDocument(dto.getAttachDocument());
-
-        if (dto.getDepartureTime() != null)
+            isUpdated = true;
+        }
+        if (dto.getDepartureTime() != null) {
             schedule.setDepartureTime(dto.getDepartureTime());
-
-        if (dto.getArrivalTime() != null)
+            isUpdated = true;
+        }
+        if (dto.getArrivalTime() != null) {
             schedule.setArrivalTime(dto.getArrivalTime());
-
-        if (dto.getNote() != null)
+            isUpdated = true;
+        }
+        if (dto.getNote() != null) {
             schedule.setNote(dto.getNote());
-
-        if (dto.getType() != null)
+            isUpdated = true;
+        }
+        if (dto.getType() != null) {
             schedule.setType(dto.getType().getValue());
+            isUpdated = true;
+        }
 
-        schedule.setUpdatedAt(new Date());
+        if (isUpdated) {
+            schedule.setUpdatedAt(new Date());
+        } else {
+            throw new InvalidFieldException("Trường cần cần cập nhật không tồn tại!");
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.project.logistic_management_2.mapper.schedule;
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import com.project.logistic_management_2.entity.ScheduleConfig;
 import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.exception.def.InvalidFieldException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -48,23 +49,30 @@ public class ScheduleConfigMapper {
 
     public void updateScheduleConfig(ScheduleConfig config, ScheduleConfigDTO dto) {
         if (dto == null) return;
-        //Update place A
-        if (dto.getPlaceA() != null)
+        boolean isUpdated = false;
+        
+        if (dto.getPlaceA() != null) {
             config.setPlaceA(dto.getPlaceA());
-
-        //Update place B
-        if (dto.getPlaceB() != null)
+            isUpdated = true;
+        }
+        if (dto.getPlaceB() != null) {
             config.setPlaceB(dto.getPlaceB());
-
-        // Update amount per schedule
-        if (dto.getAmount() != null)
+            isUpdated = true;
+        }
+        if (dto.getAmount() != null) {
             config.setAmount(dto.getAmount());
-
-        // Update note
-        if (dto.getNote() != null)
+            isUpdated = true;
+        }
+        if (dto.getNote() != null) {
             config.setNote(dto.getNote());
+            isUpdated = true;
+        }
 
-        config.setUpdatedAt(new Date());
+        if (isUpdated) {
+            config.setUpdatedAt(new Date());
+        } else {
+            throw new InvalidFieldException("Trường cần cần cập nhật không tồn tại!");
+        }
     }
 
     public ScheduleConfigDTO toScheduleConfigDTO(ScheduleConfigDTO dto, ScheduleConfig config) {

@@ -1,6 +1,5 @@
 package com.project.logistic_management_2.enums.schedule;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 public enum ScheduleType {
@@ -9,16 +8,15 @@ public enum ScheduleType {
 
     @Getter
     private final Integer value;
-    private final String note;
+    private final String description;
 
-//    @JsonValue
     public String getNote() {
-        return note;
+        return description;
     }
 
-    ScheduleType(int value, String note) {
+    ScheduleType(int value, String description) {
         this.value = value;
-        this.note = note;
+        this.description = description;
     }
 
     public static ScheduleType valueOf(Integer value) {

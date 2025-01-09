@@ -1,6 +1,8 @@
 package com.project.logistic_management_2.dto.truck;
 
 import com.project.logistic_management_2.annotations.ExportColumn;
+import com.project.logistic_management_2.enums.truck.TruckStatus;
+import com.project.logistic_management_2.enums.truck.TruckType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -26,20 +28,17 @@ public class TruckDTO {
     @ExportColumn(name = "Dung tích")
     private float capacity;
 
-    //Thong tin tai xe
     @NotNull(message = "ID tài xế không được để trống")
     private String driverId;
     @ExportColumn(name = "Tài xế")
     private String driverName;
 
     @NotNull(message = "Loại xe không được để trống")
-//    @Min(value = 1, message = "Loại xe chỉ có thể là 1 hoặc 2")
-//    @Max(value = 2, message = "Loại xe chỉ có thể là 1 hoặc 2")
-    private Integer type; //loai xe: 0 - xe tai, 1 - mooc
+    private TruckType type;
     @ExportColumn(name = "Loại")
     private String typeDescription;
 
-    private Integer status; //Trang thai xe
+    private TruckStatus status;
     @ExportColumn(name = "Trạng thái")
     private String statusDescription;
 
@@ -49,4 +48,19 @@ public class TruckDTO {
     @ExportColumn(name = "Ngày tạo")
     private Date createdAt;
     private Date updatedAt;
+
+    public TruckDTO(int id, String licensePlate, float capacity, String driverId, String driverName, int type, String typeDescription, int status, String statusDescription, String note, Date createdAt, Date updatedAt) {
+        this.id = id;
+        this.licensePlate = licensePlate;
+        this.capacity = capacity;
+        this.driverId = driverId;
+        this.driverName = driverName;
+        this.type = TruckType.valueOf(type);
+        this.typeDescription = typeDescription;
+        this.status = TruckStatus.valueOf(status);
+        this.statusDescription = statusDescription;
+        this.note = note;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }
