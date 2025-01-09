@@ -48,6 +48,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             throw new NotFoundException("User not found with ID: " + id);
         }
 
+
         if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
             updateUserDTO.setPassword(passwordEncoder.encode(updateUserDTO.getPassword()));
         }

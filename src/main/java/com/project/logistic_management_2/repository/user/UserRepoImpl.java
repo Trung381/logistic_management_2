@@ -4,6 +4,7 @@ import com.project.logistic_management_2.dto.user.UpdateUserDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.QUser;
 import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.exception.def.EditNotAllowedException;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -35,6 +36,7 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
                 user.fullName.as("fullName"),
                 user.phone.as("phone"),
                 user.dateOfBirth.as("dateOfBirth"),
+                user.imagePath.as("imagePath"), //
                 user.note.as("note"),
                 user.username.as("username"),
                 user.password.as("password"),
@@ -78,33 +80,51 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
 
         JPAUpdateClause updateClause = query.update(qUser).where(whereClause);
 
+        boolean isUpdated = false;
+
         if (updateUserDTO.getFullName() != null) {
             updateClause.set(qUser.fullName, updateUserDTO.getFullName());
+            isUpdated = true;
         }
         if (updateUserDTO.getPhone() != null) {
             updateClause.set(qUser.phone, updateUserDTO.getPhone());
+            isUpdated = true;
         }
         if (updateUserDTO.getDateOfBirth() != null) {
             updateClause.set(qUser.dateOfBirth, updateUserDTO.getDateOfBirth());
+            isUpdated = true;
+        }
+        if (updateUserDTO.getImagePath() != null) {
+            updateClause.set(qUser.imagePath, updateUserDTO.getImagePath());
+            isUpdated = true;
         }
         if (updateUserDTO.getNote() != null) {
             updateClause.set(qUser.note, updateUserDTO.getNote());
+            isUpdated = true;
         }
         if (updateUserDTO.getUsername() != null) {
             updateClause.set(qUser.username, updateUserDTO.getUsername());
+            isUpdated = true;
         }
         if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
             updateClause.set(qUser.password, updateUserDTO.getPassword());
+            isUpdated = true;
         }
         if (updateUserDTO.getRoleId() != null) {
             updateClause.set(qUser.roleId, updateUserDTO.getRoleId());
+            isUpdated = true;
         }
         if (updateUserDTO.getStatus() != null) {
             updateClause.set(qUser.status, updateUserDTO.getStatus());
+            isUpdated = true;
+        }
+        if (isUpdated) {
+            updateClause.set(qUser.updatedAt, new Date());
+        } else {
+            throw new EditNotAllowedException("No data fields are updated!!!");
         }
 
-        // Fetch lại bản ghi đã được cập nhật
-        return updateClause.set(qUser.updatedAt, new Date()).execute() > 0;
+        return updateClause.execute() > 0;
     }
 
     @Modifying

@@ -119,6 +119,7 @@ CREATE TABLE `users` (
  `password` VARCHAR(255) NOT NULL,
  `phone` VARCHAR(20) NOT NULL,
  `date_of_birth` DATE NOT NULL,
+ `image_path` VARCHAR(255) NOT NULL,
  `note` VARCHAR(255),
  `role_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến vai trò",
  `status` INT NOT NULL DEFAULT 1 COMMENT "Trạng thái người dùng: 0 - Không hoạt động, 1 - Đang hoạt động",
@@ -200,7 +201,7 @@ CREATE TABLE `schedules` (
  `mooc_license` VARCHAR(255) NOT NULL,
  `attach_document` VARCHAR(255) COMMENT "Đường dẫn lưu tài liệu bổ sung",
  `departure_time` TIMESTAMP NOT NULL COMMENT "Thời gian khởi hành",
- `arrival_time` TIMESTAMP COMMENT "Thời gian hoàn thành",
+ `arrival_time` TIMESTAMP NOT NULL COMMENT "Thời gian hoàn thành",
  `note` TEXT COMMENT "Ghi chú của mỗi hành trình",
  `type` INT NOT NULL DEFAULT 1 COMMENT "Loại lịch trình: 0 - Chạy nội bộ, 1 - Tính lương",
  `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành",
@@ -310,12 +311,12 @@ COLLATE = utf8mb4_0900_ai_ci;
 
 
 -- Insert data into `users` table
-INSERT INTO `users` (`id`, `full_name`, `username`, `password`, `phone`, `date_of_birth`, `note`, `role_id`, `status`, `created_at`, `updated_at`) VALUES
-('US001', 'Nguyen Van A', 'nguyenvana', '123456', '0901234567', '1990-05-15', 'Admin user', 1, 1, NOW(), NOW()),
-('US002', 'Tran Thi B', 'tranthib', '123456', '0912345678', '1992-10-20', 'Accountant user', 2, 1, NOW(), NOW()),
-('US003', 'Le Van C', 'levanc', '123456', '0923456789', '1988-03-25', 'Manager user', 3, 1, NOW(), NOW()),
-('US005', 'Le Van C', 'admin123', '$2a$10$RjVfmafLNmmjvWKOSYQFI.zcJ7jxjyZYBwtg/fKWSqbtVYqB7pG86', '0923456789', '1988-03-25', 'Manager user', 1, 1, NOW(), NOW()),
-('US004', 'Pham Van D', 'phamvand', '123456', '0934567890', '1995-07-10', 'Driver user', 4, 1, NOW(), NOW());
+INSERT INTO `users` (`id`, `full_name`, `username`, `password`, `phone`, `date_of_birth`, `image_path`, `note`, `role_id`, `status`, `created_at`, `updated_at`) VALUES
+('US001', 'Nguyen Van A', 'nguyenvana', '123456', '0901234567', '1990-05-15', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Admin user', 1, 1, NOW(), NOW()),
+('US002', 'Tran Thi B', 'tranthib', '123456', '0912345678', '1992-10-20', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Accountant user', 2, 1, NOW(), NOW()),
+('US003', 'Le Van C', 'levanc', '123456', '0923456789', '1988-03-25', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Manager user', 3, 1, NOW(), NOW()),
+('US005', 'Le Van C', 'admin123', '$2a$10$RjVfmafLNmmjvWKOSYQFI.zcJ7jxjyZYBwtg/fKWSqbtVYqB7pG86', '0923456789', '1988-03-25', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Manager user', 1, 1, NOW(), NOW()),
+('US004', 'Pham Van D', 'phamvand', '123456', '0934567890', '1995-07-10', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Driver user', 4, 1, NOW(), NOW());
 
 
 -- Insert data into `salary` table
@@ -389,25 +390,8 @@ INSERT INTO `transactions` (`id`, `ref_user_id`, `goods_id`, `quantity`, `transa
  ('TRANS002', 'US002', 'GS002', 50, '2024-05-10 14:00:00', b'0', 'Kho A', b'0', NOW(), NOW(), 'giang', 'C:\giang'),
  ('TRANS003', 'US003', 'GS003', 200, '2024-05-11 09:00:00', b'1', 'Kho A', b'0', NOW(), NOW(), 'giang', 'C:\giang'),
  ('TRANS004', 'US003', 'GS004', 200, '2024-05-11 10:00:00', b'1', 'Kho B', b'0', NOW(), NOW(), 'giang', 'C:\giang');
- 
--- Triger trên bảng schedules - UPDATE
-DELIMITER //
--- Cập nhật trạng thái của xe tải hoặc mooc khi trạng thái lịch trình thay đổi
-CREATE TRIGGER UD_schedules_after_update_trigger
-AFTER UPDATE ON schedules
-FOR EACH ROW
-BEGIN
-	-- Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
-	-- Trạng thái xe: `status`: -1: Bảo trì, 0 - Không có sẵn, 1 - Có sẵn
-    DECLARE newStatus INT;
-    -- Khi status của lịch trình thay đổi
-    IF OLD.status != NEW.status THEN
-		SET newStatus = CASE 
-							WHEN NEW.status IN (-1, 2) THEN 1
-							WHEN NEW.status = 1 THEN 0
-                        END;
-		-- Cập nhật trạng thái xe
-		UPDATE `trucks` SET `status` = newStatus WHERE `license_plate` = OLD.truck_license OR `license_plate` = OLD.mooc_license;
-	END IF;
-END;//
-DELIMITER ;
+
+
+
+
+
