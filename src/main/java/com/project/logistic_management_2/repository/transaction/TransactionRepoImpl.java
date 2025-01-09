@@ -1,9 +1,11 @@
 package com.project.logistic_management_2.repository.transaction;
 
-import com.project.logistic_management_2.dto.request.TransactionDTO;
-import com.project.logistic_management_2.dto.transaction.UpdateTransactionDTO;
+import com.project.logistic_management_2.dto.transaction.TransactionDTO;
 import com.project.logistic_management_2.entity.Transaction;
+import com.project.logistic_management_2.enums.Pagination;
+import com.project.logistic_management_2.enums.transaction.TransactionType;
 import com.project.logistic_management_2.exception.def.EditNotAllowedException;
+import com.project.logistic_management_2.exception.def.InvalidFieldException;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.project.logistic_management_2.entity.QGoods.goods;
+import static com.project.logistic_management_2.entity.QSchedule.schedule;
 import static com.project.logistic_management_2.entity.QTransaction.transaction;
 import static com.project.logistic_management_2.entity.QUser.user;
 
@@ -50,10 +53,10 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
                 transaction.destination.as("destination"),
                 transaction.customerName.as("customerName"),
                 transaction.transactionTime.as("transactionTime"),
-                transaction.origin.as("origin"),
+                transaction.origin.as("origin"), //true f
                 new CaseBuilder()
-                        .when(transaction.origin.eq(true)).then("Nhập hàng")
-                        .otherwise("Xuất hàng").as("originDescription"),
+                        .when(transaction.origin.eq(true)).then(TransactionType.INBOUND_TRANSACTION.getTitle())
+                        .otherwise(TransactionType.OUTBOUND_TRANSACTION.getTitle()).as("originDescription"),
                 transaction.image.as("image"),
                 transaction.createdAt.as("createdAt"),
                 transaction.updatedAt.as("updatedAt")
@@ -63,7 +66,7 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
     @Override
     @Modifying
     @Transactional
-    public long updateTransaction(String id, UpdateTransactionDTO dto) {
+    public long updateTransaction(Transaction OldTransaction, String id, TransactionDTO dto) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(transaction.id.eq(id))
                 .and(transaction.deleted.eq(false));
@@ -71,36 +74,61 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
         JPAUpdateClause updateClause = new JPAUpdateClause(entityManager, transaction);
 
         boolean isUpdated = false;
+        boolean isChanged = false;
 
         if (dto.getRefUserId() != null) {
+            if(!dto.getRefUserId().equals(OldTransaction.getRefUserId())){
+                isChanged = true;
+            }
             updateClause.set(transaction.refUserId, dto.getRefUserId());
             isUpdated = true;
         }
         if (dto.getCustomerName() != null) {
+            if(!dto.getCustomerName().equals(OldTransaction.getCustomerName())){
+                isChanged = true;
+            }
             updateClause.set(transaction.customerName, dto.getCustomerName());
             isUpdated = true;
         }
         if (dto.getGoodsId() != null) {
+            if(!dto.getGoodsId().equals(OldTransaction.getGoodsId())){
+                isChanged = true;
+            }
             updateClause.set(transaction.goodsId, dto.getGoodsId());
             isUpdated = true;
         }
         if (dto.getQuantity() != null) {
+            if(!dto.getQuantity().equals(OldTransaction.getQuantity())){
+                isChanged = true;
+            }
             updateClause.set(transaction.quantity, dto.getQuantity());
             isUpdated = true;
         }
         if (dto.getDestination() != null) {
+            if(!dto.getDestination().equals(OldTransaction.getDestination())){
+                isChanged = true;
+            }
             updateClause.set(transaction.destination, dto.getDestination());
             isUpdated = true;
         }
         if (dto.getImage() != null) {
+            if(!dto.getImage().equals(OldTransaction.getImage())){
+                isChanged = true;
+            }
             updateClause.set(transaction.image, dto.getImage());
             isUpdated = true;
         }
         if (dto.getOrigin() != null) {
-            updateClause.set(transaction.origin, dto.getOrigin());
+            if(!dto.getOrigin().getValue().equals(OldTransaction.getOrigin())){
+                isChanged = true;
+            }
+            updateClause.set(transaction.origin, dto.getOrigin().getValue());
             isUpdated = true;
         }
         if (dto.getTransactionTime() != null) {
+            if(!dto.getTransactionTime().equals(OldTransaction.getTransactionTime())){
+                isChanged = true;
+            }
             updateClause.set(transaction.transactionTime, dto.getTransactionTime());
             isUpdated = true;
         }
@@ -108,7 +136,11 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
         if (isUpdated) {
             updateClause.set(transaction.updatedAt, new java.util.Date());
         } else {
-            throw new EditNotAllowedException("No data fields are updated!!!");
+            throw new InvalidFieldException("No data fields are updated!!!");
+        }
+
+        if(!isChanged) {
+            throw new EditNotAllowedException("Data is not changed!!!");
         }
 
         return updateClause.where(builder).execute();
@@ -130,7 +162,7 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
 
 
     @Override
-    public List<TransactionDTO> getTransactionByFilter(String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
+    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
 
         BooleanBuilder builder = new BooleanBuilder()
                 .and(transaction.deleted.eq(false));
@@ -151,10 +183,14 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
             builder.and(transaction.createdAt.loe(toDate));
         }
 
+        long offset = (long) (page - 1) * Pagination.TEN.getSize();
+
         return query.from(transaction)
                 .leftJoin(goods).on(goods.id.eq(transaction.goodsId))
                 .where(builder)
                 .select(transactionProjection())
+                .orderBy(transaction.updatedAt.desc())
+                .offset(offset)
                 .fetch();
     }
 

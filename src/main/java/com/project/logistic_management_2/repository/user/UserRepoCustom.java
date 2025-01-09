@@ -13,5 +13,5 @@ public interface UserRepoCustom {
     User findByUsername(String username);
     List<UserDTO> getDriver();
     List<UserDTO> getAdmin();
-    Boolean updateUser(String id, UpdateUserDTO updateUserDTO);
+    Boolean updateUser(User exitingUser,String id, UserDTO updateUserDTO);
 }

@@ -100,4 +100,11 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+
+    @ExceptionHandler(NotModifiedException.class)
+    public ResponseEntity<Object> handleNotModifiedException(NotModifiedException ex) {
+        return ResponseEntity.ok(
+                BaseResponse.ok(null, ex.getMessage())
+        );
+    }
 }

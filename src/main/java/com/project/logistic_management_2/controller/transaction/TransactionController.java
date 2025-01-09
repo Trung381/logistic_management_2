@@ -2,8 +2,7 @@ package com.project.logistic_management_2.controller.transaction;
 
 import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.BaseResponse;
-import com.project.logistic_management_2.dto.request.TransactionDTO;
-import com.project.logistic_management_2.dto.transaction.UpdateTransactionDTO;
+import com.project.logistic_management_2.dto.transaction.TransactionDTO;
 import com.project.logistic_management_2.service.transaction.TransactionService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
@@ -39,7 +38,7 @@ public class TransactionController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> updateTransaction(@PathVariable String id, @Valid @RequestBody UpdateTransactionDTO dto) {
+    public ResponseEntity<Object> updateTransaction(@PathVariable String id, @RequestBody TransactionDTO dto) {
         return ResponseEntity.ok(BaseResponse.ok(transactionService.updateTransaction(id, dto)));
     }
 
@@ -55,6 +54,7 @@ public class TransactionController {
 
     @GetMapping("/filter")
     public ResponseEntity<Object> getTransactionByFilter(
+            @RequestParam(required = false) int page,
             @RequestParam(required = false) String warehouseId,
             @RequestParam(required = false) Boolean origin,
             @RequestParam(required = false) String fromDate,
@@ -62,20 +62,21 @@ public class TransactionController {
 
         Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
 
-        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(warehouseId, origin, dateRange.getFirst(), dateRange.getSecond());
+        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(page, warehouseId, origin, dateRange.getFirst(), dateRange.getSecond());
 
         return ResponseEntity.ok(BaseResponse.ok(transactions));
     }
 
     @GetMapping("/export")
     public ResponseEntity<Object> exportTransaction(
+            @RequestParam int page,
             @RequestParam(required = false) String warehouseId,
             @RequestParam(required = false) Boolean origin,
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) throws Exception {
         Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
 
-        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(warehouseId, origin, dateRange.getFirst(), dateRange.getSecond());
+        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(page, warehouseId, origin, dateRange.getFirst(), dateRange.getSecond());
 
 
         if (!CollectionUtils.isEmpty(transactions)) {
