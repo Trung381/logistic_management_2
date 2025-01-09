@@ -5,9 +5,9 @@ import lombok.Getter;
 @Getter
 public enum TruckStatus {
     MAINTENANCE(-1, "Đang bảo trì"),
-    ON_JOURNEY(0, "Đang trong hành trình"),
+    APPROVED_SCHEDULE(0, "Lịch trình liên quan đã được duyệt"),
     AVAILABLE(1, "Có sẵn"),
-    WAITING_FOR_SCHEDULE_APPROVAL(2, "Chờ lịch trình được duyệt");
+    PENDING_SCHEDULE(2, "Lịch trình liên quan đang chờ xử lý");
 
     private final Integer value;
     private final String description;

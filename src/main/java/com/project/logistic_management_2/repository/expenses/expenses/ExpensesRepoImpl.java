@@ -76,7 +76,6 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         }
 
         long offset = (long) (page - 1) * Pagination.TEN.getSize();
-
         return query.from(expenses)
                 .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
                 .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))

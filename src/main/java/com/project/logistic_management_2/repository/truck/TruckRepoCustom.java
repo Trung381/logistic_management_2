@@ -12,4 +12,5 @@ public interface TruckRepoCustom {
     List<TruckDTO> getAllTrucks();
     List<TruckDTO> getTrucksByType(Integer type);
     long delete(Integer id);
+    Integer getTypeByLicensePlate(String licensePlate);
 }

@@ -7,7 +7,9 @@ import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.enums.schedule.ScheduleType;
+import com.project.logistic_management_2.enums.truck.TruckType;
 import com.project.logistic_management_2.exception.def.ConflictException;
+import com.project.logistic_management_2.exception.def.InvalidFieldException;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.schedule.ScheduleMapper;
@@ -26,11 +28,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.rmi.ServerException;
 import java.sql.Timestamp;
-import java.time.YearMonth;
-import java.util.Date;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -47,21 +49,30 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         }
         if (scheduleDTO.getType() == ScheduleType.PAYROLL) {
             if (scheduleDTO.getScheduleConfigId().isBlank()) {
-                throw new InvalidParameterException("Cấu hình lịch trình không được để trống!");
+                throw new InvalidFieldException("Cấu hình lịch trình không được để trống!");
             }
             if (scheduleDTO.getDepartureTime() == null) {
-                throw new InvalidParameterException("Thời gian lấy hàng không được để trống!");
+                throw new InvalidFieldException("Thời gian lấy hàng không được để trống!");
             } else {
-                if (scheduleDTO.getDepartureTime().before(new Date())) {
-                    throw new InvalidParameterException("Thời gian khởi hành không hợp lệ. Thời gian chỉ được tính sau thời điểm lịch trình được tạo!");
+                if (scheduleDTO.getDepartureTime().before(new java.util.Date())) {
+                    throw new InvalidFieldException("Thời gian khởi hành không hợp lệ. Thời gian chỉ được tính sau thời điểm lịch trình được tạo!");
                 }
             }
         }
-        if (truckRepo.getTruckByLicensePlate(scheduleDTO.getTruckLicense()).isEmpty()) {
-            throw new InvalidParameterException("Xe tải có biển số " + scheduleDTO.getTruckLicense() + " không tồn tại!");
+        validateTruck(scheduleDTO.getTruckLicense(), TruckType.TRUCK_HEAD);
+        validateTruck(scheduleDTO.getMoocLicense(), TruckType.MOOC);
+    }
+
+    private void validateTruck(String license, TruckType type) {
+        String message = null;
+        Integer typeNumberOfTruck = truckRepo.getTypeByLicensePlate(license);
+        if (typeNumberOfTruck == null) {
+            message = String.format("Xe tải có biển số %s không tồn tại!", license);
+        } else if (!typeNumberOfTruck.equals(type.getValue())) {
+            message = String.format("Loại xe đang chọn không hợp lệ. Vui lòng chọn %s!", type.getDescription());
         }
-        if (truckRepo.getTruckByLicensePlate(scheduleDTO.getMoocLicense()).isEmpty()) {
-            throw new InvalidParameterException("Rơ-mooc có biển số " + scheduleDTO.getMoocLicense() + " không tồn tại!");
+        if (message != null) {
+            throw new InvalidFieldException(message);
         }
     }
 
@@ -98,7 +109,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         scheduleRepo.save(schedule);
 
         // Gửi notification qua WebSocket
-        String notifyMsg = "Lịch trình mới được khởi tạo cần được phê duyệt lúc " + new Date();
+        String notifyMsg = "Lịch trình mới được khởi tạo cần được phê duyệt lúc " + new java.util.Date();
         notificationService.sendNotification("{\"message\":\"" + notifyMsg + "\"}");
 
         return scheduleRepo.getByID(schedule.getId()).get();
@@ -114,11 +125,17 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         //Chỉ sửa được trước ngày bắt đầu (departure time) hoặc chưa duyệt
         Date currentTime = new Date(System.currentTimeMillis());
         if (
-                ScheduleStatus.valueOf(schedule.getStatus()) != ScheduleStatus.WAITING_FOR_APPROVAL
+                ScheduleStatus.valueOf(schedule.getStatus()) != ScheduleStatus.PENDING
                         || (schedule.getDepartureTime() != null && schedule.getDepartureTime().before(currentTime))) {
             throw new ConflictException("Lịch trình đã hết thời gian được phép chỉnh sửa!");
         }
 
+        if (dto.getTruckLicense() != null) {
+            validateTruck(dto.getTruckLicense(), TruckType.TRUCK_HEAD);
+        }
+        if (dto.getMoocLicense() != null) {
+            validateTruck(dto.getMoocLicense(), TruckType.MOOC);
+        }
         scheduleMapper.updateSchedule(schedule, dto);
         scheduleRepo.save(schedule);
 
@@ -140,17 +157,17 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     }
 
     @Override
-    public long approveByID(String id) throws ServerException {
+    public long approveByID(String id, boolean approved) throws ServerException {
         checkPermission(type, PermissionKey.APPROVE);
 
         ScheduleStatus status = scheduleRepo.getStatusByID(id);
         if (status == null) {
             throw new NotFoundException("Lịch trình cần duyệt không tồn tại!");
-        } else if (status != ScheduleStatus.WAITING_FOR_APPROVAL) {
+        } else if (status != ScheduleStatus.PENDING) {
             return -1; //Thông báo đã duyệt
         }
 
-        long numOfRowsApproved = scheduleRepo.approve(id);
+        long numOfRowsApproved = scheduleRepo.approve(id, approved);
         if (numOfRowsApproved == 0) {
             throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
         }
@@ -165,7 +182,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             throw new NotFoundException("Lịch trình không tồn tại!");
         }
         switch (status) {
-            case ScheduleStatus.WAITING_FOR_APPROVAL, ScheduleStatus.NOT_APPROVED
+            case ScheduleStatus.PENDING, ScheduleStatus.REJECTED
                     -> throw new ConflictException("Lịch trình chưa/không được duyệt để di chuyển!");
             case ScheduleStatus.COMPLETED -> { return ScheduleStatus.COMPLETED.getValue(); }
         }
@@ -178,27 +195,28 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     }
 
     @Override
-    public List<ScheduleDTO> report(String license, String period) {
+    public List<ScheduleDTO> report(String license, int year, int month) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        YearMonth periodYM = parsePeriod(period);
-
-        //Báo cáo theo fe (Có cột số chuyến phát sinh)
-        return scheduleRepo.exportReport(license, periodYM);
+        Date fromDate = convertToDate(year, month);
+        Date toDate = convertToDate(year, (month % 12) + 1);
+        return scheduleRepo.exportReport(license, fromDate, toDate);
     }
 
     @Override
-    public List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, String period) {
-        YearMonth periodYM = parsePeriod(period);
-        return scheduleRepo.exportScheduleSalary(driverId, periodYM);
+    public List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, int year, int month) {
+        checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
+        Date fromDate = convertToDate(year, month);
+        Date toDate = convertToDate(year, (month % 12) + 1);
+        return scheduleRepo.exportScheduleSalary(driverId, fromDate, toDate);
     }
 
-    private YearMonth parsePeriod(String period) {
-        //Check định dạng: yyyy-MM
-        String regex = "^(\\d{4}-(0[1-9]|1[0-2]))$";
-        if (!Pattern.matches(regex, period)) {
-            throw new InvalidParameterException("Định dạng chu kỳ không hợp lệ! Dạng đúng: yyyy-MM");
+    private Date convertToDate(int year, int month) {
+        try {
+            LocalDate localDate = LocalDate.of(year, month, 1);
+            return Date.valueOf(localDate);
+        } catch (DateTimeException ex) {
+            throw new InvalidParameterException("Chu kỳ đã chọn không hợp lệ!");
         }
-        return YearMonth.parse(period);
     }
 
     @Override

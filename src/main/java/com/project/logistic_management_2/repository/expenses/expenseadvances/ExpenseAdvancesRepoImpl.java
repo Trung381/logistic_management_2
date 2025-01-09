@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.repository.expenses.expenseadvances;
 
 import com.project.logistic_management_2.dto.expenses.ExpenseAdvancesDTO;
+import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -40,13 +41,16 @@ public class ExpenseAdvancesRepoImpl extends BaseRepo implements ExpenseAdvances
     }
 
     @Override
-    public List<ExpenseAdvancesDTO> getAll() {
+    public List<ExpenseAdvancesDTO> getAll(int page) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(expenseAdvances.deleted.eq(false));
 
+        long offset = (long) (page - 1) * Pagination.TEN.getSize();
         return query.from(expenseAdvances)
                 .where(builder)
                 .select(constructorExpression())
+                .offset(offset)
+                .limit(Pagination.TEN.getSize())
                 .fetch();
     }
 

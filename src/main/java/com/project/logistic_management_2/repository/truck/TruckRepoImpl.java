@@ -36,16 +36,16 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
                 user.fullName.as("driverName"),
                 truck.type.as("type"),
                 new CaseBuilder()
-                        .when(truck.type.eq(TruckType.TRUCK_HEAD.getValue())).then("Đầu xe tải")
-                        .when(truck.type.eq(TruckType.MOOC.getValue())).then("Mooc")
+                        .when(truck.type.eq(TruckType.TRUCK_HEAD.getValue())).then(TruckType.TRUCK_HEAD.getDescription())
+                        .when(truck.type.eq(TruckType.MOOC.getValue())).then(TruckType.MOOC.getDescription())
                         .otherwise("Không xác định")
                         .as("typeDescription"),
                 truck.status.as("status"),
                 new CaseBuilder()
-                        .when(truck.status.eq(TruckStatus.ON_JOURNEY.getValue())).then("Đang trong hành trình")
-                        .when(truck.status.eq(TruckStatus.AVAILABLE.getValue())).then("Sẵn sàng")
-                        .when(truck.status.eq(TruckStatus.MAINTENANCE.getValue())).then("Đang bảo trì")
-                        .when(truck.status.eq(TruckStatus.WAITING_FOR_SCHEDULE_APPROVAL.getValue())).then("Đang chờ duyệt lịch trình")
+                        .when(truck.status.eq(TruckStatus.APPROVED_SCHEDULE.getValue())).then(TruckStatus.APPROVED_SCHEDULE.getDescription())
+                        .when(truck.status.eq(TruckStatus.AVAILABLE.getValue())).then(TruckStatus.AVAILABLE.getDescription())
+                        .when(truck.status.eq(TruckStatus.MAINTENANCE.getValue())).then(TruckStatus.MAINTENANCE.getDescription())
+                        .when(truck.status.eq(TruckStatus.PENDING_SCHEDULE.getValue())).then(TruckStatus.PENDING_SCHEDULE.getDescription())
                         .otherwise("Không xác định")
                         .as("statusDescription"),
                 truck.note.as("note"),
@@ -108,6 +108,17 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
                 .where(builder)
                 .set(truck.deleted, true)
                 .execute();
+    }
+
+    @Override
+    public Integer getTypeByLicensePlate(String licensePlate) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(truck.licensePlate.eq(licensePlate))
+                .and(truck.deleted.eq(false));
+        return query.from(truck)
+                .where(builder)
+                .select(truck.type)
+                .fetchOne();
     }
 
     public List<TruckDTO> getTrucksByType(Integer type) {
