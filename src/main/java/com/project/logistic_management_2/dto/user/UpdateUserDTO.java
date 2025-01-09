@@ -10,6 +10,7 @@ public class UpdateUserDTO {
     private String fullName;
     private String phone;
     private Date dateOfBirth;
+    private String imagePath;
     private String note;
     private String username;
     private String password;

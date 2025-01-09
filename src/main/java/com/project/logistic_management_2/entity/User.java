@@ -25,6 +25,9 @@ public class User {
     @Column(name = "date_of_birth")
     private Date dateOfBirth;
 
+    @Column(name = "image_path")
+    private String imagePath;
+
     @Column(name = "note")
     private String note;
 

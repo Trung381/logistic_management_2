@@ -3,6 +3,7 @@ package com.project.logistic_management_2.repository.transaction;
 import com.project.logistic_management_2.dto.request.TransactionDTO;
 import com.project.logistic_management_2.dto.transaction.UpdateTransactionDTO;
 import com.project.logistic_management_2.entity.Transaction;
+import com.project.logistic_management_2.exception.def.EditNotAllowedException;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -69,32 +70,46 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
 
         JPAUpdateClause updateClause = new JPAUpdateClause(entityManager, transaction);
 
+        boolean isUpdated = false;
+
         if (dto.getRefUserId() != null) {
             updateClause.set(transaction.refUserId, dto.getRefUserId());
+            isUpdated = true;
         }
         if (dto.getCustomerName() != null) {
             updateClause.set(transaction.customerName, dto.getCustomerName());
+            isUpdated = true;
         }
         if (dto.getGoodsId() != null) {
             updateClause.set(transaction.goodsId, dto.getGoodsId());
+            isUpdated = true;
         }
         if (dto.getQuantity() != null) {
             updateClause.set(transaction.quantity, dto.getQuantity());
+            isUpdated = true;
         }
         if (dto.getDestination() != null) {
             updateClause.set(transaction.destination, dto.getDestination());
+            isUpdated = true;
         }
         if (dto.getImage() != null) {
             updateClause.set(transaction.image, dto.getImage());
+            isUpdated = true;
         }
         if (dto.getOrigin() != null) {
             updateClause.set(transaction.origin, dto.getOrigin());
+            isUpdated = true;
         }
         if (dto.getTransactionTime() != null) {
             updateClause.set(transaction.transactionTime, dto.getTransactionTime());
+            isUpdated = true;
         }
 
-        updateClause.set(transaction.updatedAt, new java.util.Date());
+        if (isUpdated) {
+            updateClause.set(transaction.updatedAt, new java.util.Date());
+        } else {
+            throw new EditNotAllowedException("No data fields are updated!!!");
+        }
 
         return updateClause.where(builder).execute();
     }

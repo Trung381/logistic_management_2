@@ -119,6 +119,7 @@ CREATE TABLE `users` (
  `password` VARCHAR(255) NOT NULL,
  `phone` VARCHAR(20) NOT NULL,
  `date_of_birth` DATE NOT NULL,
+ `image_path` VARCHAR(255) NOT NULL,
  `note` VARCHAR(255),
  `role_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến vai trò",
  `status` INT NOT NULL DEFAULT 1 COMMENT "Trạng thái người dùng: 0 - Không hoạt động, 1 - Đang hoạt động",
@@ -310,12 +311,12 @@ COLLATE = utf8mb4_0900_ai_ci;
 
 
 -- Insert data into `users` table
-INSERT INTO `users` (`id`, `full_name`, `username`, `password`, `phone`, `date_of_birth`, `note`, `role_id`, `status`, `created_at`, `updated_at`) VALUES
-('US001', 'Nguyen Van A', 'nguyenvana', '123456', '0901234567', '1990-05-15', 'Admin user', 1, 1, NOW(), NOW()),
-('US002', 'Tran Thi B', 'tranthib', '123456', '0912345678', '1992-10-20', 'Accountant user', 2, 1, NOW(), NOW()),
-('US003', 'Le Van C', 'levanc', '123456', '0923456789', '1988-03-25', 'Manager user', 3, 1, NOW(), NOW()),
-('US005', 'Le Van C', 'admin123', '$2a$10$RjVfmafLNmmjvWKOSYQFI.zcJ7jxjyZYBwtg/fKWSqbtVYqB7pG86', '0923456789', '1988-03-25', 'Manager user', 1, 1, NOW(), NOW()),
-('US004', 'Pham Van D', 'phamvand', '123456', '0934567890', '1995-07-10', 'Driver user', 4, 1, NOW(), NOW());
+INSERT INTO `users` (`id`, `full_name`, `username`, `password`, `phone`, `date_of_birth`, `image_path`, `note`, `role_id`, `status`, `created_at`, `updated_at`) VALUES
+('US001', 'Nguyen Van A', 'nguyenvana', '123456', '0901234567', '1990-05-15', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Admin user', 1, 1, NOW(), NOW()),
+('US002', 'Tran Thi B', 'tranthib', '123456', '0912345678', '1992-10-20', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Accountant user', 2, 1, NOW(), NOW()),
+('US003', 'Le Van C', 'levanc', '123456', '0923456789', '1988-03-25', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Manager user', 3, 1, NOW(), NOW()),
+('US005', 'Le Van C', 'admin123', '$2a$10$RjVfmafLNmmjvWKOSYQFI.zcJ7jxjyZYBwtg/fKWSqbtVYqB7pG86', '0923456789', '1988-03-25', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Manager user', 1, 1, NOW(), NOW()),
+('US004', 'Pham Van D', 'phamvand', '123456', '0934567890', '1995-07-10', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Driver user', 4, 1, NOW(), NOW());
 
 
 -- Insert data into `salary` table
