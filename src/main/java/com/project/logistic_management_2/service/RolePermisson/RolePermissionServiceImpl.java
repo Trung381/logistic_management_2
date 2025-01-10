@@ -4,7 +4,6 @@ import com.project.logistic_management_2.dto.rolepermission.UpdateRolePermission
 import com.project.logistic_management_2.entity.QRolePermission;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
-import com.project.logistic_management_2.mapper.rolePermission.RolePermissionMapper;
 import com.project.logistic_management_2.repository.rolePermission.RolePermissionRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.querydsl.core.types.Path;
@@ -23,7 +22,6 @@ public class RolePermissionServiceImpl extends BaseService implements RolePermis
 
     private final RolePermissionRepo rolePermissionRepo;
     private PermissionType type = PermissionType.PERMISSIONS;
-    private final RolePermissionMapper rolePermissionMapper;
 
     @Override
     public boolean hasPermission(PermissionType type, PermissionKey key){

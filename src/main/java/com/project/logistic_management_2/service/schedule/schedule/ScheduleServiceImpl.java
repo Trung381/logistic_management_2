@@ -3,7 +3,6 @@ package com.project.logistic_management_2.service.schedule.schedule;
 import com.project.logistic_management_2.dto.attached.AttachedImagePathsDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
-import com.project.logistic_management_2.entity.AttachedImage;
 import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.entity.Truck;
 import com.project.logistic_management_2.enums.attached.AttachedType;
@@ -14,12 +13,11 @@ import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import com.project.logistic_management_2.enums.truck.TruckStatus;
 import com.project.logistic_management_2.enums.truck.TruckType;
 import com.project.logistic_management_2.exception.def.*;
-import com.project.logistic_management_2.mapper.attached.AttachedImageMapper;
 import com.project.logistic_management_2.mapper.schedule.ScheduleMapper;
-import com.project.logistic_management_2.repository.attached.AttachedImageRepo;
 import com.project.logistic_management_2.repository.schedule.schedule.ScheduleRepo;
 import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.service.attached.AttachedImageService;
 import com.project.logistic_management_2.service.notification.NotificationService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;
@@ -45,8 +43,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     private final TruckRepo truckRepo;
     private final ScheduleMapper scheduleMapper;
     private final NotificationService notificationService;
-    private final AttachedImageRepo attachedRepo;
-    private final AttachedImageMapper attachedMapper;
+    private final AttachedImageService attachedService;
     private final PermissionType type = PermissionType.SCHEDULES;
 
     private <T> void validateDTO(T dto) {
@@ -194,11 +191,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             case ScheduleStatus.COMPLETED ->
                     throw new NotModifiedException("Chuyến đi đã được đánh dấu là hoàn thành trước đó!");
         }
-
-        List<String> attachedImagePaths = attachedImagePathsDTO.getAttachedImagePaths();
-        List<AttachedImage> attachedImages = attachedMapper.toAttachedImages(id, AttachedType.ATTACHED_OF_SCHEDULE, attachedImagePaths);
-        attachedRepo.saveAll(attachedImages);
-
+        attachedService.addAttachedImages(id, AttachedType.ATTACHED_OF_SCHEDULE, attachedImagePathsDTO);
         long numOfRowsMarked = scheduleRepo.markComplete(id);
         if (numOfRowsMarked == 0) {
             throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");

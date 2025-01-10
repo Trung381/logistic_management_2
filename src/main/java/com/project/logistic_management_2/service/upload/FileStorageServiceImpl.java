@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.*;
+import java.rmi.ServerException;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,18 +24,15 @@ public class FileStorageServiceImpl implements FileStoarageService {
                 .toAbsolutePath().normalize();
         try {
             Files.createDirectories(this.fileStorageLocation);
-            //System.out.println("Thư mục lưu trữ file: " + this.fileStorageLocation.toString());
         } catch (Exception ex) {
             throw new RuntimeException("Không thể tạo thư mục lưu trữ file!", ex);
         }
     }
 
     public String storeFile(MultipartFile file) {
-        // Lấy tên file gốc
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
         try {
-            // Kiểm tra tên file hợp lệ
             if(fileName.contains("..")) {
                 throw new RuntimeException("Tên file không hợp lệ: " + fileName);
             }
@@ -46,6 +44,7 @@ public class FileStorageServiceImpl implements FileStoarageService {
             return fileName;
         } catch (IOException ex) {
             throw new RuntimeException("Không thể lưu file " + fileName, ex);
+//            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
         }
     }
 
@@ -63,7 +62,7 @@ public class FileStorageServiceImpl implements FileStoarageService {
         }
     }
 
-    public void deleteFiles(List<String> fileNames) {
+    public void deleteFiles(String[] fileNames) throws ServerException {
         for (String fileName : fileNames) {
             try {
                 Path filePathToDelete = this.fileStorageLocation.resolve(fileName).normalize();
@@ -75,6 +74,7 @@ public class FileStorageServiceImpl implements FileStoarageService {
                 }
             } catch (IOException ex) {
                 System.err.println("Lỗi khi xoá file " + fileName + ":" +  ex.getMessage());
+                throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
             }
         }
     }

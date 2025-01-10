@@ -13,11 +13,10 @@ import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.exception.def.NotModifiedException;
-import com.project.logistic_management_2.mapper.attached.AttachedImageMapper;
 import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
-import com.project.logistic_management_2.repository.attached.AttachedImageRepo;
 import com.project.logistic_management_2.repository.expenses.expenses.ExpensesRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.service.attached.AttachedImageService;
 import com.project.logistic_management_2.service.notification.NotificationService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;
@@ -45,8 +44,7 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     private final ExpensesRepo expensesRepo;
     private final ExpensesMapper expensesMapper;
     private final NotificationService notificationService;
-    private final AttachedImageMapper attachedMapper;
-    private final AttachedImageRepo attachedRepo;
+    private final AttachedImageService attachedService;
     private final PermissionType type = PermissionType.EXPENSES;
 
     @Override
@@ -76,10 +74,9 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     public ExpensesDTO create(ExpensesDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
 
-        String[] attachedImagePaths = dto.getAttachedPaths().split(",");
+        String[] attachedImagePaths = dto.getAttachedPaths();
         Expenses expenses = expensesMapper.toExpenses(dto);
-        List<AttachedImage> attachedImages = attachedMapper.toAttachedImages(expenses.getId(), AttachedType.ATTACHED_OF_EXPENSES, attachedImagePaths);
-        attachedRepo.saveAll(attachedImages);
+        attachedService.addAttachedImages(expenses.getId(), AttachedType.ATTACHED_OF_EXPENSES, attachedImagePaths);
         expensesRepo.save(expenses);
 
         String notifyMsg = "Có một chi phí được tạo mới cần được phê duyệt lúc " + new Date();

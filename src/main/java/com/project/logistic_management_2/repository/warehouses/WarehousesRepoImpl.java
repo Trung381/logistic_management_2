@@ -17,10 +17,8 @@ public class WarehousesRepoImpl extends BaseRepo implements WarehousesRepoCustom
     }
     @Override
     public Optional<Warehouses> getWarehouseById(String id) {
-
         BooleanBuilder builder = new BooleanBuilder()
                 .and(warehouses.id.eq(id));
-
         return Optional.ofNullable(
                 query.from(warehouses)
                         .where(builder)

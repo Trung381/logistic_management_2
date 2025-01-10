@@ -3,6 +3,7 @@ package com.project.logistic_management_2.dto.expenses;
 import com.project.logistic_management_2.annotations.ExportColumn;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -31,9 +32,10 @@ public class ExpensesDTO {
     @ExportColumn(name = "Ghi chú")
     private String note;
 
-    @NotBlank(message = "Vui lòng cung cấp ít nhất một ảnh minh chứng!")
+    @NotEmpty(message = "Vui lòng cung cấp ít nhất một ảnh minh chứng!")
     @ExportColumn(name = "Hóa đơn")
-    private String attachedPaths;
+//    private String attachedPaths;
+    private String[] attachedPaths = {};
 
     @NotBlank(message = "Thông tin lịch trình không được để trống!")
     @ExportColumn(name = "Mã hành trình")
@@ -61,7 +63,9 @@ public class ExpensesDTO {
         this.expensesConfigType = expensesConfigType;
         this.amount = amount;
         this.note = note;
-        this.attachedPaths = attachedPaths;
+        if (attachedPaths != null) {
+            this.attachedPaths = attachedPaths.split(",");
+        }
         this.scheduleId = scheduleId;
         this.status = ExpensesStatus.valueOf(status);
         this.createdAt = createdAt;

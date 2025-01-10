@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +73,7 @@ public class FileController {
     }
 
     @PostMapping("/delete/multiple")
-    public ResponseEntity<String> deleteMultipleFiles(@RequestBody List<String> fileNames) {
+    public ResponseEntity<String> deleteMultipleFiles(@RequestBody String[] fileNames) throws ServerException {
         fileStorageService.deleteFiles(fileNames);
         return new ResponseEntity<>("Đã xoá các file được yêu cầu.", HttpStatus.OK);
     }

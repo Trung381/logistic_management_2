@@ -49,7 +49,7 @@ public class ScheduleDTO {
     private String note;
 
     //Ảnh đính kèm
-    private String attachedPaths;
+    private String[] attachedPaths = {};
 
     //Loại hành trình: nội bộ/tính lương
     @NotNull(message = "Loại hành trình không được để trống")
@@ -76,7 +76,9 @@ public class ScheduleDTO {
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
         this.note = note;
-        this.attachedPaths = attachedPaths;
+        if (attachedPaths != null) {
+            this.attachedPaths = attachedPaths.split(",");
+        }
         this.type = ScheduleType.valueOf(type);
         this.status = ScheduleStatus.valueOf(status);
         this.createdAt = createdAt;
