@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.*;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -59,6 +60,22 @@ public class FileStorageServiceImpl implements FileStoarageService {
             }
         } catch (MalformedURLException ex) {
             throw new RuntimeException("File không tồn tại " + fileName, ex);
+        }
+    }
+
+    public void deleteFiles(List<String> fileNames) {
+        for (String fileName : fileNames) {
+            try {
+                Path filePathToDelete = this.fileStorageLocation.resolve(fileName).normalize();
+                boolean deleted = Files.deleteIfExists(filePathToDelete);
+                if (deleted) {
+                    System.out.println("Đã xoá file: " + fileName);
+                } else {
+                    System.out.println("Không tìm thấy file để xoá: " + fileName);
+                }
+            } catch (IOException ex) {
+                System.err.println("Lỗi khi xoá file " + fileName + ":" +  ex.getMessage());
+            }
         }
     }
 }
