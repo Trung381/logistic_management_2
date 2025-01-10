@@ -64,9 +64,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
 
     @Override
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers(int page) {
         checkPermission(type, PermissionKey.VIEW);
-        return userRepo.getAll();
+        return userRepo.getAll(page);
     }
 
     @Override
@@ -93,15 +93,15 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public List<UserDTO> getDriver() {
+    public List<UserDTO> getDriver(int page) {
         checkPermission(type, PermissionKey.VIEW);
-        return userRepo.getDriver();
+        return userRepo.getDriver(page);
     }
 
     @Override
-    public List<UserDTO> getAdmin() {
+    public List<UserDTO> getAdmin(int page) {
         checkPermission(type, PermissionKey.VIEW);
-        return userRepo.getAdmin();
+        return userRepo.getAdmin(page);
     }
 
     @Override
