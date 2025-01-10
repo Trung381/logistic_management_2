@@ -40,7 +40,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public User updateUser(String id, UpdateUserDTO updateUserDTO) {
+    public User updateUser(String id, UserDTO updateUserDTO) {
         checkPermission(type, PermissionKey.WRITE);
 
         User existingUser = userRepo.getUserById(id);
@@ -54,7 +54,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 
         entityManager.clear();
-        if (!userRepo.updateUser(id, updateUserDTO)) {
+        if (!userRepo.updateUser(existingUser,id, updateUserDTO)) {
             throw new RuntimeException("Failed to update user with ID: " + id);
         }
 

@@ -2,7 +2,7 @@ package com.project.logistic_management_2.utils;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
-import com.project.logistic_management_2.dto.request.TransactionDTO;
+import com.project.logistic_management_2.dto.transaction.TransactionDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.truck.TruckDTO;

@@ -4,24 +4,19 @@ import lombok.Getter;
 
 @Getter
 public enum TransactionType {
-    INBOUND_TRANSACTION(0, "Giao dịch nhập"),
-    OUTBOUND_TRANSACTION(1, "Giao dịch xuất");
+    INBOUND_TRANSACTION(false, "Nhập hàng"),
+    OUTBOUND_TRANSACTION(true, "Xuất hàng");
 
-    private final int value;
+    private final Boolean value;
     private final String title;
 
-    TransactionType(int value, String title) {
+    TransactionType(Boolean value, String title) {
         this.value = value;
         this.title = title;
     }
 
-    public static TransactionType valueOf(int value) {
-        TransactionType[] values = TransactionType.values();
-        for (TransactionType status : values) {
-            if (status.value == value) {
-                return status;
-            }
-        }
-        throw new IllegalArgumentException("");
+    public static TransactionType valueOf(Boolean value) {
+        if(value) return OUTBOUND_TRANSACTION;
+        else return INBOUND_TRANSACTION;
     }
 }

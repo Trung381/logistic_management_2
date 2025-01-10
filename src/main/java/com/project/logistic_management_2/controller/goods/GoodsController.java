@@ -2,7 +2,6 @@ package com.project.logistic_management_2.controller.goods;
 
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.request.GoodsDTO;
-import com.project.logistic_management_2.dto.request.TransactionDTO;
 import com.project.logistic_management_2.service.goods.GoodsService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
 import java.util.List;
 
 @RestController

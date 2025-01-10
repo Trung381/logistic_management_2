@@ -1,6 +1,7 @@
-package com.project.logistic_management_2.dto.request;
+package com.project.logistic_management_2.dto.transaction;
 
 import com.project.logistic_management_2.annotations.ExportColumn;
+import com.project.logistic_management_2.enums.transaction.TransactionType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -42,16 +43,32 @@ public class TransactionDTO {
     private Date transactionTime;
 
     @NotNull(message = "Loại giao dịch không được để trống")
-    private Boolean origin;
+    private TransactionType origin;
     @ExportColumn(name = "Loại giao dịch")
     private String originDescription;
 
     private String image;
 
+    public TransactionDTO(String id, String refUserId, String fullNameRefUser, String goodsId, String goodsName, Float quantity, String destination, String customerName, Date transactionTime, Boolean origin, String originDescription, String image, Date createdAt, Date updatedAt) {
+        this.id = id;
+        this.refUserId = refUserId;
+        this.fullNameRefUser = fullNameRefUser;
+        this.goodsId = goodsId;
+        this.goodsName = goodsName;
+        this.quantity = quantity;
+        this.destination = destination;
+        this.customerName = customerName;
+        this.transactionTime = transactionTime;
+        this.origin = TransactionType.valueOf(origin);
+        this.originDescription = originDescription;
+        this.image = image;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     private Date createdAt;
 
     private Date updatedAt;
-
 
 }
 
