@@ -63,17 +63,4 @@ public class TransactionMapper {
     }
 
 
-    public void updateTransaction(Transaction transaction, TransactionDTO dto) {
-        if (transaction == null || dto == null) return;
-        Optional.ofNullable(dto.getRefUserId()).ifPresent(transaction::setRefUserId);
-        Optional.ofNullable(dto.getCustomerName()).ifPresent(transaction::setCustomerName);
-        Optional.ofNullable(dto.getGoodsId()).ifPresent(transaction::setGoodsId);
-        Optional.ofNullable(dto.getQuantity()).ifPresent(transaction::setQuantity);
-        Optional.ofNullable(dto.getTransactionTime()).ifPresent(transaction::setTransactionTime);
-        Optional.ofNullable(dto.getOrigin()).ifPresent(transaction::setOrigin);
-        Optional.ofNullable(dto.getDestination()).ifPresent(transaction::setDestination);
-        Optional.ofNullable(dto.getImage()).ifPresent(transaction::setImage);
-        transaction.setUpdatedAt(new Date());
-    }
-
 }
