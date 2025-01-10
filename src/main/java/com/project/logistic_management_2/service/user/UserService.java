@@ -13,11 +13,11 @@ import java.util.List;
 public interface UserService {
     User createUser(UserDTO userDto);
     User updateUser(String id, UserDTO updateUserDTO);
-    List<User> getAllUsers();
+    List<User> getAllUsers(int page);
     User getUserById(String id);
     String deleteById(String id);
     User findByUsername(String username);
-    List<UserDTO> getDriver();
-    List<UserDTO> getAdmin();
+    List<UserDTO> getDriver(int page);
+    List<UserDTO> getAdmin(int page);
     List<User> importUserData(MultipartFile importFile);
 }

@@ -191,6 +191,7 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
                 .select(transactionProjection())
                 .orderBy(transaction.updatedAt.desc())
                 .offset(offset)
+                .limit(Pagination.TEN.getSize())
                 .fetch();
     }
 

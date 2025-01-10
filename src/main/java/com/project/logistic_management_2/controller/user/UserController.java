@@ -48,8 +48,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponse<List<User>>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<BaseResponse<List<User>>> getAllUsers(@RequestParam int page) {
+        List<User> users = userService.getAllUsers(page);
         return ResponseEntity.ok(BaseResponse.ok(users));
     }
 
@@ -66,20 +66,20 @@ public class UserController {
     }
 
     @GetMapping("/driver")
-    public ResponseEntity<BaseResponse<List<UserDTO>>> getDriver() {
-        List<UserDTO> users = userService.getDriver();
+    public ResponseEntity<BaseResponse<List<UserDTO>>> getDriver(@RequestParam int page) {
+        List<UserDTO> users = userService.getDriver(page);
         return ResponseEntity.ok(BaseResponse.ok(users));
     }
 
     @GetMapping("/admin")
-    public ResponseEntity<BaseResponse<List<UserDTO>>> getAdmin() {
-        List<UserDTO> users = userService.getAdmin();
+    public ResponseEntity<BaseResponse<List<UserDTO>>> getAdmin(@RequestParam int page) {
+        List<UserDTO> users = userService.getAdmin(page);
         return ResponseEntity.ok(BaseResponse.ok(users));
     }
 
     @GetMapping("/export/driver")
-    public ResponseEntity<Object> exportDriver() throws Exception {
-        List<UserDTO> users = userService.getDriver();
+    public ResponseEntity<Object> exportDriver(@RequestParam int page) throws Exception {
+        List<UserDTO> users = userService.getDriver(page);
 
         if (!CollectionUtils.isEmpty(users)) {
             String fileName = "Driver Export" + ".xlsx";
@@ -101,8 +101,8 @@ public class UserController {
     }
 
     @GetMapping("/export/admin")
-    public ResponseEntity<Object> exportAdmin() throws Exception {
-        List<UserDTO> users = userService.getAdmin();
+    public ResponseEntity<Object> exportAdmin(@RequestParam int page) throws Exception {
+        List<UserDTO> users = userService.getAdmin(page);
 
         if (!CollectionUtils.isEmpty(users)) {
             String fileName = "Admin Export" + ".xlsx";
