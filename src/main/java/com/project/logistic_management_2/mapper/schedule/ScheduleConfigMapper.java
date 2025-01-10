@@ -17,6 +17,17 @@ import java.util.stream.Collectors;
 public class ScheduleConfigMapper {
     public ScheduleConfig toScheduleConfig(ScheduleConfigDTO dto) {
         if (dto == null) return null;
+        return createScheduleConfig(dto);
+    }
+
+    public List<ScheduleConfig> toScheduleConfigList(List<ScheduleConfigDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::createScheduleConfig).collect(Collectors.toList());
+    }
+
+    private ScheduleConfig createScheduleConfig(ScheduleConfigDTO dto) {
         return ScheduleConfig.builder()
                 .id(Utils.genID(IDKey.SCHEDULE_CONFIG))
                 .placeA(dto.getPlaceA())
@@ -27,25 +38,6 @@ public class ScheduleConfigMapper {
                 .createdAt(new Date())
                 .updatedAt(new Date())
                 .build();
-    }
-
-    public List<ScheduleConfig> toScheduleConfigList(List<ScheduleConfigDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return dtos.stream().map(dto ->
-                ScheduleConfig.builder()
-                        .id(Utils.genID(IDKey.SCHEDULE_CONFIG))
-                        .placeA(dto.getPlaceA())
-                        .placeB(dto.getPlaceB())
-                        .amount(dto.getAmount())
-                        .note(dto.getNote())
-                        .deleted(false)
-                        .createdAt(new Date())
-                        .updatedAt(new Date())
-                        .build()
-        ).collect(Collectors.toList());
     }
 
     public void updateScheduleConfig(ScheduleConfig config, ScheduleConfigDTO dto) {

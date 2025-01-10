@@ -18,40 +18,28 @@ import java.util.stream.Collectors;
 public class ExpensesMapper {
     public Expenses toExpenses(ExpensesDTO dto) {
         if (dto == null) return null;
-
-        return Expenses.builder()
-                .id(Utils.genID(IDKey.EXPENSES))
-                .scheduleId(dto.getScheduleId())
-                .expensesConfigId(dto.getExpensesConfigId())
-                .amount(dto.getAmount())
-                .note(dto.getNote())
-                .imgPath(dto.getImgPath())
-                .status(ExpensesStatus.PENDING.getValue())
-                .deleted(false)
-                .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
-                .updatedAt(new Date())
-                .build();
+        return createExpenses(dto);
     }
 
     public List<Expenses> toExpensesList(List<ExpensesDTO> dtos) {
         if(dtos == null || dtos.isEmpty()) {
             return Collections.emptyList();
         }
+        return dtos.stream().map(this::createExpenses).collect(Collectors.toList());
+    }
 
-        return dtos.stream().map(dto ->
-                Expenses.builder()
-                        .id(Utils.genID(IDKey.EXPENSES))
-                        .scheduleId(dto.getScheduleId())
-                        .expensesConfigId(dto.getExpensesConfigId())
-                        .amount(dto.getAmount())
-                        .note(dto.getNote())
-                        .imgPath(dto.getImgPath())
-                        .status(ExpensesStatus.PENDING.getValue())
-                        .deleted(false)
-                        .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
-                        .updatedAt(new Date())
-                        .build()
-        ).collect(Collectors.toList());
+    private Expenses createExpenses(ExpensesDTO dto) {
+        return Expenses.builder()
+                .id(Utils.genID(IDKey.EXPENSES))
+                .scheduleId(dto.getScheduleId())
+                .expensesConfigId(dto.getExpensesConfigId())
+                .amount(dto.getAmount())
+                .note(dto.getNote())
+                .status(ExpensesStatus.PENDING.getValue())
+                .deleted(false)
+                .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
+                .updatedAt(new Date())
+                .build();
     }
 
     /**
@@ -88,13 +76,6 @@ public class ExpensesMapper {
         if (dto.getNote() != null) {
             if (!expenses.getNote().equals(dto.getNote())) {
                 expenses.setNote(dto.getNote());
-                isUpdated = true;
-            }
-            isValidField = true;
-        }
-        if (dto.getImgPath() != null) {
-            if (!expenses.getImgPath().equals(dto.getImgPath())) {
-                expenses.setImgPath(dto.getImgPath());
                 isUpdated = true;
             }
             isValidField = true;

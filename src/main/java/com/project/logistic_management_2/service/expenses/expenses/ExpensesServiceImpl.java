@@ -3,7 +3,9 @@ package com.project.logistic_management_2.service.expenses.expenses;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
+import com.project.logistic_management_2.entity.AttachedImage;
 import com.project.logistic_management_2.entity.Expenses;
+import com.project.logistic_management_2.enums.attached.AttachedType;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
@@ -11,13 +13,16 @@ import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.exception.def.NotModifiedException;
+import com.project.logistic_management_2.mapper.attached.AttachedImageMapper;
 import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
+import com.project.logistic_management_2.repository.attached.AttachedImageRepo;
 import com.project.logistic_management_2.repository.expenses.expenses.ExpensesRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.notification.NotificationService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
@@ -28,6 +33,7 @@ import java.sql.Timestamp;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +45,8 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     private final ExpensesRepo expensesRepo;
     private final ExpensesMapper expensesMapper;
     private final NotificationService notificationService;
+    private final AttachedImageMapper attachedMapper;
+    private final AttachedImageRepo attachedRepo;
     private final PermissionType type = PermissionType.EXPENSES;
 
     @Override
@@ -64,9 +72,14 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     }
 
     @Override
+    @Transactional
     public ExpensesDTO create(ExpensesDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
+
+        String[] attachedImagePaths = dto.getAttachedPaths().split(",");
         Expenses expenses = expensesMapper.toExpenses(dto);
+        List<AttachedImage> attachedImages = attachedMapper.toAttachedImages(expenses.getId(), AttachedType.ATTACHED_OF_EXPENSES, attachedImagePaths);
+        attachedRepo.saveAll(attachedImages);
         expensesRepo.save(expenses);
 
         String notifyMsg = "Có một chi phí được tạo mới cần được phê duyệt lúc " + new Date();

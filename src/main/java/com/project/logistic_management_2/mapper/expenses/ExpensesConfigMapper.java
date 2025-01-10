@@ -17,6 +17,17 @@ import java.util.stream.Collectors;
 public class ExpensesConfigMapper {
     public ExpensesConfig toExpensesConfig(ExpensesConfigDTO dto) {
         if (dto == null) return null;
+        return createExpensesConfig(dto);
+    }
+
+    public List<ExpensesConfig> toExpensesConfigList(List<ExpensesConfigDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::createExpensesConfig).collect(Collectors.toList());
+    }
+
+    private ExpensesConfig createExpensesConfig(ExpensesConfigDTO dto) {
         return ExpensesConfig.builder()
                 .id(Utils.genID(IDKey.EXPENSES_CONFIG))
                 .type(dto.getType())
@@ -25,23 +36,6 @@ public class ExpensesConfigMapper {
                 .createdAt(new Date())
                 .updatedAt(new Date())
                 .build();
-    }
-
-    public List<ExpensesConfig> toExpensesConfigList(List<ExpensesConfigDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return dtos.stream().map(dto ->
-                ExpensesConfig.builder()
-                        .id(Utils.genID(IDKey.EXPENSES_CONFIG))
-                        .type(dto.getType())
-                        .note(dto.getNote())
-                        .deleted(false)
-                        .createdAt(new Date())
-                        .updatedAt(new Date())
-                        .build()
-        ).collect(Collectors.toList());
     }
 
     public void updateExpensesConfig(ExpensesConfig config, ExpensesConfigDTO dto) {

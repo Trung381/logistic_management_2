@@ -2,6 +2,7 @@ package com.project.logistic_management_2.repository.expenses.expenses;
 
 import com.project.logistic_management_2.dto.expenses.*;
 
+import static com.project.logistic_management_2.entity.QAttachedImage.attachedImage;
 import static com.project.logistic_management_2.entity.QExpenses.expenses;
 import static com.project.logistic_management_2.entity.QExpensesConfig.expensesConfig;
 import static com.project.logistic_management_2.entity.QSchedule.schedule;
@@ -45,8 +46,11 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                         .from(expensesConfig)
                         .where(expensesConfig.id.eq(expenses.expensesConfigId)),
                 expenses.amount.as("amount"),
-                expenses.note.as("note"),
-                expenses.imgPath.as("imgPath"),
+                expenses.note.coalesce("").as("note"),
+                JPAExpressions.select(
+                                Expressions.stringTemplate("GROUP_CONCAT({0})", attachedImage.imgPath).coalesce("").as("attachedPaths"))
+                        .from(attachedImage)
+                        .where(attachedImage.referenceId.eq(expenses.id)),
                 expenses.scheduleId.as("scheduleId"),
                 expenses.status.as("status"),
                 expenses.createdAt.as("createdAt"),

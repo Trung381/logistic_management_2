@@ -8,6 +8,7 @@ import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -23,6 +24,7 @@ import static com.project.logistic_management_2.entity.QSchedule.schedule;
 import static com.project.logistic_management_2.entity.QScheduleConfig.scheduleConfig;
 import static com.project.logistic_management_2.entity.QUser.user;
 import static com.project.logistic_management_2.entity.QTruck.truck;
+import static com.project.logistic_management_2.entity.QAttachedImage.attachedImage;
 
 @Repository
 public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
@@ -46,7 +48,10 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
                 schedule.departureTime.as("departureTime"),
                 schedule.arrivalTime.as("arrivalTime"),
                 schedule.note.coalesce("").as("note"),
-                schedule.attachDocument.coalesce("").as("attachDocument"),
+                JPAExpressions.select(
+                                Expressions.stringTemplate("GROUP_CONCAT({0})", attachedImage.imgPath).coalesce("").as("attachedPaths"))
+                        .from(attachedImage)
+                        .where(attachedImage.referenceId.eq(schedule.id)),
                 schedule.type.as("type"),
                 schedule.status.as("status"),
                 schedule.createdAt.as("createdAt"),
