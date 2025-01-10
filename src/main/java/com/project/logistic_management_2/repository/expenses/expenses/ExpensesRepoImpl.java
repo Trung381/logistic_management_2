@@ -11,6 +11,7 @@ import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseA
 
 import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
+import com.project.logistic_management_2.enums.role.UserRole;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -261,7 +262,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
 
     private List<ExpensesReportDTO> reportsQuery(String period, ConstructorExpression<ExpensesReportDTO> expression) {
         BooleanBuilder builder = new BooleanBuilder()
-                .and(user.roleId.eq(4))
+                .and(user.roleId.eq(UserRole.DRIVER.getId()))
                 .and(expenseAdvances.period.eq(period));
 
         return query.from(user)
