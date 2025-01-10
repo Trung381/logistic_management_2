@@ -2,8 +2,8 @@ package com.project.logistic_management_2.service.expenses.expenseadvances;
 
 import com.project.logistic_management_2.dto.expenses.ExpenseAdvancesDTO;
 import com.project.logistic_management_2.entity.ExpenseAdvances;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.expenses.ExpenseAdvancesMapper;
@@ -22,24 +22,22 @@ public class ExpenseAdvancesServiceImpl extends BaseService implements ExpenseAd
     private final PermissionType type = PermissionType.EXPENSES;
 
     @Override
-    public List<ExpenseAdvancesDTO> getAll() {
+    public List<ExpenseAdvancesDTO> getAll(int page) {
         checkPermission(type, PermissionKey.VIEW);
-        return expenseAdvancesRepo.getAll();
+        return expenseAdvancesRepo.getAll(page);
     }
 
     @Override
     public ExpenseAdvancesDTO getByDriverId(String id) {
         checkPermission(type, PermissionKey.VIEW);
-        if (id == null || id.isBlank()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
         return expenseAdvancesRepo.getByDriverId(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin!"));
+                .orElseThrow(() -> new NotFoundException("Thông tin ứng chi phí không tồn tại!"));
     }
 
     @Override
     public long delete(Integer id) {
         checkPermission(type, PermissionKey.DELETE);
+
         return expenseAdvancesRepo.deleted(id);
     }
 
@@ -47,7 +45,7 @@ public class ExpenseAdvancesServiceImpl extends BaseService implements ExpenseAd
     public ExpenseAdvancesDTO update(Integer id, ExpenseAdvancesDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
         ExpenseAdvancesDTO expenseAdvancesDTO = expenseAdvancesRepo.getExpenseAdvanceById(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin!"));
+                .orElseThrow(() -> new NotFoundException("Thông tin ứng chi phí không tồn tại!"));
         ExpenseAdvances expenseAdvances = expenseAdvancesMapper.toExpenseAdvances(expenseAdvancesDTO);
         expenseAdvancesMapper.updateExpenseAdvance(id, expenseAdvances, dto);
         expenseAdvancesRepo.save(expenseAdvances);

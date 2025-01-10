@@ -12,31 +12,32 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.rmi.ServerException;
 import java.util.Objects;
 
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleValidationException(MethodArgumentNotValidException e) {
+    public ResponseEntity<Object> handleValidationException(MethodArgumentNotValidException ex) {
         return new ResponseEntity<>(
-                BaseResponse.fail(Objects.requireNonNull(e.getFieldError()).getDefaultMessage()),
+                BaseResponse.fail(Objects.requireNonNull(ex.getFieldError()).getDefaultMessage()),
                 HttpStatus.BAD_REQUEST
         );
     }
 
     @ExceptionHandler(value = NotFoundException.class)
-    public ResponseEntity<Object> handleNotFoundException (NotFoundException e) {
+    public ResponseEntity<Object> handleNotFoundException (NotFoundException ex) {
         return new ResponseEntity<>(
-                BaseResponse.fail(e.getMessage()),
+                BaseResponse.fail(ex.getMessage()),
                 HttpStatus.NOT_FOUND
         );
     }
 
     @ExceptionHandler(value = ConflictException.class)
-    public ResponseEntity<Object> handleConflictException(ConflictException e) {
+    public ResponseEntity<Object> handleConflictException(ConflictException ex) {
         return new ResponseEntity<>(
-                BaseResponse.fail(e.getMessage()),
+                BaseResponse.fail(ex.getMessage()),
                 HttpStatus.CONFLICT
         );
     }
@@ -52,25 +53,25 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<BaseResponse<?>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+    public ResponseEntity<BaseResponse<?>> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         return new ResponseEntity<>(
-                BaseResponse.fail(e.getMessage()),
+                BaseResponse.fail(ex.getMessage()),
                 HttpStatus.BAD_REQUEST
         );
     }
 
     @ExceptionHandler(EditNotAllowedException.class)
-    public ResponseEntity<Object> handleEditNotAllowedException(EditNotAllowedException e) {
+    public ResponseEntity<Object> handleEditNotAllowedException(EditNotAllowedException ex) {
         return new ResponseEntity<>(
-                BaseResponse.fail(e.getMessage()),
+                BaseResponse.fail(ex.getMessage()),
                 HttpStatus.CONFLICT
         );
     }
 
     @ExceptionHandler(InvalidParameterException.class)
-    public ResponseEntity<Object> handleInvalidParameterException(InvalidParameterException e) {
+    public ResponseEntity<Object> handleInvalidParameterException(InvalidParameterException ex) {
         return new ResponseEntity<>(
-                BaseResponse.fail(e.getMessage()),
+                BaseResponse.fail(ex.getMessage()),
                 HttpStatus.BAD_REQUEST
         );
     }
@@ -81,6 +82,29 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 BaseResponse.fail(errorMessage),
                 HttpStatus.METHOD_NOT_ALLOWED
+        );
+    }
+
+    @ExceptionHandler(ServerException.class)
+    public ResponseEntity<Object> handleServerException(ServerException ex) {
+        return new ResponseEntity<>(
+                BaseResponse.fail("Đã có lỗi xảy ra. Vui lòng thử lại sau!"),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
+
+    @ExceptionHandler(InvalidFieldException.class)
+    public ResponseEntity<Object> handleInvalidFieldException(InvalidFieldException ex) {
+        return new ResponseEntity<>(
+                BaseResponse.fail(ex.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(NotModifiedException.class)
+    public ResponseEntity<Object> handleNotModifiedException(NotModifiedException ex) {
+        return ResponseEntity.ok(
+                BaseResponse.ok(null, ex.getMessage())
         );
     }
 }

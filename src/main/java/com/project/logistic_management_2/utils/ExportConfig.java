@@ -7,7 +7,7 @@ import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.report.SummarySalaryDTO;
 import com.project.logistic_management_2.dto.request.GoodsDTO;
 import com.project.logistic_management_2.dto.request.GoodsReportDTO;
-import com.project.logistic_management_2.dto.request.TransactionDTO;
+import com.project.logistic_management_2.dto.transaction.TransactionDTO;
 import com.project.logistic_management_2.dto.request.WarehousesDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.truck.TruckDTO;

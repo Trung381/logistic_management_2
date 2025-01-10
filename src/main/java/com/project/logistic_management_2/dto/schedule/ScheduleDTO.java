@@ -1,6 +1,8 @@
 package com.project.logistic_management_2.dto.schedule;
 
 import com.project.logistic_management_2.annotations.ExportColumn;
+import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
+import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -17,7 +19,6 @@ public class ScheduleDTO {
     private String id;
 
     //Thông tin cấu hình lịch trình, null nếu chạy nội bộ
-//    @NotBlank(message = "Cấu hình lịch trình không được để trống!")
     private String scheduleConfigId;
     @ExportColumn(name = "Điểm đi")
     private String placeA;
@@ -26,40 +27,35 @@ public class ScheduleDTO {
     @ExportColumn(name = "Số tiền")
     private Float amount;
 
-    //Thông tin tài xế + xe, mooc
     @NotBlank(message = "Thông tin tài xế không được để trống!")
     @ExportColumn(name = "Mã tài xế")
     private String driverId;
-
     @ExportColumn(name = "Tên tài xế")
     private String driverName;
 
     @NotBlank(message = "Thông tin xe tải không được để trống!")
     @ExportColumn(name = "BS Xe")
     private String truckLicense;
-
     @NotBlank(message = "Thông tin rơ-mooc không được để trống!")
     private String moocLicense;
 
-    //Thời gian lấy / giao hàng
-//    @NotNull(message = "Thời gian lấy hàng không được để trống!")
+    //Thời gian khởi hành/hoàn thành
     @ExportColumn(name = "Ngày lấy hàng")
     private Date departureTime;
-
-//    @NotNull(message = "Thời gian giao hàng không được để trống!")
     @ExportColumn(name = "Ngày giao hàng")
     private Date arrivalTime;
 
-    //Ghi chú
     @ExportColumn(name = "Ghi chú")
     private String note;
+
     //Ảnh đính kèm
     private String attachDocument;
-    //Loại hành trình: 0 - nội bộ, 1 - tính lương
+
+    //Loại hành trình: nội bộ/tính lương
     @NotNull(message = "Loại hành trình không được để trống")
-    private Integer type;
-    //Trạng thái
-    private Integer status;
+    private ScheduleType type;
+    //Trạng thái: không duyệt/đang chờ/duyệt + chưa hoàn thành/đã hoàn thành
+    private ScheduleStatus status;
 
     private Integer count = 1; //Số chuyến phát sinh: mặc định = 1
 
@@ -81,8 +77,8 @@ public class ScheduleDTO {
         this.arrivalTime = arrivalTime;
         this.note = note;
         this.attachDocument = attachDocument;
-        this.type = type;
-        this.status = status;
+        this.type = ScheduleType.valueOf(type);
+        this.status = ScheduleStatus.valueOf(status);
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }

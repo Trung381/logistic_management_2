@@ -5,8 +5,8 @@ import com.project.logistic_management_2.dto.rolepermission.RolePermissionRespon
 import com.project.logistic_management_2.entity.QPermission;
 import com.project.logistic_management_2.entity.QRole;
 import com.project.logistic_management_2.entity.QRolePermission;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Path;
@@ -56,7 +56,7 @@ public class RolePermissionRepoImpl extends BaseRepo implements RolePermissionRe
 
         BooleanBuilder builder = new BooleanBuilder()
                 .and(qRolePermission.roleId.eq(roleId))
-                .and(qPermission.name.eq(type.name()));
+                .and(qPermission.name.eq(type.getName()));
 
         if (key != null){
             switch(key){

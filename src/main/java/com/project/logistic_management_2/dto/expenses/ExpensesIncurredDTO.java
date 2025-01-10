@@ -7,10 +7,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ExpensesIncurredDTO {
-//    private String userId;
     private String expensesConfigId;
     @ExportColumn(name = "Loại chi phí")
-    private String type; //Loai chi phi
+    private String type;
     @ExportColumn(name = "Số tiền")
-    private Float amount; //So tien tuong ung
+    private Float amount;
 }

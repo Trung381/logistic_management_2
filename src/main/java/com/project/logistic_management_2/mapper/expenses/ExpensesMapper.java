@@ -3,6 +3,9 @@ package com.project.logistic_management_2.mapper.expenses;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
+import com.project.logistic_management_2.exception.def.InvalidFieldException;
+import com.project.logistic_management_2.exception.def.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +26,7 @@ public class ExpensesMapper {
                 .amount(dto.getAmount())
                 .note(dto.getNote())
                 .imgPath(dto.getImgPath())
-                .status(0)
+                .status(ExpensesStatus.PENDING.getValue())
                 .deleted(false)
                 .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                 .updatedAt(new Date())
@@ -43,7 +46,7 @@ public class ExpensesMapper {
                         .amount(dto.getAmount())
                         .note(dto.getNote())
                         .imgPath(dto.getImgPath())
-                        .status(0)
+                        .status(ExpensesStatus.PENDING.getValue())
                         .deleted(false)
                         .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                         .updatedAt(new Date())
@@ -59,23 +62,50 @@ public class ExpensesMapper {
      */
     public void updateExpenses(Expenses expenses, ExpensesDTO dto) {
         if (dto == null) return;
+        boolean isUpdated = false, isValidField = false;
 
-        // Update schedule
-        if (dto.getScheduleId() != null)
-            expenses.setScheduleId(dto.getScheduleId());
-        // Update expenses config
-        if (dto.getExpensesConfigId() != null)
-            expenses.setExpensesConfigId(dto.getExpensesConfigId());
-        // Update amount
-        if (dto.getAmount() != null)
-            expenses.setAmount(dto.getAmount());
-        // Update note
-        if (dto.getNote() != null)
-            expenses.setNote(dto.getNote());
-        // Update references image
-        if (dto.getImgPath() != null)
-            expenses.setImgPath(dto.getImgPath());
-        // Update last modified
-        expenses.setUpdatedAt(new Date());
+        if (dto.getScheduleId() != null) {
+            if (!expenses.getScheduleId().equals(dto.getScheduleId())) {
+                expenses.setScheduleId(dto.getScheduleId());
+                isUpdated = true;
+            }
+            isValidField = true;
+        }
+        if (dto.getExpensesConfigId() != null) {
+            if (!expenses.getExpensesConfigId().equals(dto.getExpensesConfigId())) {
+                expenses.setExpensesConfigId(dto.getExpensesConfigId());
+                isUpdated = true;
+            }
+            isValidField = true;
+        }
+        if (dto.getAmount() != null) {
+            if (!expenses.getAmount().equals(dto.getAmount())) {
+                expenses.setAmount(dto.getAmount());
+                isUpdated = true;
+            }
+            isValidField = true;
+        }
+        if (dto.getNote() != null) {
+            if (!expenses.getNote().equals(dto.getNote())) {
+                expenses.setNote(dto.getNote());
+                isUpdated = true;
+            }
+            isValidField = true;
+        }
+        if (dto.getImgPath() != null) {
+            if (!expenses.getImgPath().equals(dto.getImgPath())) {
+                expenses.setImgPath(dto.getImgPath());
+                isUpdated = true;
+            }
+            isValidField = true;
+        }
+
+        if (isUpdated) {
+            expenses.setUpdatedAt(new Date());
+        } else if (isValidField) {
+            throw new NotModifiedException("Không có sự thay đổi nào của chi phí!");
+        } else {
+            throw new InvalidFieldException("Trường cần cập nhật không tồn tại trong chi phí!");
+        }
     }
 }

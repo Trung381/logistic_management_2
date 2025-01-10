@@ -4,8 +4,8 @@ package com.project.logistic_management_2.service.user;
 import com.project.logistic_management_2.dto.user.UpdateUserDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.User;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.user.UserMapper;
 import com.project.logistic_management_2.repository.user.UserRepo;
@@ -40,7 +40,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public User updateUser(String id, UpdateUserDTO updateUserDTO) {
+    public User updateUser(String id, UserDTO updateUserDTO) {
         checkPermission(type, PermissionKey.WRITE);
 
         User existingUser = userRepo.getUserById(id);
@@ -48,12 +48,13 @@ public class UserServiceImpl extends BaseService implements UserService {
             throw new NotFoundException("User not found with ID: " + id);
         }
 
+
         if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
             updateUserDTO.setPassword(passwordEncoder.encode(updateUserDTO.getPassword()));
         }
 
         entityManager.clear();
-        if (!userRepo.updateUser(id, updateUserDTO)) {
+        if (!userRepo.updateUser(existingUser,id, updateUserDTO)) {
             throw new RuntimeException("Failed to update user with ID: " + id);
         }
 

@@ -2,8 +2,8 @@ package com.project.logistic_management_2.service.schedule.scheduleconfig;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import com.project.logistic_management_2.entity.ScheduleConfig;
-import com.project.logistic_management_2.enums.PermissionKey;
-import com.project.logistic_management_2.enums.PermissionType;
+import com.project.logistic_management_2.enums.permission.PermissionKey;
+import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.schedule.ScheduleConfigMapper;
@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.rmi.ServerException;
 import java.util.List;
 
 @Service
@@ -25,6 +26,15 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
     private final ScheduleConfigRepo scheduleConfigRepo;
     private final ScheduleConfigMapper scheduleConfigMapper;
     private final PermissionType type = PermissionType.CONFIGS;
+
+    @Override
+    public List<ScheduleConfigDTO> getAll(int page) {
+        checkPermission(type, PermissionKey.VIEW);
+        if (page <= 0) {
+            throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
+        }
+        return scheduleConfigRepo.getAll(page);
+    }
 
     @Override
     public List<ScheduleConfigDTO> getAll() {
@@ -56,18 +66,20 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
                 .orElseThrow(() -> new NotFoundException("Cấu hình lịch trình không tồn tại hoặc đã bị xóa trước đó!"));
 
         scheduleConfigMapper.updateScheduleConfig(config, dto);
-
-        //Save to DB
         return scheduleConfigMapper.toScheduleConfigDTO(dto, scheduleConfigRepo.save(config));
     }
 
     @Override
-    public long deleteByID(String id) {
+    public long deleteByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.DELETE);
         if (scheduleConfigRepo.countByID(id) == 0) {
             throw new NotFoundException("Cấu hình lịch trình không tồn tại!");
         }
-        return scheduleConfigRepo.delete(id);
+        long numOfRowsDeleted = scheduleConfigRepo.delete(id);
+        if (numOfRowsDeleted == 0) {
+            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+        }
+        return numOfRowsDeleted;
     }
 
     @Override
@@ -80,7 +92,6 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
 
         List<ScheduleConfig> scheduleConfig = scheduleConfigMapper.toScheduleConfigList(scheduleConfigDTOList);
 
-        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return scheduleConfigRepo.saveAll(scheduleConfig);
     }
 }

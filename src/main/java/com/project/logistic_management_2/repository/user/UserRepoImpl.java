@@ -4,6 +4,8 @@ import com.project.logistic_management_2.dto.user.UpdateUserDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.QUser;
 import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.exception.def.EditNotAllowedException;
+import com.project.logistic_management_2.exception.def.InvalidFieldException;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -35,6 +37,7 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
                 user.fullName.as("fullName"),
                 user.phone.as("phone"),
                 user.dateOfBirth.as("dateOfBirth"),
+                user.imagePath.as("imagePath"), //
                 user.note.as("note"),
                 user.username.as("username"),
                 user.password.as("password"),
@@ -70,7 +73,7 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
 
     @Override
     @Transactional
-    public Boolean updateUser(String id, UpdateUserDTO updateUserDTO) {
+    public Boolean updateUser(User exitingUser,String id, UserDTO updateUserDTO) {
         QUser qUser = QUser.user;
 
         BooleanBuilder whereClause = new BooleanBuilder();
@@ -78,33 +81,84 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
 
         JPAUpdateClause updateClause = query.update(qUser).where(whereClause);
 
+        boolean isUpdated = false;
+        boolean isChanged = false;
+
         if (updateUserDTO.getFullName() != null) {
+            if(!updateUserDTO.getFullName().equals(exitingUser.getFullName())){
+                isChanged = true;
+            }
             updateClause.set(qUser.fullName, updateUserDTO.getFullName());
+            isUpdated = true;
         }
         if (updateUserDTO.getPhone() != null) {
+            if(!updateUserDTO.getPhone().equals(exitingUser.getPhone())){
+                isChanged = true;
+            }
             updateClause.set(qUser.phone, updateUserDTO.getPhone());
+            isUpdated = true;
         }
         if (updateUserDTO.getDateOfBirth() != null) {
+            if(!updateUserDTO.getDateOfBirth().equals(exitingUser.getDateOfBirth())){
+                isChanged = true;
+            }
             updateClause.set(qUser.dateOfBirth, updateUserDTO.getDateOfBirth());
+            isUpdated = true;
+        }
+        if (updateUserDTO.getImagePath() != null) {
+            if(!updateUserDTO.getImagePath().equals(exitingUser.getImagePath())){
+                isChanged = true;
+            }
+            updateClause.set(qUser.imagePath, updateUserDTO.getImagePath());
+            isUpdated = true;
         }
         if (updateUserDTO.getNote() != null) {
+            if(!updateUserDTO.getNote().equals(exitingUser.getNote())){
+                isChanged = true;
+            }
             updateClause.set(qUser.note, updateUserDTO.getNote());
+            isUpdated = true;
         }
         if (updateUserDTO.getUsername() != null) {
+            if(!updateUserDTO.getUsername().equals(exitingUser.getUsername())){
+                isChanged = true;
+            }
             updateClause.set(qUser.username, updateUserDTO.getUsername());
+            isUpdated = true;
         }
         if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
+            if(!updateUserDTO.getPassword().equals(exitingUser.getPassword())){
+                isChanged = true;
+            }
             updateClause.set(qUser.password, updateUserDTO.getPassword());
+            isUpdated = true;
         }
         if (updateUserDTO.getRoleId() != null) {
+            if(!updateUserDTO.getRoleId().equals(exitingUser.getRoleId())){
+                isChanged = true;
+            }
             updateClause.set(qUser.roleId, updateUserDTO.getRoleId());
+            isUpdated = true;
         }
         if (updateUserDTO.getStatus() != null) {
+            if(!updateUserDTO.getStatus().equals(exitingUser.getStatus())){
+                isChanged = true;
+            }
             updateClause.set(qUser.status, updateUserDTO.getStatus());
+            isUpdated = true;
         }
 
-        // Fetch lại bản ghi đã được cập nhật
-        return updateClause.set(qUser.updatedAt, new Date()).execute() > 0;
+        if (isUpdated) {
+            updateClause.set(qUser.updatedAt, new Date());
+        } else {
+            throw new InvalidFieldException("No data fields are updated!!!");
+        }
+
+        if(!isChanged) {
+            throw new EditNotAllowedException("Data is not changed!!!");
+        }
+
+        return updateClause.execute() > 0;
     }
 
     @Modifying

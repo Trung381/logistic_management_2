@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.rmi.ServerException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class ExpensesController {
 
     @GetMapping()
     public ResponseEntity<Object> getExpenses(
+            @RequestParam int page,
             @RequestParam(required = false) String expensesConfigId,
             @RequestParam(required = false) String truckLicense,
             @RequestParam(required = false) String fromDate,
@@ -40,7 +42,7 @@ public class ExpensesController {
         Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
 
         return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.getAll(expensesConfigId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
+                BaseResponse.ok(expensesService.getAll(page, expensesConfigId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
         );
     }
 
@@ -67,36 +69,28 @@ public class ExpensesController {
     }
 
     @GetMapping("/delete/{id}")
-    public ResponseEntity<Object> deleteExpensesByID(@PathVariable String id) {
+    public ResponseEntity<Object> deleteExpensesByID(@PathVariable String id) throws ServerException {
         long res = expensesService.deleteByID(id);
-        return res != 0
-                ? ResponseEntity.ok(BaseResponse.ok(res, "Đã xóa thành công " + res + " chi phí!"))
-                : new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra khi cố gắng xóa chi phí. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.ok(BaseResponse.ok(res, "Đã xóa thành công " + res + " chi phí!"));
     }
 
     @GetMapping("/approve/{id}")
-    public ResponseEntity<Object> approveExpensesByID(@PathVariable String id) {
+    public ResponseEntity<Object> approveExpensesByID(@PathVariable String id) throws ServerException {
         long res = expensesService.approveByID(id);
-        return  res != 0
-                ? (
-                        res != -1
-                        ? ResponseEntity.ok(BaseResponse.ok(res, "Đã duyệt thành công " + res + " chi phí!"))
-                        : ResponseEntity.ok(BaseResponse.ok(null, "Chi phí đã được duyệt trước đó!"))
-                )
-                : new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra khi duyệt chi phí. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.ok(BaseResponse.ok(res, "Đã duyệt thành công " + res + " chi phí!"));
     }
 
     @GetMapping("/reports")
-    public ResponseEntity<Object> exportReport(@RequestParam String driverId, @RequestParam String period) {
+    public ResponseEntity<Object> exportReport(@RequestParam String driverId, @RequestParam int year, int month) {
         return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.report(driverId, period))
+                BaseResponse.ok(expensesService.report(driverId, year, month))
         );
     }
 
     @GetMapping("/reports/all")
-    public ResponseEntity<Object> exportReportForAll(@RequestParam String period) {
+    public ResponseEntity<Object> exportReportForAll(@RequestParam int year, int month) {
         return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.reportForAll(period))
+                BaseResponse.ok(expensesService.reportForAll(year, month))
         );
     }
 
@@ -134,9 +128,11 @@ public class ExpensesController {
     @GetMapping("/export/reports")
     public ResponseEntity<Object> exportReportExpenses(
             @RequestParam(required = false) String driverId,
-            @RequestParam(required = false) String period) throws Exception {
+            @RequestParam(required = false) int year,
+            @RequestParam(required = false) int month
+    ) throws Exception {
 
-        List<ExpensesIncurredDTO> expensesReport = expensesService.report(driverId, period);
+        List<ExpensesIncurredDTO> expensesReport = expensesService.report(driverId, year, month);
 
 
         if (!CollectionUtils.isEmpty(expensesReport)) {

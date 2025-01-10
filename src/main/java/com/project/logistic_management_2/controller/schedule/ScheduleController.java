@@ -3,6 +3,7 @@ package com.project.logistic_management_2.controller.schedule;
 import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
+import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.service.schedule.schedule.ScheduleService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.rmi.ServerException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -31,6 +33,7 @@ public class ScheduleController {
 
     @GetMapping()
     public ResponseEntity<Object> getSchedule(
+            @RequestParam int page,
             @RequestParam(required = false) String driverId,
             @RequestParam(required = false) String truckLicense,
             @RequestParam(required = false) String fromDate,
@@ -39,7 +42,7 @@ public class ScheduleController {
         Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
 
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.getAll(driverId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
+                BaseResponse.ok(scheduleService.getAll(page, driverId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
         );
     }
 
@@ -66,47 +69,41 @@ public class ScheduleController {
     }
 
     @GetMapping("/delete/{id}")
-    public ResponseEntity<Object> deleteScheduleByID(@PathVariable String id) {
-        long res = scheduleService.deleteByID(id);
-        return res != 0
-                ? ResponseEntity.ok(BaseResponse.ok(res, "Đã xóa thành công " + res + " lịch trình!"))
-                : new ResponseEntity<>("Đã có lỗi xảy ra. Vui lòng thử lại sau!", HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<Object> deleteScheduleByID(@PathVariable String id) throws ServerException {
+        long numOfRows = scheduleService.deleteByID(id);
+        return ResponseEntity.ok(
+                BaseResponse.ok(numOfRows, "Đã xóa thành công " + numOfRows + " lịch trình!")
+        );
     }
 
     @GetMapping("/approve/{id}")
-    public ResponseEntity<Object> approveScheduleByID(@PathVariable String id) {
-        long res = scheduleService.approveByID(id);
-        return res != 0
-                ? (
-                        res != -1 ? ResponseEntity.ok(BaseResponse.ok(res, "Đã duyệt thành công " + res + " lịch trình!"))
-                                : ResponseEntity.ok(BaseResponse.ok(null, "Lịch trình đã được duyệt trước đó!"))
-                ) : new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra trong quá trình duyệt. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<Object> approveScheduleByID(@PathVariable String id, @RequestParam boolean approved) throws ServerException {
+        long numOfRows = scheduleService.approveByID(id, approved);
+        return ResponseEntity.ok(
+                BaseResponse.ok(numOfRows, "Đã xử lý thành công " + numOfRows + " lịch trình!")
+        );
     }
 
     @GetMapping("/mark_complete/{id}")
-    public ResponseEntity<Object> markComplete(@PathVariable String id) {
-        int rowUpdated = (int) scheduleService.markComplete(id);
-        ResponseEntity<Object> response;
-        switch (rowUpdated) {
-            case 0 -> response = new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
-            case 2 -> response = ResponseEntity.ok(BaseResponse.ok(null, "Chuyến đi đã được đánh dấu là hoàn thành trước đó!"));
-            default -> response = ResponseEntity.ok(BaseResponse.ok(rowUpdated, rowUpdated + " lịch trình đã được đánh dấu là hoàn thành!"));
-        }
-        return response;
+    public ResponseEntity<Object> markComplete(@PathVariable String id) throws ServerException {
+        long numOfRows = scheduleService.markComplete(id);
+        return ResponseEntity.ok(
+                BaseResponse.ok(numOfRows, numOfRows + " lịch trình đã được đánh dấu là hoàn thành!")
+        );
     }
 
     @GetMapping("/reports")
-    public ResponseEntity<Object> exportReport(@RequestParam String license, @RequestParam String period) {
+    public ResponseEntity<Object> exportReport(@RequestParam String license, @RequestParam int year, @RequestParam int month) {
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.report(license, period))
+                BaseResponse.ok(scheduleService.report(license, year, month))
         );
     }
 
     //Xuất lương lịch trình của một tài xế trong 1 chu kỳ
     @GetMapping("/reports/salary")
-    public ResponseEntity<Object> exportScheduleSalary(@RequestParam String driverId, @RequestParam String period) {
+    public ResponseEntity<Object> exportScheduleSalary(@RequestParam String driverId, @RequestParam int year, @RequestParam int month) {
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.exportScheduleSalary(driverId, period))
+                BaseResponse.ok(scheduleService.exportScheduleSalary(driverId, year, month))
         );
     }
 
@@ -135,7 +132,6 @@ public class ScheduleController {
                     .body(inputStreamResource);
         } else {
             throw new Exception("No data");
-
         }
     }
 

@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.mapper.transaction;
 
-import com.project.logistic_management_2.dto.request.TransactionDTO;
+import com.project.logistic_management_2.dto.transaction.TransactionDTO;
 import com.project.logistic_management_2.entity.Transaction;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.utils.Utils;
@@ -27,7 +27,7 @@ public class TransactionMapper {
                 .goodsId(dto.getGoodsId())
                 .quantity(dto.getQuantity())
                 .transactionTime(dto.getTransactionTime())
-                .origin(dto.getOrigin())
+                .origin(dto.getOrigin().getValue())
                 .destination(dto.getDestination())
                 .image(dto.getImage())
                 .deleted(false)

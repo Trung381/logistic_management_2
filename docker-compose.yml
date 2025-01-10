@@ -10,9 +10,9 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ""
     volumes:
-      - mysql-data:/var/lib/mysql
+      - ./mysql-data:/var/lib/mysql
   app:
-    image: trung381/logistic_management:1.0
+    image: trung381/logistic_management:lst
     build:
       context: .
       dockerfile: Dockerfile
@@ -29,6 +29,8 @@ services:
       DB_PASSWORD: ""
     depends_on:
       - mysql
+    volumes:
+      - ./uploads:/app/uploads
 networks:
   spring-boot-network:
 volumes:
