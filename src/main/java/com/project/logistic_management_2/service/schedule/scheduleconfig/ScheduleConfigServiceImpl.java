@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.rmi.ServerException;
 import java.util.List;
 
 @Service
@@ -65,18 +66,20 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
                 .orElseThrow(() -> new NotFoundException("Cấu hình lịch trình không tồn tại hoặc đã bị xóa trước đó!"));
 
         scheduleConfigMapper.updateScheduleConfig(config, dto);
-
-        //Save to DB
         return scheduleConfigMapper.toScheduleConfigDTO(dto, scheduleConfigRepo.save(config));
     }
 
     @Override
-    public long deleteByID(String id) {
+    public long deleteByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.DELETE);
         if (scheduleConfigRepo.countByID(id) == 0) {
             throw new NotFoundException("Cấu hình lịch trình không tồn tại!");
         }
-        return scheduleConfigRepo.delete(id);
+        long numOfRowsDeleted = scheduleConfigRepo.delete(id);
+        if (numOfRowsDeleted == 0) {
+            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+        }
+        return numOfRowsDeleted;
     }
 
     @Override

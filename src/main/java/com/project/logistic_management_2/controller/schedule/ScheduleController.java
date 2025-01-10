@@ -79,17 +79,17 @@ public class ScheduleController {
     @GetMapping("/approve/{id}")
     public ResponseEntity<Object> approveScheduleByID(@PathVariable String id, @RequestParam boolean approved) throws ServerException {
         long numOfRows = scheduleService.approveByID(id, approved);
-        return numOfRows != -1 ? ResponseEntity.ok(BaseResponse.ok(numOfRows, "Đã xử lý thành công " + numOfRows + " lịch trình!"))
-                                : ResponseEntity.ok(BaseResponse.ok(null, "Lịch trình đã được xử lý trước đó!"));
+        return ResponseEntity.ok(
+                BaseResponse.ok(numOfRows, "Đã xử lý thành công " + numOfRows + " lịch trình!")
+        );
     }
 
     @GetMapping("/mark_complete/{id}")
     public ResponseEntity<Object> markComplete(@PathVariable String id) throws ServerException {
         long numOfRows = scheduleService.markComplete(id);
-        return
-                numOfRows == ScheduleStatus.COMPLETED.getValue()
-                ? ResponseEntity.ok(BaseResponse.ok(null, "Chuyến đi đã được đánh dấu là hoàn thành trước đó!"))
-                : ResponseEntity.ok(BaseResponse.ok(numOfRows, numOfRows + " lịch trình đã được đánh dấu là hoàn thành!"));
+        return ResponseEntity.ok(
+                BaseResponse.ok(numOfRows, numOfRows + " lịch trình đã được đánh dấu là hoàn thành!")
+        );
     }
 
     @GetMapping("/reports")

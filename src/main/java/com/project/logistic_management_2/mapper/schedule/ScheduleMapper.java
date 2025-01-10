@@ -6,6 +6,7 @@ import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import com.project.logistic_management_2.exception.def.InvalidFieldException;
+import com.project.logistic_management_2.exception.def.NotModifiedException;
 import com.project.logistic_management_2.service.schedule.schedule.ScheduleServiceImpl;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
@@ -61,45 +62,71 @@ public class ScheduleMapper {
 
     public void updateSchedule(Schedule schedule, ScheduleDTO dto) {
         if (dto == null) return;
-        boolean isUpdated = false;
+        boolean isUpdated = false, isValidField = false;
 
         if (dto.getScheduleConfigId() != null) {
-            schedule.setScheduleConfigId(dto.getScheduleConfigId());
-            isUpdated = true;
+            if (!schedule.getScheduleConfigId().equals(dto.getScheduleConfigId())) {
+                schedule.setScheduleConfigId(dto.getScheduleConfigId());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getTruckLicense() != null) {
-            schedule.setTruckLicense(dto.getTruckLicense());
-            isUpdated = true;
+            if (!schedule.getTruckLicense().equals(dto.getTruckLicense())) {
+                schedule.setTruckLicense(dto.getTruckLicense());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getMoocLicense() != null) {
-            schedule.setMoocLicense(dto.getMoocLicense());
-            isUpdated = true;
+            if (!schedule.getMoocLicense().equals(dto.getMoocLicense())) {
+                schedule.setMoocLicense(dto.getMoocLicense());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getAttachDocument() != null) {
-            schedule.setAttachDocument(dto.getAttachDocument());
-            isUpdated = true;
+            if (!schedule.getAttachDocument().equals(dto.getAttachDocument())) {
+                schedule.setAttachDocument(dto.getAttachDocument());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getDepartureTime() != null) {
-            schedule.setDepartureTime(dto.getDepartureTime());
-            isUpdated = true;
+            if (!schedule.getDepartureTime().equals(dto.getDepartureTime())) {
+                schedule.setDepartureTime(dto.getDepartureTime());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getArrivalTime() != null) {
-            schedule.setArrivalTime(dto.getArrivalTime());
-            isUpdated = true;
+            if (!schedule.getArrivalTime().equals(dto.getArrivalTime())) {
+                schedule.setArrivalTime(dto.getArrivalTime());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getNote() != null) {
-            schedule.setNote(dto.getNote());
-            isUpdated = true;
+            if (!schedule.getNote().equals(dto.getNote())) {
+                schedule.setNote(dto.getNote());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getType() != null) {
-            schedule.setType(dto.getType().getValue());
-            isUpdated = true;
+            if (!schedule.getType().equals(dto.getType().getValue())) {
+                schedule.setType(dto.getType().getValue());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
 
         if (isUpdated) {
             schedule.setUpdatedAt(new Date());
+        } else if (isValidField) {
+            throw new NotModifiedException("Không có sự thay đổi nào của lịch trình!");
         } else {
-            throw new InvalidFieldException("Trường cần cần cập nhật không tồn tại!");
+            throw new InvalidFieldException("Trường cần cập nhật không tồn tại trong lịch trình!");
         }
     }
 }
