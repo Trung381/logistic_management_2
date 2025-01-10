@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.rmi.ServerException;
 import java.util.List;
 
 @RestController
@@ -58,11 +59,9 @@ public class ScheduleConfigController {
     }
 
     @GetMapping("/configs/delete/{id}")
-    public ResponseEntity<Object> deleteScheduleConfigByID(@PathVariable String id) {
+    public ResponseEntity<Object> deleteScheduleConfigByID(@PathVariable String id) throws ServerException {
         long res = scheduleConfigService.deleteByID(id);
-        return res != 0
-                ? ResponseEntity.ok(BaseResponse.ok(res, "Đã xóa thành công " + res + " cấu hình lịch trình"))
-                : new ResponseEntity<>(BaseResponse.fail("Đã có lỗi xảy ra. Vui lòng thử lại sau!"), HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.ok(BaseResponse.ok(res, "Đã xóa thành công " + res + " cấu hình lịch trình"));
     }
 
     @GetMapping("/configs/export")

@@ -4,6 +4,7 @@ import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import com.project.logistic_management_2.entity.ScheduleConfig;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.exception.def.InvalidFieldException;
+import com.project.logistic_management_2.exception.def.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -49,29 +50,43 @@ public class ScheduleConfigMapper {
 
     public void updateScheduleConfig(ScheduleConfig config, ScheduleConfigDTO dto) {
         if (dto == null) return;
-        boolean isUpdated = false;
-        
+        boolean isUpdated = false, isValidField = false;
+
         if (dto.getPlaceA() != null) {
-            config.setPlaceA(dto.getPlaceA());
-            isUpdated = true;
+            if (!config.getPlaceA().equals(dto.getPlaceA())) {
+                config.setPlaceA(dto.getPlaceA());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getPlaceB() != null) {
-            config.setPlaceB(dto.getPlaceB());
-            isUpdated = true;
+            if (!config.getPlaceB().equals(dto.getPlaceB())) {
+                config.setPlaceB(dto.getPlaceB());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getAmount() != null) {
-            config.setAmount(dto.getAmount());
-            isUpdated = true;
+            if (!config.getAmount().equals(dto.getAmount())) {
+                config.setAmount(dto.getAmount());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getNote() != null) {
-            config.setNote(dto.getNote());
-            isUpdated = true;
+            if (!config.getNote().equals(dto.getNote())) {
+                config.setNote(dto.getNote());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
 
         if (isUpdated) {
             config.setUpdatedAt(new Date());
+        } else if (isValidField) {
+            throw new NotModifiedException("Không có sự thay đổi nào của cấu hình lịch trình!");
         } else {
-            throw new InvalidFieldException("Trường cần cần cập nhật không tồn tại!");
+            throw new InvalidFieldException("Trường cần cập nhật không tồn tại trong cấu hình lịch trình!");
         }
     }
 

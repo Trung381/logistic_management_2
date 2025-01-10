@@ -11,7 +11,6 @@ import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseA
 
 import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
-import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -118,7 +117,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     @Override
-    public List<ExpensesIncurredDTO> getByFilter(String driverId, YearMonth period) {
+    public List<ExpensesIncurredDTO> getByFilter(String driverId, Date fromDate, Date toDate) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(expenses.deleted.eq(false));
 
@@ -126,10 +125,8 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
             builder.and(truck.driverId.eq(driverId));
         }
 
-        if (period != null) {
-            Date startDate = Date.valueOf(period.atDay(1).atStartOfDay().toLocalDate());
-            Date endDate = Date.valueOf(period.plusMonths(1).atDay(1).atStartOfDay().toLocalDate());
-            builder.and(expenses.createdAt.between(startDate, endDate));
+        if (fromDate != null && toDate != null) {
+            builder.and(expenses.createdAt.between(fromDate, toDate));
         }
 
         ConstructorExpression<ExpensesIncurredDTO> expensesIncurredExpression = Projections.constructor(
@@ -186,11 +183,11 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(expenses.id.eq(id))
                 .and(expenses.deleted.eq(false))
-                .and(expenses.status.eq(0));
+                .and(expenses.status.eq(ExpensesStatus.PENDING.getValue()));
 
         return query.update(expenses)
                 .where(builder)
-                .set(expenses.status, 1)
+                .set(expenses.status, ExpensesStatus.APPROVED.getValue())
                 .execute();
     }
 

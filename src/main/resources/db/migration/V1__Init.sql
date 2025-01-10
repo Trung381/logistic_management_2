@@ -421,17 +421,3 @@ BEGIN
     UPDATE `trucks` SET `status` = 2 WHERE `license_plate` = NEW.truck_license OR `license_plate` = NEW.mooc_license;
 END;//
 DELIMITER ;
-
-DELIMITER //
--- Cập nhật trạng thái của xe tải hoặc mooc khi trạng thái lịch trình thay đổi
-CREATE TRIGGER UD_schedules_after_update_trigger
-AFTER UPDATE ON users
-FOR EACH ROW
-BEGIN
-    DECLARE newStatus INT;
-    -- Khi status của lịch trình thay đổi
-    IF OLD.username != NEW.username THEN
-		UPDATE `trucks` SET `status` = newStatus WHERE `license_plate` = OLD.truck_license OR `license_plate` = OLD.mooc_license;
-	END IF;
-END;//
-DELIMITER ;
