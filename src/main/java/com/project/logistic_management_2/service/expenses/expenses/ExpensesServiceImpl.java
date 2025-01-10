@@ -10,6 +10,7 @@ import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.InvalidParameterException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
+import com.project.logistic_management_2.exception.def.NotModifiedException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
 import com.project.logistic_management_2.repository.expenses.expenses.ExpensesRepo;
 import com.project.logistic_management_2.service.BaseService;
@@ -24,6 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.rmi.ServerException;
 import java.sql.Timestamp;
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
@@ -113,7 +116,7 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
 
         ExpensesStatus status = expensesRepo.getStatusByID(id);
         if (status == ExpensesStatus.APPROVED) {
-            return -1;
+            throw new NotModifiedException("Chi phí đã được duyệt trước đó!");
         }
 
         long numOfRowsApproved = expensesRepo.approve(id);
@@ -123,27 +126,31 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
         return numOfRowsApproved;
     }
 
-    // thees moiws cos chuwcs nanwg bao cao
-    // thang dc xem bao cao la chuc cao nhat roi. quyenn all
-
     @Override
-    public List<ExpensesIncurredDTO> report(String driverId, String period) {
+    public List<ExpensesIncurredDTO> report(String driverId, int year, int month) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        //Check định dạng chu kỳ: yyyy-MM
-        String regex = "^(\\d{4}-(0[1-9]|1[0-2]))$";
-        if (!Pattern.matches(regex, period)) {
-            throw new InvalidParameterException("Định dạng chu kỳ không hợp lệ! Dạng đúng: yyyy-MM");
-        }
-
-        YearMonth periodYM = YearMonth.parse(period);
-
-        return expensesRepo.getByFilter(driverId, periodYM);
+        java.sql.Date fromDate = convertToDate(year, month);
+        java.sql.Date toDate = convertToDate(year, (month % 12) + 1);
+        return expensesRepo.getByFilter(driverId, fromDate, toDate);
     }
 
     @Override
-    public List<ExpensesReportDTO> reportForAll(String period) {
+    public List<ExpensesReportDTO> reportForAll(int year, int month) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
+        if (month < 1 || month > 12) {
+            throw new InvalidParameterException("Chu kỳ đã chọn không hợp lệ!");
+        }
+        String period = year + "-" + month;
         return expensesRepo.reportForAll(period);
+    }
+
+    private java.sql.Date convertToDate(int year, int month) {
+        try {
+            LocalDate localDate = LocalDate.of(year, month, 1);
+            return java.sql.Date.valueOf(localDate);
+        } catch (DateTimeException ex) {
+            throw new InvalidParameterException("Chu kỳ đã chọn không hợp lệ!");
+        }
     }
 
     @Override

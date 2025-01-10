@@ -16,9 +16,9 @@ public class ExpenseAdvancesController {
     private final ExpenseAdvancesService expenseAdvancesService;
 
     @GetMapping()
-    public ResponseEntity<Object> getExpenseAdvances() {
+    public ResponseEntity<Object> getExpenseAdvances(@RequestParam int page) {
         return ResponseEntity.ok(
-                BaseResponse.ok(expenseAdvancesService.getAll())
+                BaseResponse.ok(expenseAdvancesService.getAll(page))
         );
     }
 

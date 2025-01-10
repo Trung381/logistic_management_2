@@ -5,12 +5,10 @@ import lombok.Getter;
 
 @Getter
 public enum ExpensesStatus {
-    WAITING_FOR_APPROVAL(0, "Chờ duyệt"),
+    PENDING(0, "Chờ xử lý"),
     APPROVED(1, "Đã duyệt");
 
     private final Integer value;
-
-//    @JsonValue
     private final String description;
 
     ExpensesStatus(int value, String description) {

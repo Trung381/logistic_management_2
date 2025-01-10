@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum ScheduleStatus {
-    NOT_APPROVED(-1, "Không duyệt"),
-    WAITING_FOR_APPROVAL(0, "Đang chờ duyệt"),
+    REJECTED(-1, "Không duyệt/Bị từ chối"),
+    PENDING(0, "Đang chờ duyệt"),
     APPROVED(1, "Đã duyệt"),
     COMPLETED(2, "Đã hoàn thành");
 

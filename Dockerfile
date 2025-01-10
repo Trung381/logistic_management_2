@@ -1,7 +1,7 @@
 FROM gradle:jdk23 as build
 WORKDIR /app
 COPY . .
-RUN ./gradlew clean build -x test
+RUN ./gradlew build -x test
 
 FROM openjdk:23-jdk
 

@@ -34,6 +34,8 @@ public class UserDTO {
     @ExportColumn(name = "Ngày sinh")
     private Date dateOfBirth;
 
+    private String imagePath;
+
     @ExportColumn(name = "Ghi chú")
     private String note;
 

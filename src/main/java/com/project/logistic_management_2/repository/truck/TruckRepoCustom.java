@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface TruckRepoCustom {
     Optional<TruckDTO> getTruckById(Integer id);
-    Optional<TruckDTO> getTruckByLicensePlate(String licensePlate);
+    Optional<TruckDTO> getTruckByLicense(String licensePlate);
     List<TruckDTO> getAllTrucks();
     List<TruckDTO> getTrucksByType(Integer type);
     long delete(Integer id);

@@ -1,7 +1,6 @@
 package com.project.logistic_management_2.service.transaction;
 
-import com.project.logistic_management_2.dto.request.TransactionDTO;
-import com.project.logistic_management_2.dto.transaction.UpdateTransactionDTO;
+import com.project.logistic_management_2.dto.transaction.TransactionDTO;
 import com.project.logistic_management_2.entity.Goods;
 import com.project.logistic_management_2.entity.Transaction;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
@@ -23,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -43,7 +43,7 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
         Goods goods = goodsRepo.findById(transactionDTO.getGoodsId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng hóa"));
 
-        if(transactionDTO.getOrigin()) {
+        if(transactionDTO.getOrigin().getValue()) {
             goods.setQuantity(goods.getQuantity() + transactionDTO.getQuantity());
             goodsRepo.save(goods);
         } else {
@@ -62,7 +62,7 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
 
 
     @Override
-    public Optional<TransactionDTO> updateTransaction(String id, UpdateTransactionDTO dto) {
+    public Optional<TransactionDTO> updateTransaction(String id, TransactionDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
 
         Transaction transaction = repository.findById(id)
@@ -71,7 +71,7 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
         Goods goods = goodsRepo.findById(transaction.getGoodsId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng hóa"));
 
-        if (dto.getOrigin() != null & !transaction.getOrigin().equals(dto.getOrigin())) {
+        if (dto.getOrigin() != null && !transaction.getOrigin().equals(dto.getOrigin().getValue())) {
             throw new ConflictException("Không được cập nhật kiểu giao dịch");
         }
 
@@ -87,7 +87,7 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
 
         goodsRepo.save(goods);
 
-        long updatedCount = repository.updateTransaction(id, dto);
+        long updatedCount = repository.updateTransaction(transaction, id, dto);
         if (updatedCount == 0) {
             throw new NotFoundException("Transaction update failed");
         }
@@ -115,11 +115,11 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
     }
 
     @Override
-    public List<TransactionDTO> getTransactionByFilter(String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
+    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
 
         checkPermission(type, PermissionKey.VIEW);
 
-        return repository.getTransactionByFilter(warehouseId, origin, fromDate, toDate);
+        return repository.getTransactionByFilter(page, warehouseId, origin, fromDate, toDate);
     }
 
     @Override

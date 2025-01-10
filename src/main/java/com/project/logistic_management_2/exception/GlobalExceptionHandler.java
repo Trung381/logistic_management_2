@@ -92,4 +92,19 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
+
+    @ExceptionHandler(InvalidFieldException.class)
+    public ResponseEntity<Object> handleInvalidFieldException(InvalidFieldException ex) {
+        return new ResponseEntity<>(
+                BaseResponse.fail(ex.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(NotModifiedException.class)
+    public ResponseEntity<Object> handleNotModifiedException(NotModifiedException ex) {
+        return ResponseEntity.ok(
+                BaseResponse.ok(null, ex.getMessage())
+        );
+    }
 }

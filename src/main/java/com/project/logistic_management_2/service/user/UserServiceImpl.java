@@ -40,7 +40,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public User updateUser(String id, UpdateUserDTO updateUserDTO) {
+    public User updateUser(String id, UserDTO updateUserDTO) {
         checkPermission(type, PermissionKey.WRITE);
 
         User existingUser = userRepo.getUserById(id);
@@ -48,12 +48,13 @@ public class UserServiceImpl extends BaseService implements UserService {
             throw new NotFoundException("User not found with ID: " + id);
         }
 
+
         if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
             updateUserDTO.setPassword(passwordEncoder.encode(updateUserDTO.getPassword()));
         }
 
         entityManager.clear();
-        if (!userRepo.updateUser(id, updateUserDTO)) {
+        if (!userRepo.updateUser(existingUser,id, updateUserDTO)) {
             throw new RuntimeException("Failed to update user with ID: " + id);
         }
 
@@ -63,9 +64,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
 
     @Override
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers(int page) {
         checkPermission(type, PermissionKey.VIEW);
-        return userRepo.getAll();
+        return userRepo.getAll(page);
     }
 
     @Override
@@ -92,15 +93,15 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public List<UserDTO> getDriver() {
+    public List<UserDTO> getDriver(int page) {
         checkPermission(type, PermissionKey.VIEW);
-        return userRepo.getDriver();
+        return userRepo.getDriver(page);
     }
 
     @Override
-    public List<UserDTO> getAdmin() {
+    public List<UserDTO> getAdmin(int page) {
         checkPermission(type, PermissionKey.VIEW);
-        return userRepo.getAdmin();
+        return userRepo.getAdmin(page);
     }
 
     @Override

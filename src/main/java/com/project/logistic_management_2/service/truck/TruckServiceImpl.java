@@ -4,6 +4,7 @@ import com.project.logistic_management_2.dto.truck.TruckDTO;
 import com.project.logistic_management_2.entity.Truck;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
+import com.project.logistic_management_2.enums.truck.TruckType;
 import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.mapper.truck.TruckMapper;
@@ -51,11 +52,11 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
     }
 
     @Override
-    public List<TruckDTO> getTrucksByType(Integer Type) {
+    public List<TruckDTO> getTrucksByType(TruckType type) {
 //        checkPermission(type, PermissionKey.VIEW);
-        List<TruckDTO> trucks = repository.getTrucksByType(Type);
+        List<TruckDTO> trucks = repository.getTrucksByType(type.getValue());
         if (trucks.isEmpty()) {
-            throw new NotFoundException("Không tìm thấy xe với loại: " + Type);
+            throw new NotFoundException("Không tìm thấy xe với loại: " + type.getDescription());
         }
         return trucks;
     }
@@ -63,7 +64,7 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
     @Override
     public TruckDTO getTruckByLicensePlate(String licensePlate) {
         checkPermission(type, PermissionKey.VIEW);
-        return repository.getTruckByLicensePlate(licensePlate)
+        return repository.getTruckByLicense(licensePlate)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy xe với biển số: " + licensePlate));
     }
 

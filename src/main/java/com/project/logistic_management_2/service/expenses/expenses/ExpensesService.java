@@ -18,7 +18,7 @@ public interface ExpensesService {
     ExpensesDTO update(String id, ExpensesDTO dto);
     long deleteByID(String id) throws ServerException;
     long approveByID(String id) throws ServerException;
-    List<ExpensesIncurredDTO> report(String driverId, String period);
-    List<ExpensesReportDTO> reportForAll(String period);
+    List<ExpensesIncurredDTO> report(String driverId, int year, int month);
+    List<ExpensesReportDTO> reportForAll(int year, int month);
     List<Expenses> importExpensesData(MultipartFile importFile);
 }
