@@ -10,10 +10,7 @@ import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import com.project.logistic_management_2.enums.truck.TruckStatus;
 import com.project.logistic_management_2.enums.truck.TruckType;
-import com.project.logistic_management_2.exception.def.ConflictException;
-import com.project.logistic_management_2.exception.def.InvalidFieldException;
-import com.project.logistic_management_2.exception.def.InvalidParameterException;
-import com.project.logistic_management_2.exception.def.NotFoundException;
+import com.project.logistic_management_2.exception.def.*;
 import com.project.logistic_management_2.mapper.schedule.ScheduleMapper;
 import com.project.logistic_management_2.repository.schedule.schedule.ScheduleRepo;
 import com.project.logistic_management_2.repository.truck.TruckRepo;
@@ -133,13 +130,13 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             throw new ConflictException("Lịch trình đã hết thời gian được phép chỉnh sửa!");
         }
 
+        scheduleMapper.updateSchedule(schedule, dto);
         if (dto.getTruckLicense() != null) {
             validateTruck(dto.getTruckLicense(), TruckType.TRUCK_HEAD);
         }
         if (dto.getMoocLicense() != null) {
             validateTruck(dto.getMoocLicense(), TruckType.MOOC);
         }
-        scheduleMapper.updateSchedule(schedule, dto);
         scheduleRepo.save(schedule);
 
         Optional<ScheduleDTO> res = scheduleRepo.getByID(id);
@@ -167,7 +164,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         if (status == null) {
             throw new NotFoundException("Lịch trình cần duyệt không tồn tại!");
         } else if (status != ScheduleStatus.PENDING) {
-            return -1; //Thông báo đã duyệt
+            throw new NotModifiedException("Lịch trình đã được xử lý trước đó!");
         }
 
         long numOfRowsApproved = scheduleRepo.approve(id, approved);
@@ -185,16 +182,17 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
             throw new NotFoundException("Lịch trình không tồn tại!");
         }
         switch (status) {
-            case ScheduleStatus.PENDING, ScheduleStatus.REJECTED
-                    -> throw new ConflictException("Lịch trình chưa/không được duyệt để di chuyển!");
-            case ScheduleStatus.COMPLETED -> { return ScheduleStatus.COMPLETED.getValue(); }
+            case ScheduleStatus.PENDING, ScheduleStatus.REJECTED ->
+                    throw new ConflictException("Lịch trình chưa/không được duyệt để di chuyển!");
+            case ScheduleStatus.COMPLETED ->
+                    throw new NotModifiedException("Chuyến đi đã được đánh dấu là hoàn thành trước đó!");
         }
 
         long numOfRowsMarked = scheduleRepo.markComplete(id);
         if (numOfRowsMarked == 0) {
             throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
         }
-        return scheduleRepo.markComplete(id);
+        return numOfRowsMarked;
     }
 
     @Override

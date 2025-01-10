@@ -5,6 +5,7 @@ import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
 import com.project.logistic_management_2.exception.def.InvalidFieldException;
+import com.project.logistic_management_2.exception.def.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,7 @@ public class ExpensesMapper {
                 .amount(dto.getAmount())
                 .note(dto.getNote())
                 .imgPath(dto.getImgPath())
-                .status(ExpensesStatus.WAITING_FOR_APPROVAL.getValue())
+                .status(ExpensesStatus.PENDING.getValue())
                 .deleted(false)
                 .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                 .updatedAt(new Date())
@@ -45,7 +46,7 @@ public class ExpensesMapper {
                         .amount(dto.getAmount())
                         .note(dto.getNote())
                         .imgPath(dto.getImgPath())
-                        .status(ExpensesStatus.WAITING_FOR_APPROVAL.getValue())
+                        .status(ExpensesStatus.PENDING.getValue())
                         .deleted(false)
                         .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
                         .updatedAt(new Date())
@@ -61,33 +62,50 @@ public class ExpensesMapper {
      */
     public void updateExpenses(Expenses expenses, ExpensesDTO dto) {
         if (dto == null) return;
-        boolean isUpdated = false;
+        boolean isUpdated = false, isValidField = false;
 
         if (dto.getScheduleId() != null) {
-            expenses.setScheduleId(dto.getScheduleId());
-            isUpdated = true;
+            if (!expenses.getScheduleId().equals(dto.getScheduleId())) {
+                expenses.setScheduleId(dto.getScheduleId());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getExpensesConfigId() != null) {
-            expenses.setExpensesConfigId(dto.getExpensesConfigId());
-            isUpdated = true;
+            if (!expenses.getExpensesConfigId().equals(dto.getExpensesConfigId())) {
+                expenses.setExpensesConfigId(dto.getExpensesConfigId());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getAmount() != null) {
-            expenses.setAmount(dto.getAmount());
-            isUpdated = true;
+            if (!expenses.getAmount().equals(dto.getAmount())) {
+                expenses.setAmount(dto.getAmount());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getNote() != null) {
-            expenses.setNote(dto.getNote());
-            isUpdated = true;
+            if (!expenses.getNote().equals(dto.getNote())) {
+                expenses.setNote(dto.getNote());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
         if (dto.getImgPath() != null) {
-            expenses.setImgPath(dto.getImgPath());
-            isUpdated = true;
+            if (!expenses.getImgPath().equals(dto.getImgPath())) {
+                expenses.setImgPath(dto.getImgPath());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
 
         if (isUpdated) {
             expenses.setUpdatedAt(new Date());
+        } else if (isValidField) {
+            throw new NotModifiedException("Không có sự thay đổi nào của chi phí!");
         } else {
-            throw new InvalidFieldException("Trường cần cần cập nhật không tồn tại!");
+            throw new InvalidFieldException("Trường cần cập nhật không tồn tại trong chi phí!");
         }
     }
 }
