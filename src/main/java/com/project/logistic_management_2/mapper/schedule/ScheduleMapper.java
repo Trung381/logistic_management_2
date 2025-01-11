@@ -25,7 +25,7 @@ public class ScheduleMapper {
                 .scheduleConfigId(dto.getScheduleConfigId().isBlank() ? null : dto.getScheduleConfigId())
                 .truckLicense(dto.getTruckLicense())
                 .moocLicense(dto.getMoocLicense())
-                .attachDocument(dto.getAttachDocument())
+//                .attachDocument(dto.getAttachDocument())
                 .departureTime(dto.getDepartureTime())
                 .note(dto.getNote())
                 .type(dto.getType().getValue())
@@ -47,7 +47,7 @@ public class ScheduleMapper {
                         .scheduleConfigId(dto.getScheduleConfigId().isBlank() ? null : dto.getScheduleConfigId())
                         .truckLicense(dto.getTruckLicense())
                         .moocLicense(dto.getMoocLicense())
-                        .attachDocument(dto.getAttachDocument())
+//                        .attachDocument(dto.getAttachDocument())
                         .departureTime(dto.getDepartureTime())
                         .arrivalTime(dto.getDepartureTime())
                         .note(dto.getNote())
@@ -85,13 +85,13 @@ public class ScheduleMapper {
             }
             isValidField = true;
         }
-        if (dto.getAttachDocument() != null) {
-            if (!schedule.getAttachDocument().equals(dto.getAttachDocument())) {
-                schedule.setAttachDocument(dto.getAttachDocument());
-                isUpdated = true;
-            }
-            isValidField = true;
-        }
+//        if (dto.getAttachDocument() != null) {
+//            if (!schedule.getAttachDocument().equals(dto.getAttachDocument())) {
+//                schedule.setAttachDocument(dto.getAttachDocument());
+//                isUpdated = true;
+//            }
+//            isValidField = true;
+//        }
         if (dto.getDepartureTime() != null) {
             if (!schedule.getDepartureTime().equals(dto.getDepartureTime())) {
                 schedule.setDepartureTime(dto.getDepartureTime());

@@ -49,7 +49,7 @@ public class ScheduleDTO {
     private String note;
 
     //Ảnh đính kèm
-    private String attachDocument;
+    private String[] attachedPaths = {};
 
     //Loại hành trình: nội bộ/tính lương
     @NotNull(message = "Loại hành trình không được để trống")
@@ -63,7 +63,7 @@ public class ScheduleDTO {
     private Date createdAt;
     private Date updatedAt;
 
-    public ScheduleDTO(String id, String scheduleConfigId, String placeA, String placeB, Float amount, String driverId, String driverName, String truckLicense, String moocLicense, Date departureTime, Date arrivalTime, String note, String attachDocument, Integer type, Integer status, Date createdAt, Date updatedAt) {
+    public ScheduleDTO(String id, String scheduleConfigId, String placeA, String placeB, Float amount, String driverId, String driverName, String truckLicense, String moocLicense, Date departureTime, Date arrivalTime, String note, String attachedPaths, Integer type, Integer status, Date createdAt, Date updatedAt) {
         this.id = id;
         this.scheduleConfigId = scheduleConfigId;
         this.placeA = placeA;
@@ -76,7 +76,9 @@ public class ScheduleDTO {
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
         this.note = note;
-        this.attachDocument = attachDocument;
+        if (attachedPaths != null) {
+            this.attachedPaths = attachedPaths.split(",");
+        }
         this.type = ScheduleType.valueOf(type);
         this.status = ScheduleStatus.valueOf(status);
         this.createdAt = createdAt;

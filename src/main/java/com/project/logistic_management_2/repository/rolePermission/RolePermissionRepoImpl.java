@@ -60,18 +60,10 @@ public class RolePermissionRepoImpl extends BaseRepo implements RolePermissionRe
 
         if (key != null){
             switch(key){
-                case VIEW:
-                    builder.and(qRolePermission.canView.eq(true));
-                    break;
-                case WRITE:
-                    builder.and(qRolePermission.canWrite.eq(true));
-                    break;
-                case APPROVE:
-                    builder.and(qRolePermission.canApprove.eq(true));
-                    break;
-                case DELETE:
-                    builder.and(qRolePermission.canDelete.eq(true));
-                    break;
+                case VIEW -> builder.and(qRolePermission.canView.eq(true));
+                case WRITE -> builder.and(qRolePermission.canWrite.eq(true));
+                case APPROVE -> builder.and(qRolePermission.canApprove.eq(true));
+                case DELETE -> builder.and(qRolePermission.canDelete.eq(true));
             }
         }
 

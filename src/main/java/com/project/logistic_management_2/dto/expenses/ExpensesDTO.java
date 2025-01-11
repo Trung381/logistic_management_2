@@ -3,6 +3,7 @@ package com.project.logistic_management_2.dto.expenses;
 import com.project.logistic_management_2.annotations.ExportColumn;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -10,6 +11,7 @@ import java.util.Date;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class ExpensesDTO {
     @ExportColumn(name = "Mã chi phí")
     private String id;
@@ -30,8 +32,10 @@ public class ExpensesDTO {
     @ExportColumn(name = "Ghi chú")
     private String note;
 
+    @NotEmpty(message = "Vui lòng cung cấp ít nhất một ảnh minh chứng!")
     @ExportColumn(name = "Hóa đơn")
-    private String imgPath;
+//    private String attachedPaths;
+    private String[] attachedPaths = {};
 
     @NotBlank(message = "Thông tin lịch trình không được để trống!")
     @ExportColumn(name = "Mã hành trình")
@@ -51,7 +55,7 @@ public class ExpensesDTO {
         this.amount = amount;
     }
 
-    public ExpensesDTO(String id, String driverId, String driverName, String expensesConfigId, String expensesConfigType, Float amount, String note, String imgPath, String scheduleId, Integer status, Date createdAt, Date updatedAt) {
+    public ExpensesDTO(String id, String driverId, String driverName, String expensesConfigId, String expensesConfigType, Float amount, String note, String attachedPaths, String scheduleId, Integer status, Date createdAt, Date updatedAt) {
         this.id = id;
         this.driverId = driverId;
         this.driverName = driverName;
@@ -59,7 +63,9 @@ public class ExpensesDTO {
         this.expensesConfigType = expensesConfigType;
         this.amount = amount;
         this.note = note;
-        this.imgPath = imgPath;
+        if (attachedPaths != null) {
+            this.attachedPaths = attachedPaths.split(",");
+        }
         this.scheduleId = scheduleId;
         this.status = ExpensesStatus.valueOf(status);
         this.createdAt = createdAt;

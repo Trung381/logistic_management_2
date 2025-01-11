@@ -52,12 +52,15 @@ public class ScheduleConfigRepoImpl extends BaseRepo implements ScheduleConfigRe
                 .fetch();
     }
 
-    @Override
-    public Optional<ScheduleConfig> getByID(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
+    BooleanBuilder initGetOneBuilder(String id) {
+        return new BooleanBuilder()
                 .and(scheduleConfig.id.eq(id))
                 .and(scheduleConfig.deleted.eq(false));
+    }
 
+    @Override
+    public Optional<ScheduleConfig> getByID(String id) {
+        BooleanBuilder builder = initGetOneBuilder(id);
         return Optional.ofNullable(
                 query.from(scheduleConfig)
                         .where(builder)
@@ -70,10 +73,7 @@ public class ScheduleConfigRepoImpl extends BaseRepo implements ScheduleConfigRe
     @Modifying
     @Transactional
     public long delete(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(scheduleConfig.id.eq(id))
-                .and(scheduleConfig.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         return query.update(scheduleConfig)
                 .where(builder)
                 .set(scheduleConfig.deleted, true)
@@ -82,10 +82,7 @@ public class ScheduleConfigRepoImpl extends BaseRepo implements ScheduleConfigRe
 
     @Override
     public long countByID(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(scheduleConfig.id.eq(id))
-                .and(scheduleConfig.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         Long res = query.from(scheduleConfig)
                 .where(builder)
                 .select(scheduleConfig.id.count().coalesce(0L))

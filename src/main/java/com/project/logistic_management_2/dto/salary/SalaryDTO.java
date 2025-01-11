@@ -5,6 +5,7 @@ import lombok.*;
 
 @Getter
 @Setter
+@Builder
 public class SalaryDTO {
     @ExportColumn(name = "Phụ cấp điện thoại")
     private Float phoneAllowance;

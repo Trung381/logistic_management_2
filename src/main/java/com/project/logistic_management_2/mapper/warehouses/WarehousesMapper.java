@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 public class WarehousesMapper {
     public List<WarehousesDTO> toWarehouseDTOList(List<Warehouses> warehousesList) {
         if(warehousesList == null || warehousesList.isEmpty()) return null;
-
         return warehousesList.stream().map(warehouse ->
                 WarehousesDTO.builder()
                         .id(warehouse.getId())
@@ -22,5 +21,4 @@ public class WarehousesMapper {
                         .build()
         ).collect(Collectors.toList());
     }
-
 }

@@ -38,7 +38,6 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
     }
 
     private ConstructorExpression<TransactionDTO> transactionProjection() {
-
         return Projections.constructor(TransactionDTO.class,
                 transaction.id.as("id"),
                 transaction.refUserId.as("refUserId"),
@@ -63,13 +62,17 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
         );
     }
 
+    BooleanBuilder initGetOneBuilder(String id) {
+        return new BooleanBuilder()
+                .and(transaction.id.eq(id))
+                .and(transaction.deleted.eq(false));
+    }
+
     @Override
     @Modifying
     @Transactional
     public long updateTransaction(Transaction OldTransaction, String id, TransactionDTO dto) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(transaction.id.eq(id))
-                .and(transaction.deleted.eq(false));
+        BooleanBuilder builder = initGetOneBuilder(id);
 
         JPAUpdateClause updateClause = new JPAUpdateClause(entityManager, transaction);
 
@@ -148,9 +151,7 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
 
     @Override
     public Optional<TransactionDTO> getTransactionsById(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(transaction.id.eq(id))
-                .and(transaction.deleted.eq(false));
+        BooleanBuilder builder = initGetOneBuilder(id);
 
         return Optional.ofNullable(
                 query.from(transaction)
@@ -159,7 +160,6 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
                 .fetchOne()
         );
     }
-
 
     @Override
     public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
@@ -199,10 +199,7 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
     @Modifying
     @Transactional
     public long deleteTransaction(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(transaction.id.eq(id))
-                .and(transaction.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         return query.update(transaction)
                 .where(builder)
                 .set(transaction.deleted, true)
@@ -227,10 +224,9 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
 
         Float totalQuantity = query.from(transaction)
                 .where(builder)
-                .select(transaction.quantity.sum())  // sum() trả về BigDecimal
+                .select(transaction.quantity.sum())
                 .fetchOne();
 
-        // Kiểm tra nếu totalQuantity là null, trả về 0f nếu không có kết quả
         return totalQuantity != null ? totalQuantity : 0f;
     }
 }

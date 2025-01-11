@@ -2,6 +2,7 @@ package com.project.logistic_management_2.controller.schedule;
 
 import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.BaseResponse;
+import com.project.logistic_management_2.dto.attached.AttachedImagePathsDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.service.schedule.schedule.ScheduleService;
@@ -84,9 +85,9 @@ public class ScheduleController {
         );
     }
 
-    @GetMapping("/mark_complete/{id}")
-    public ResponseEntity<Object> markComplete(@PathVariable String id) throws ServerException {
-        long numOfRows = scheduleService.markComplete(id);
+    @PostMapping("/mark_complete/{id}")
+    public ResponseEntity<Object> markComplete(@PathVariable String id, @Valid @RequestBody AttachedImagePathsDTO attachedImagePathsDTO) throws ServerException {
+        long numOfRows = scheduleService.markComplete(id, attachedImagePathsDTO);
         return ResponseEntity.ok(
                 BaseResponse.ok(numOfRows, numOfRows + " lịch trình đã được đánh dấu là hoàn thành!")
         );

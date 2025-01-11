@@ -25,9 +25,6 @@ public class Schedule {
     @Column(name = "mooc_license")
     private String moocLicense;
 
-    @Column(name = "attach_document")
-    private String attachDocument;
-
     @Column(name = "departure_time")
     private Date departureTime;
 

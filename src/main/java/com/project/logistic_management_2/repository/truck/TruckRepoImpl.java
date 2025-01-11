@@ -59,7 +59,6 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(truck.id.eq(id));
         builder.and(truck.deleted.eq(false));
-
         return Optional.ofNullable(
                 query.from(truck)
                         .innerJoin(user).on(truck.driverId.eq(user.id))
@@ -74,7 +73,6 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(truck.licensePlate.eq(licensePlate));
         builder.and(truck.deleted.eq(false));
-
         return Optional.ofNullable(
                 query.from(truck)
                         .innerJoin(user).on(truck.driverId.eq(user.id))
@@ -88,7 +86,6 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
     public List<TruckDTO> getAllTrucks() {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(truck.deleted.eq(false));
-
         return query.from(truck)
                 .innerJoin(user).on(truck.driverId.eq(user.id))
                 .where(builder)
@@ -103,7 +100,6 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(truck.id.eq(id))
                 .and(truck.deleted.eq(false));
-
         return query.update(truck)
                 .where(builder)
                 .set(truck.deleted, true)
@@ -112,11 +108,8 @@ public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {
 
     public List<TruckDTO> getTrucksByType(Integer type) {
         BooleanBuilder builder = new BooleanBuilder();
-
         builder.and(truck.type.eq(type));
-
         builder.and(truck.deleted.eq(false));
-
         return query.from(truck)
                 .innerJoin(user).on(truck.driverId.eq(user.id))
                 .where(builder)

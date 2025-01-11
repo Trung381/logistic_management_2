@@ -28,14 +28,6 @@ public class Expenses {
     @Column(name = "note")
     private String note;
 
-    //Duong dan luu anh hoa don
-    @Column(name = "img_path")
-    private String imgPath;
-
-    /* Trạng thái chi phí
-    0: Chưa duyệt (Mặc định)
-    1: Đã duyệt
-    */
     @Column(name = "status")
     private Integer status;
 
