@@ -4,6 +4,7 @@ import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
+import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -16,7 +17,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,11 +69,11 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
             builder.and(schedule.truckLicense.eq(truckLicense));
         }
         if (fromDate != null && toDate != null) {
-            builder.and(schedule.createdAt.between(fromDate, toDate));
+            builder.and(schedule.departureTime.between(fromDate, toDate));
         } else if (fromDate != null) {
-            builder.and(schedule.createdAt.goe(fromDate));
+            builder.and(schedule.departureTime.goe(fromDate));
         } else if (toDate != null) {
-            builder.and(schedule.createdAt.loe(toDate));
+            builder.and(schedule.departureTime.loe(toDate));
         }
 
         return builder;
@@ -193,7 +193,7 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     @Override
     public List<ScheduleDTO> exportReport(String license, Date fromDate, Date toDate) {
         ConstructorExpression<ScheduleDTO> expression = Projections.constructor(ScheduleDTO.class,
-                schedule.scheduleConfigId.coalesce("Chạy nội bộ").as("scheduleConfigId"),
+                schedule.scheduleConfigId.coalesce(ScheduleType.INTERNAL.getDescription()).as("scheduleConfigId"),
                 scheduleConfig.placeA.as("placeA"),
                 scheduleConfig.placeB.as("placeB"),
                 JPAExpressions.select(truck.driverId.as("driverId"))
