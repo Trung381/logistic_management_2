@@ -25,7 +25,7 @@ public class AttachedImageController {
     }
 
     @PostMapping("/delete/{refId}")
-    public ResponseEntity<Object> deleteAttachedImages(@PathVariable String refId, @RequestParam AttachedImagePathsDTO attachedImagePathsDTO) throws ServerException {
+    public ResponseEntity<Object> deleteAttachedImages(@PathVariable String refId, @RequestBody AttachedImagePathsDTO attachedImagePathsDTO) throws ServerException {
         String result = attachedImageService.deleteAttachedImages(refId, attachedImagePathsDTO);
         return ResponseEntity.ok(BaseResponse.ok(
                         result,

@@ -121,12 +121,13 @@ public class FileStorageServiceImpl implements FileStoarageService {
         return response;
     }
 
-    public Map<String, List<String>> storeFiles(MultipartFile[] files) {
-        List<String> uploadedFileNames = new ArrayList<>();
-        for (MultipartFile file : files) {
-            uploadedFileNames.add(storeFile(file));
+    public Map<String, String[]> storeFiles(MultipartFile[] files) {
+        String[] uploadedFileNames = new String[files.length];
+        for (int i = 0; i < files.length; i++) {
+            MultipartFile file = files[i];
+            uploadedFileNames[i] = storeFile(file);
         }
-        Map<String, List<String>> response = new HashMap<>();
+        Map<String, String[]> response = new HashMap<>();
         response.put("attachedImagePaths", uploadedFileNames);
         return response;
     }
@@ -160,7 +161,7 @@ public class FileStorageServiceImpl implements FileStoarageService {
         }
     }
 
-    public void deleteFiles(List<String> fileNames) {
+    public void deleteFiles(String[] fileNames) {
         for (String fileName : fileNames) {
             try {
                 Path filePathToDelete = this.fileStorageLocation.resolve(fileName).normalize();

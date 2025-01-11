@@ -101,7 +101,7 @@ public class FileController {
 
     // API Upload Multiple Files
     @PostMapping("/upload/multiple")
-    public ResponseEntity<Map<String, List<String>>> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
+    public ResponseEntity<Map<String, String[]>> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
         return ResponseEntity.ok(fileStorageService.storeFiles(files));
     }
 
@@ -139,7 +139,7 @@ public class FileController {
     }
 
     @PostMapping("/delete/multiple")
-    public ResponseEntity<String> deleteMultipleFiles(@RequestBody List<String> fileNames) {
+    public ResponseEntity<String> deleteMultipleFiles(@RequestBody String[] fileNames) {
         fileStorageService.deleteFiles(fileNames);
         return ResponseEntity.ok("Đã xoá các file được yêu cầu.");
     }
