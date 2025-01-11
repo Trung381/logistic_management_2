@@ -47,17 +47,15 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
         if (page <= 0) {
             throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
         }
-        Date fromDate = Utils.convertToDateOfTimestamp(fromDateStr);
-        Date toDate = Utils.convertToDateOfTimestamp(toDateStr);
-        return expensesRepo.getAll(page, expensesConfigId, truckLicense, fromDate, toDate);
+        Date[] range = Utils.createDateRange(fromDateStr, toDateStr);
+        return expensesRepo.getAll(page, expensesConfigId, truckLicense, range[0], range[1]);
     }
 
     @Override
     public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, String fromDateStr, String toDateStr) {
         checkPermission(type, PermissionKey.VIEW);
-        Date fromDate = Utils.convertToDateOfTimestamp(fromDateStr);
-        Date toDate = Utils.convertToDateOfTimestamp(toDateStr);
-        return expensesRepo.getAll(expensesConfigId, truckLicense, fromDate, toDate);
+        Date[] range = Utils.createDateRange(fromDateStr, toDateStr);
+        return expensesRepo.getAll(expensesConfigId, truckLicense, range[0], range[1]);
     }
 
     @Override
@@ -137,9 +135,8 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     @Override
     public List<ExpensesIncurredDTO> report(String driverId, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        Date fromDate = Utils.convertToDate(period);
-        Date toDate = Utils.convertToDateOfNextMonth(period);
-        return expensesRepo.getExpenseIncurredByDriverID(driverId, fromDate, toDate);
+        Date[] range = Utils.createDateRange(period);
+        return expensesRepo.getExpenseIncurredByDriverID(driverId, range[0], range[1]);
     }
 
     @Override

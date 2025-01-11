@@ -14,6 +14,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 public class Utils {
+    static final DateTimeFormatter YMD_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    static final DateTimeFormatter YM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
+
     public static String genID(IDKey key) {
         if (key == null) return null;
         LocalDateTime now = LocalDateTime.now();
@@ -23,35 +26,7 @@ public class Utils {
         return key.label + code + randomPart;
     }
 
-    static Date parseFromYearMonth(String yearMonthString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
-        try {
-            LocalDate localDate = LocalDate.parse(yearMonthString, formatter);
-            return java.sql.Date.valueOf(localDate);
-        } catch (DateTimeParseException ex) {
-            throw new InvalidParameterException("Định dạng chu kỳ không hợp lệ! (yyyyy-MM)");
-        }
-    }
-
-    /**
-     * @param yearMonth yyyy-MM
-     * @return start date of month: yyyy-MM-01 00:00:00
-     */
-    public static Date convertToDate(String yearMonth) {
-        if (yearMonth == null) return null;
-        return parseFromYearMonth(yearMonth);
-    }
-
-    /**
-     * @param yearMonth: yyyy-MM
-     * @return start date of next month: yyyy-MM-01 00:00:00
-     */
-    public static Date convertToDateOfNextMonth(String yearMonth) {
-        Date date = convertToDate(yearMonth);
-        return moveToNextMonth(date);
-    }
-
-    static Date moveToNextMonth(Date date) {
+    static Date toNextMonth(Date date) {
         if (date == null) return null;
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -59,18 +34,37 @@ public class Utils {
         return calendar.getTime();
     }
 
-    /**
-     * @param dateString: yyyy-MM-dd
-     * @return start date of month: yyyy-MM-dd 00:00:00
-     */
-    public static Date convertToDateOfTimestamp(String dateString) {
-        if (dateString == null) return null;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    static Date convertStringToDate(String dateString, DateTimeFormatter formatter) {
         try {
             LocalDate localDate = LocalDate.parse(dateString, formatter);
             return java.sql.Date.valueOf(localDate);
         } catch (DateTimeParseException ex) {
-            throw new InvalidParameterException("Định dạng ngày tháng không hợp lệ! (yyyy-MM-dd)");
+            throw new InvalidParameterException("Định dạng yêu cầu không hợp lệ! (" + formatter + ")");
         }
+    }
+
+    /**
+     * @param fromDateStr ngày bắt đầu (String: yyyy-MM-dd)
+     * @param toDateStr ngày kết thúc (String: yyyy-MM-dd)
+     * @return mảng gồm ngày bắt dầu và ngày kết thúc (Date: yyyy-MM-dd 00:00:00)
+     */
+    public static Date[] createDateRange(String fromDateStr, String toDateStr) {
+        if (fromDateStr == null || toDateStr == null) return null;
+        Date[] range = new Date[2];
+        range[0] = convertStringToDate(fromDateStr, YMD_FORMATTER);
+        range[1] = convertStringToDate(toDateStr, YMD_FORMATTER);
+        return range;
+    }
+
+    /**
+     * @param periodStr chu kỳ theo tháng (String: yyyy-MM)
+     * @return mảng gồm ngày đầu chu kỳ và ngày cuối chu kỳ (Date: yyyy-MM-dd 00:00:00)
+     */
+    public static Date[] createDateRange(String periodStr) {
+        if (periodStr == null) return null;
+        Date[] range = new Date[2];
+        range[0] = convertStringToDate(periodStr, YM_FORMATTER);
+        range[1] = toNextMonth(range[0]);
+        return range;
     }
 }

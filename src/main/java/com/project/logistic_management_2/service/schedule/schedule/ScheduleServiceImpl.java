@@ -85,17 +85,15 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         if (page <= 0) {
             throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
         }
-        Date fromDate = Utils.convertToDateOfTimestamp(fromDateStr);
-        Date toDate = Utils.convertToDateOfTimestamp(toDateStr);
-        return scheduleRepo.getAll(page, driverId, truckLicense, fromDate, toDate);
+        Date[] range = Utils.createDateRange(fromDateStr, toDateStr);
+        return scheduleRepo.getAll(page, driverId, truckLicense, range[0], range[1]);
     }
 
     @Override
     public List<ScheduleDTO> getAll(String driverId, String truckLicense, String fromDateStr, String toDateStr) {
         checkPermission(type, PermissionKey.VIEW);
-        Date fromDate = Utils.convertToDateOfTimestamp(fromDateStr);
-        Date toDate = Utils.convertToDateOfTimestamp(toDateStr);
-        return scheduleRepo.getAll(driverId, truckLicense, fromDate, toDate);
+        Date[] range = Utils.createDateRange(fromDateStr, toDateStr);
+        return scheduleRepo.getAll(driverId, truckLicense, range[0], range[1]);
     }
 
     @Override
@@ -204,17 +202,15 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     @Override
     public List<ScheduleDTO> report(String license, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        Date fromDate = Utils.convertToDate(period);
-        Date toDate = Utils.convertToDateOfNextMonth(period);
-        return scheduleRepo.exportReport(license, fromDate, toDate);
+        Date[] range = Utils.createDateRange(period);
+        return scheduleRepo.exportReport(license, range[0], range[1]);
     }
 
     @Override
     public List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        Date fromDate = Utils.convertToDate(period);
-        Date toDate = Utils.convertToDateOfNextMonth(period);
-        return scheduleRepo.exportScheduleSalary(driverId, fromDate, toDate);
+        Date[] range = Utils.createDateRange(period);
+        return scheduleRepo.exportScheduleSalary(driverId, range[0], range[1]);
     }
 
     @Override

@@ -27,15 +27,14 @@ public class GoodsReportServiceImpl extends BaseService implements GoodsReportSe
 
     @Override
     public void createGoodsReport(String period) {
-        Date fromDate = Utils.convertToDate(period);
-        Date toDate = Utils.convertToDateOfNextMonth(period);
+        Date[] range = Utils.createDateRange(period);
 
         List<Goods> goodsList = goodsRepo.findAll();
         for (Goods goods : goodsList) {
-            GoodsReport goodsReportMinusMonths = goodsReportRepo.getGoodReport(goods.getId(), fromDate, toDate);
+            GoodsReport goodsReportMinusMonths = goodsReportRepo.getGoodReport(goods.getId(), range[0], range[1]);
             GoodsReport goodsReportCurrentMonths = new GoodsReport();
-            float inboundQuantity = transactionRepo.getQuantityByOrigin(goods.getId(), true, fromDate, toDate);
-            float outboundQuantity = transactionRepo.getQuantityByOrigin(goods.getId(), false, fromDate, toDate);
+            float inboundQuantity = transactionRepo.getQuantityByOrigin(goods.getId(), true, range[0], range[1]);
+            float outboundQuantity = transactionRepo.getQuantityByOrigin(goods.getId(), false, range[0], range[1]);
             if(goodsReportMinusMonths == null) {
                 goodsReportCurrentMonths.setBeginningInventory(goods.getQuantity() - inboundQuantity + outboundQuantity);
                 goodsReportCurrentMonths.setEndingInventory(goods.getQuantity());
@@ -54,8 +53,7 @@ public class GoodsReportServiceImpl extends BaseService implements GoodsReportSe
 
     public List<GoodsReportDTO> getGoodsReport(String period) {
         checkPermission(type, PermissionKey.VIEW);
-        Date fromDate = Utils.convertToDate(period);
-        Date toDate = Utils.convertToDateOfNextMonth(period);
-        return goodsReportRepo.getGoodReportDTO(fromDate, toDate);
+        Date[] range = Utils.createDateRange(period);
+        return goodsReportRepo.getGoodReportDTO(range[0], range[1]);
     }
 }

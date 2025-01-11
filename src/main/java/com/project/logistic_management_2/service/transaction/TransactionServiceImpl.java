@@ -115,9 +115,8 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
     @Override
     public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, String fromDateStr, String toDateStr) {
         checkPermission(type, PermissionKey.VIEW);
-        Date fromDate = Utils.convertToDateOfTimestamp(fromDateStr);
-        Date toDate = Utils.convertToDateOfTimestamp(toDateStr);
-        return repository.getTransactionByFilter(page, warehouseId, origin, fromDate, toDate);
+        Date[] range = Utils.createDateRange(fromDateStr, toDateStr);
+        return repository.getTransactionByFilter(page, warehouseId, origin, range[0], range[1]);
     }
 
     @Override

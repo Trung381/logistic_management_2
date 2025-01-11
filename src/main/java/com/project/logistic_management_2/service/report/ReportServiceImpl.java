@@ -26,15 +26,13 @@ public class ReportServiceImpl extends BaseService implements ReportService {
         if (userId.isEmpty()) {
             throw new InvalidParameterException("UserId không hợp lệ!");
         }
-        Date fromDate = Utils.convertToDate(period);
-        Date toDate = Utils.convertToDateOfNextMonth(period);
-        return reportRepo.getReport(userId, period, fromDate, toDate);
+        Date[] range = Utils.createDateRange(period);
+        return reportRepo.getReport(userId, period, range[0], range[1]);
     }
 
     public List<SummarySalaryDTO> getSummarySalaryReport(String period) {
         checkPermission(type, PermissionKey.VIEW);
-        Date fromDate = Utils.convertToDate(period);
-        Date toDate = Utils.convertToDateOfNextMonth(period);
-        return reportRepo.getSummarySalary(period, fromDate, toDate);
+        Date[] range = Utils.createDateRange(period);
+        return reportRepo.getSummarySalary(period, range[0], range[1]);
     }
 }
