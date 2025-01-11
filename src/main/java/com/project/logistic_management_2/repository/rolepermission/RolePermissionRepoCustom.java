@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.repository.rolePermission;
+package com.project.logistic_management_2.repository.rolepermission;
 
 
 import com.project.logistic_management_2.dto.rolepermission.RolePermissionResponse;

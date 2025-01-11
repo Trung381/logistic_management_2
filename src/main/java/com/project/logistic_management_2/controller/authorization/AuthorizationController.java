@@ -5,7 +5,7 @@ import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.rolepermission.UpdateRolePermissionRequest;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
-import com.project.logistic_management_2.service.RolePermisson.RolePermissionService;
+import com.project.logistic_management_2.service.rolepermisson.RolePermissionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
