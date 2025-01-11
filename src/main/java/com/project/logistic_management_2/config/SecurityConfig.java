@@ -37,7 +37,7 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests(request -> request
                                 .requestMatchers("/auth/**").permitAll() // Cho phép truy cập không xác thực đến /auth/**
-                                .requestMatchers("/uploads/**").permitAll()
+                                .requestMatchers("/files/**").permitAll()
                                 .anyRequest().authenticated()
 //                                .anyRequest().permitAll()
                 )
