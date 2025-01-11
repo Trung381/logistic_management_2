@@ -11,10 +11,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public interface ExpensesService {
-    List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, String fromDateStr, String toDateStr);
-    List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, String fromDateStr, String toDateStr);
+    List<ExpensesDTO> getAll(Integer page, String expensesConfigId, String truckLicense, String fromDateStr, String toDateStr);
     ExpensesDTO getByID(String id);
-    ExpensesDTO create(ExpensesDTO dto);
+    ExpensesDTO create(ExpensesDTO dto) throws ServerException;
     ExpensesDTO update(String id, ExpensesDTO dto);
     long deleteByID(String id) throws ServerException;
     long approveByID(String id) throws ServerException;

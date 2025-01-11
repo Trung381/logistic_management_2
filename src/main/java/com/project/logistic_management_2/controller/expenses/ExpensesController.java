@@ -1,6 +1,5 @@
 package com.project.logistic_management_2.controller.expenses;
 
-import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
@@ -22,7 +21,6 @@ import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.rmi.ServerException;
-import java.sql.Timestamp;
 import java.util.List;
 
 @RestController
@@ -33,7 +31,7 @@ public class ExpensesController {
 
     @GetMapping()
     public ResponseEntity<Object> getExpenses(
-            @RequestParam int page,
+            @RequestParam Integer page,
             @RequestParam(required = false) String expensesConfigId,
             @RequestParam(required = false) String truckLicense,
             @RequestParam(required = false) String fromDate,
@@ -52,7 +50,7 @@ public class ExpensesController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Object> createExpenses(@Valid @RequestBody ExpensesDTO dto) {
+    public ResponseEntity<Object> createExpenses(@Valid @RequestBody ExpensesDTO dto) throws ServerException {
         return new ResponseEntity<>(
                 BaseResponse.ok(expensesService.create(dto)),
                 HttpStatus.CREATED
@@ -103,7 +101,7 @@ public class ExpensesController {
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) throws Exception {
 
-        List<ExpensesDTO> expenses = expensesService.getAll(expensesConfigId, truckLicense, fromDate, toDate);
+        List<ExpensesDTO> expenses = expensesService.getAll(null, expensesConfigId, truckLicense, fromDate, toDate);
 
         if (!CollectionUtils.isEmpty(expenses)) {
             String fileName = "Expenses Export" + ".xlsx";

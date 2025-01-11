@@ -42,20 +42,18 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     private final PermissionType type = PermissionType.EXPENSES;
 
     @Override
-    public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, String fromDateStr, String toDateStr) {
+    public List<ExpensesDTO> getAll(Integer page, String expensesConfigId, String truckLicense, String fromDateStr, String toDateStr) {
         checkPermission(type, PermissionKey.VIEW);
-        if (page <= 0) {
-            throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
+        Date[] range = Utils.createDateRange(fromDateStr, toDateStr);
+        if (page != null) {
+            if (page <= 0) {
+                throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
+            } else {
+                return expensesRepo.getAll(page, expensesConfigId, truckLicense, range[0], range[1]);
+            }
+        } else {
+            return expensesRepo.getAll(expensesConfigId, truckLicense, range[0], range[1]);
         }
-        Date[] range = Utils.createDateRange(fromDateStr, toDateStr);
-        return expensesRepo.getAll(page, expensesConfigId, truckLicense, range[0], range[1]);
-    }
-
-    @Override
-    public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, String fromDateStr, String toDateStr) {
-        checkPermission(type, PermissionKey.VIEW);
-        Date[] range = Utils.createDateRange(fromDateStr, toDateStr);
-        return expensesRepo.getAll(expensesConfigId, truckLicense, range[0], range[1]);
     }
 
     @Override
@@ -67,18 +65,31 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
 
     @Override
     @Transactional
-    public ExpensesDTO create(ExpensesDTO dto) {
+    public ExpensesDTO create(ExpensesDTO dto) throws ServerException {
         checkPermission(type, PermissionKey.WRITE);
 
-        String[] attachedImagePaths = dto.getAttachedPaths();
-        Expenses expenses = expensesMapper.toExpenses(dto);
-        attachedService.addAttachedImages(expenses.getId(), AttachedType.ATTACHED_OF_EXPENSES, attachedImagePaths);
-        expensesRepo.save(expenses);
+        Expenses expenses = createExpensesFromDTO(dto);
+        attachImages(expenses.getId(), dto);
 
         String notifyMsg = "Có một chi phí được tạo mới cần được phê duyệt lúc " + new Date();
         notificationService.sendNotification("{\"message\":\"" + notifyMsg + "\"}");
 
-        return expensesRepo.getByID(expenses.getId()).orElse(null);
+        Optional<ExpensesDTO> result = expensesRepo.getByID(expenses.getId());
+        if (result.isEmpty()) {
+            throw new ServerException("Có lỗi khi tạo chi phí mới. Vui lòng thử lại sau!");
+        }
+        return result.get();
+    }
+
+    private void attachImages(String referenceID, ExpensesDTO dto) {
+        String[] attachedImagePaths = dto.getAttachedPaths();
+        attachedService.addAttachedImages(referenceID, AttachedType.ATTACHED_OF_EXPENSES, attachedImagePaths);
+    }
+
+    private Expenses createExpensesFromDTO(ExpensesDTO dto) {
+        Expenses expenses = expensesMapper.toExpenses(dto);
+        expensesRepo.save(expenses);
+        return expenses;
     }
 
     @Override
@@ -87,36 +98,54 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
 
         Expenses expenses = expensesRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Chi phí cần cập nhật không tồn tại!"));
+        checkUpdateConditions(id);
 
+        updateExpensesFromDTO(expenses, dto);
+
+        Optional<ExpensesDTO> result = expensesRepo.getByID(expenses.getId());
+        return result.orElse(null);
+    }
+
+    private void checkUpdateConditions(String id) {
         ExpensesStatus status = expensesRepo.getStatusByID(id);
         if (status == ExpensesStatus.APPROVED) {
             throw new ConflictException("Chi phí đã được duyệt không thể chỉnh sửa!");
         }
+    }
 
+    private void updateExpensesFromDTO(Expenses expenses, ExpensesDTO dto) {
         expensesMapper.updateExpenses(expenses, dto);
         expensesRepo.save(expenses);
-
-        Optional<ExpensesDTO> res = expensesRepo.getByID(expenses.getId());
-        return res.orElse(null);
     }
 
     @Override
     public long deleteByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.DELETE);
-        if (expensesRepo.countByID(id) == 0)
-            throw new NotFoundException("Chi phí cần xóa không tồn tại hoặc đã được xóa trước đó!");
+        checkDeleteConditions(id);
+        return delete(id);
+    }
 
-        long numOfRowsDeleted = expensesRepo.delete(id);
-        if (numOfRowsDeleted == 0) {
-            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+    private void checkDeleteConditions(String id) {
+        if (expensesRepo.countByID(id) == 0)
+            throw new NotFoundException("Chi phí cần xóa không tồn tại!");
+    }
+
+    private long delete(String id) throws ServerException {
+        long result = expensesRepo.delete(id);
+        if (result == 0) {
+            throw new ServerException("Có lỗi khi xóa chi phí. Vui lòng thử lại sau!");
         }
-        return numOfRowsDeleted;
+        return result;
     }
 
     @Override
     public long approveByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.APPROVE);
+        checkApproveConditions(id);
+        return approve(id);
+    }
 
+    private void checkApproveConditions(String id) {
         if (expensesRepo.countByID(id) == 0)
             throw new NotFoundException("Chi phí cần duyệt không tồn tại!");
 
@@ -124,12 +153,14 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
         if (status == ExpensesStatus.APPROVED) {
             throw new NotModifiedException("Chi phí đã được duyệt trước đó!");
         }
+    }
 
-        long numOfRowsApproved = expensesRepo.approve(id);
-        if (numOfRowsApproved == 0) {
-            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+    private long approve(String id) throws ServerException {
+        long result = expensesRepo.approve(id);
+        if (result == 0) {
+            throw new ServerException("Có lỗi khi duyệt chi phí. Vui lòng thử lại sau!");
         }
-        return numOfRowsApproved;
+        return result;
     }
 
     @Override
