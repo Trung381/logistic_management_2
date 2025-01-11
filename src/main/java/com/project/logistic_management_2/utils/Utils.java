@@ -34,9 +34,11 @@ public class Utils {
         return calendar.getTime();
     }
 
-    static Date convertStringToDate(String dateString, DateTimeFormatter formatter) {
+    static Date convertStringToDate(String dateString, DateTimeFormatter formatter, boolean isOffset) {
+        if (dateString == null) return null;
         try {
             LocalDate localDate = LocalDate.parse(dateString, formatter);
+            if (isOffset) localDate = localDate.plusDays(1);
             return java.sql.Date.valueOf(localDate);
         } catch (DateTimeParseException ex) {
             throw new InvalidParameterException("Định dạng yêu cầu không hợp lệ! (" + formatter + ")");
@@ -49,10 +51,9 @@ public class Utils {
      * @return mảng gồm ngày bắt dầu và ngày kết thúc (Date: yyyy-MM-dd 00:00:00)
      */
     public static Date[] createDateRange(String fromDateStr, String toDateStr) {
-        if (fromDateStr == null || toDateStr == null) return null;
         Date[] range = new Date[2];
-        range[0] = convertStringToDate(fromDateStr, YMD_FORMATTER);
-        range[1] = convertStringToDate(toDateStr, YMD_FORMATTER);
+        range[0] = convertStringToDate(fromDateStr, YMD_FORMATTER, false);
+        range[1] = convertStringToDate(toDateStr, YMD_FORMATTER, true);
         return range;
     }
 
@@ -61,9 +62,8 @@ public class Utils {
      * @return mảng gồm ngày đầu chu kỳ và ngày cuối chu kỳ (Date: yyyy-MM-dd 00:00:00)
      */
     public static Date[] createDateRange(String periodStr) {
-        if (periodStr == null) return null;
         Date[] range = new Date[2];
-        range[0] = convertStringToDate(periodStr, YM_FORMATTER);
+        range[0] = convertStringToDate(periodStr, YM_FORMATTER, false);
         range[1] = toNextMonth(range[0]);
         return range;
     }

@@ -10,7 +10,7 @@ public enum ScheduleType {
     private final Integer value;
     private final String description;
 
-    public String getNote() {
+    public String getDescription() {
         return description;
     }
 

@@ -11,10 +11,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public interface ScheduleService {
-    List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, String fromDateStr, String toDateStr);
-    List<ScheduleDTO> getAll(String driverId, String truckLicense, String fromDateStr, String toDateStr);
+    List<ScheduleDTO> getAll(Integer page, String driverId, String truckLicense, String fromDateStr, String toDateStr);
     ScheduleDTO getByID(String id);
-    ScheduleDTO create(ScheduleDTO dto);
+    ScheduleDTO create(ScheduleDTO dto) throws ServerException;
     ScheduleDTO update(String id, ScheduleDTO dto);
     long deleteByID(String id) throws ServerException;
     long approveByID(String id, boolean approved) throws ServerException;

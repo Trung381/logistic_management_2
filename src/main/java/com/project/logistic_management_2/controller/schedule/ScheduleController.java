@@ -33,8 +33,8 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @GetMapping()
-    public ResponseEntity<Object> getSchedule(
-            @RequestParam int page,
+    public ResponseEntity<Object> getSchedules(
+            @RequestParam Integer page,
             @RequestParam(required = false) String driverId,
             @RequestParam(required = false) String truckLicense,
             @RequestParam(required = false) String fromDate,
@@ -53,7 +53,7 @@ public class ScheduleController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Object> createSchedule(@Valid @RequestBody ScheduleDTO dto) {
+    public ResponseEntity<Object> createSchedule(@Valid @RequestBody ScheduleDTO dto) throws ServerException {
         return new ResponseEntity<>(
                 BaseResponse.ok(scheduleService.create(dto)),
                 HttpStatus.CREATED
@@ -114,7 +114,7 @@ public class ScheduleController {
             @RequestParam(required = false) String toDate
     ) throws Exception {
 
-        List<ScheduleDTO> schedule = scheduleService.getAll(driverId, truckLicense, fromDate, toDate);
+        List<ScheduleDTO> schedule = scheduleService.getAll(null, driverId, truckLicense, fromDate, toDate);
 
         if (!CollectionUtils.isEmpty(schedule)) {
             String fileName = "Schedule Export" + ".xlsx";
