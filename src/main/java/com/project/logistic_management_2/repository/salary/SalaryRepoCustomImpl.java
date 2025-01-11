@@ -109,12 +109,6 @@ public class SalaryRepoCustomImpl extends BaseRepo implements SalaryRepoCustom {
         return updateClause.execute() > 0;
     }
 
-    public void deleteSalary(Integer salaryId) {
-        query.delete(salary)
-                .where(salary.id.eq(salaryId))
-                .execute();
-    }
-
     @Transactional
     public void createSalaryForAllUsers() {
         YearMonth currentPeriod = YearMonth.now();

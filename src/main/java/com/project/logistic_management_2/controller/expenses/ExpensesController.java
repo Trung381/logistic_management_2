@@ -39,10 +39,8 @@ public class ExpensesController {
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) {
 
-        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
-
         return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.getAll(page, expensesConfigId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
+                BaseResponse.ok(expensesService.getAll(page, expensesConfigId, truckLicense, fromDate, toDate))
         );
     }
 
@@ -80,17 +78,21 @@ public class ExpensesController {
         return ResponseEntity.ok(BaseResponse.ok(res, "Đã duyệt thành công " + res + " chi phí!"));
     }
 
+    /**
+     * @param driverId id of driver
+     * @param period format: yyyy-MM
+     */
     @GetMapping("/reports")
-    public ResponseEntity<Object> exportReport(@RequestParam String driverId, @RequestParam int year, int month) {
+    public ResponseEntity<Object> exportReport(@RequestParam String driverId, @RequestParam String period) {
         return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.report(driverId, year, month))
+                BaseResponse.ok(expensesService.report(driverId, period))
         );
     }
 
     @GetMapping("/reports/all")
-    public ResponseEntity<Object> exportReportForAll(@RequestParam int year, int month) {
+    public ResponseEntity<Object> exportReportForAll(@RequestParam String period) {
         return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.reportForAll(year, month))
+                BaseResponse.ok(expensesService.reportForAll(period))
         );
     }
 
@@ -100,10 +102,8 @@ public class ExpensesController {
             @RequestParam(required = false) String truckLicense,
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) throws Exception {
-        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
 
-        List<ExpensesDTO> expenses = expensesService.getAll(expensesConfigId, truckLicense, dateRange.getFirst(), dateRange.getSecond());
-
+        List<ExpensesDTO> expenses = expensesService.getAll(expensesConfigId, truckLicense, fromDate, toDate);
 
         if (!CollectionUtils.isEmpty(expenses)) {
             String fileName = "Expenses Export" + ".xlsx";
@@ -124,16 +124,13 @@ public class ExpensesController {
         }
     }
 
-
     @GetMapping("/export/reports")
     public ResponseEntity<Object> exportReportExpenses(
             @RequestParam(required = false) String driverId,
-            @RequestParam(required = false) int year,
-            @RequestParam(required = false) int month
+            @RequestParam(required = false) String period
     ) throws Exception {
 
-        List<ExpensesIncurredDTO> expensesReport = expensesService.report(driverId, year, month);
-
+        List<ExpensesIncurredDTO> expensesReport = expensesService.report(driverId, period);
 
         if (!CollectionUtils.isEmpty(expensesReport)) {
             String fileName = "ExpensesReport Export" + ".xlsx";
@@ -159,28 +156,5 @@ public class ExpensesController {
                 BaseResponse.ok(expensesService.importExpensesData(importFile)),
                 HttpStatus.CREATED
         );
-    }
-
-    private Pair<Timestamp, Timestamp> parseAndValidateDates(String fromDate, String toDate) throws IllegalArgumentException {
-        Timestamp fromTimestamp = null;
-        Timestamp toTimestamp = null;
-
-        if (fromDate != null) {
-            try {
-                fromTimestamp = Timestamp.valueOf(fromDate.replace("T", " ") + ".000");
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid fromDate format.");
-            }
-        }
-
-        if (toDate != null) {
-            try {
-                toTimestamp = Timestamp.valueOf(toDate.replace("T", " ") + ".000");
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid toDate format.");
-            }
-        }
-
-        return Pair.of(fromTimestamp, toTimestamp);
     }
 }

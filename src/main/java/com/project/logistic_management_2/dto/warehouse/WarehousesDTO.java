@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.dto.request;
+package com.project.logistic_management_2.dto.warehouse;
 
 import com.project.logistic_management_2.annotations.ExportColumn;
 import jakarta.validation.constraints.NotBlank;

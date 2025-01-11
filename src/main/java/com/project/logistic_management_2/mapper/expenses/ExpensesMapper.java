@@ -4,8 +4,8 @@ import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
-import com.project.logistic_management_2.exception.def.InvalidFieldException;
-import com.project.logistic_management_2.exception.def.NotModifiedException;
+import com.project.logistic_management_2.exception.define.InvalidFieldException;
+import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 

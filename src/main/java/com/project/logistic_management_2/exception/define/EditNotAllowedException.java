@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.exception.def;
+package com.project.logistic_management_2.exception.define;
 
 public class EditNotAllowedException extends RuntimeException {
     public EditNotAllowedException(String message) {

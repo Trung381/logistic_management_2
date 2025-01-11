@@ -40,38 +40,6 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         }, 1, 1, TimeUnit.MINUTES);
     }
 
-    @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        sessions.add(session);
-        lastActiveTime.put(session.getId(), Instant.now());
-    }
-
-    @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        // Cập nhật thời gian tương tác
-        lastActiveTime.put(session.getId(), Instant.now());
-
-        // Parse JSON message từ client, giả sử dạng {"message":"trung"}
-        // Sử dụng Jackson để parse
-        String payload = message.getPayload();
-        // Có thể dùng ObjectMapper để parse JSON:
-        // ObjectMapper mapper = new ObjectMapper();
-        // Map<String, String> map = mapper.readValue(payload, new TypeReference<Map<String,String>>(){});
-        // String clientMsg = map.get("message");
-
-        // Ở đây ví dụ đơn giản, assume payload luôn có dạng {"message":"xxx"}
-        String clientMsg = payload.replace("{\"message\":\"","").replace("\"}","");
-
-        String response = "{\"message\":\"hello " + clientMsg + "\"}";
-        session.sendMessage(new TextMessage(response));
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        sessions.remove(session);
-        lastActiveTime.remove(session.getId());
-    }
-
     // Hàm này để broadcast message đến mọi session
     public void broadcast(String msg) {
         for (WebSocketSession session : sessions) {

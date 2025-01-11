@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.utils;
 
 import com.project.logistic_management_2.enums.IDKey;
-import com.project.logistic_management_2.exception.def.InvalidParameterException;
+import com.project.logistic_management_2.exception.define.InvalidParameterException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -11,7 +11,6 @@ import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.regex.Pattern;
 
 @Component
 public class Utils {
@@ -34,13 +33,21 @@ public class Utils {
         }
     }
 
-    public static Date convertToDateOfCurrentMonth(String yearMonth) {
+    /**
+     * @param yearMonth yyyy-MM
+     * @return start date of month: yyyy-MM-01 00:00:00
+     */
+    public static Date convertToDate(String yearMonth) {
         if (yearMonth == null) return null;
         return parseFromYearMonth(yearMonth);
     }
 
-    public Date convertToDateOfNextMonth(String yearMonth) {
-        Date date = convertToDateOfCurrentMonth(yearMonth);
+    /**
+     * @param yearMonth: yyyy-MM
+     * @return start date of next month: yyyy-MM-01 00:00:00
+     */
+    public static Date convertToDateOfNextMonth(String yearMonth) {
+        Date date = convertToDate(yearMonth);
         return moveToNextMonth(date);
     }
 
@@ -52,6 +59,10 @@ public class Utils {
         return calendar.getTime();
     }
 
+    /**
+     * @param dateString: yyyy-MM-dd
+     * @return start date of month: yyyy-MM-dd 00:00:00
+     */
     public static Date convertToDateOfTimestamp(String dateString) {
         if (dateString == null) return null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

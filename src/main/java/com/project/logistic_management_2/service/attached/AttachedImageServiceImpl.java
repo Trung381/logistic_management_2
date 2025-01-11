@@ -3,7 +3,7 @@ package com.project.logistic_management_2.service.attached;
 import com.project.logistic_management_2.dto.attached.AttachedImagePathsDTO;
 import com.project.logistic_management_2.entity.AttachedImage;
 import com.project.logistic_management_2.enums.attached.AttachedType;
-import com.project.logistic_management_2.exception.def.NotFoundException;
+import com.project.logistic_management_2.exception.define.NotFoundException;
 import com.project.logistic_management_2.mapper.attached.AttachedImageMapper;
 import com.project.logistic_management_2.repository.attached.AttachedImageRepo;
 import com.project.logistic_management_2.service.upload.FileStorageServiceImpl;

@@ -41,7 +41,7 @@ public class SalaryController {
     public ResponseEntity<BaseResponse<String>> createSalaryForAllUsers(){
         salaryService.createSalaryForAllUsers();
         return ResponseEntity.ok(
-                BaseResponse.ok("Tạo thành công lương tháng cho tất cả user với giá trị dèault rồi he")
+                BaseResponse.ok("Tạo thành công lương tháng cho tất cả user với giá trị default rồi he")
         );
     }
 }

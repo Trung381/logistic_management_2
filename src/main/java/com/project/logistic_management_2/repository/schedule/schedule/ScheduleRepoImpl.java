@@ -15,7 +15,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
+import java.util.Date;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -59,7 +59,7 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
         );
     }
 
-    private BooleanBuilder initGetAllBuilder(String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    private BooleanBuilder initGetAllBuilder(String driverId, String truckLicense, Date fromDate, Date toDate) {
         BooleanBuilder builder = new BooleanBuilder().and(schedule.deleted.eq(false));
 
         if (driverId != null && !driverId.isBlank()) {
@@ -86,7 +86,7 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     }
 
     @Override
-    public List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    public List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, Date fromDate, Date toDate) {
         BooleanBuilder builder = initGetAllBuilder(driverId, truckLicense, fromDate, toDate);
         long offset = (long) (page - 1) * Pagination.TEN.getSize();
         return query.from(schedule)
@@ -102,7 +102,7 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     }
 
     @Override
-    public List<ScheduleDTO> getAll(String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    public List<ScheduleDTO> getAll(String driverId, String truckLicense, Date fromDate, Date toDate) {
         BooleanBuilder builder = initGetAllBuilder(driverId, truckLicense, fromDate, toDate);
         return query.from(schedule)
                 .innerJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))

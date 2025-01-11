@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.repository.goods;
 
-import com.project.logistic_management_2.dto.request.GoodsDTO;
+import com.project.logistic_management_2.dto.goods.GoodsDTO;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;

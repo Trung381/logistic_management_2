@@ -69,12 +69,10 @@ public class ScheduleConfigController {
 
         List<ScheduleConfigDTO> scheduleConfig = scheduleConfigService.getAll();
 
-
         if (!CollectionUtils.isEmpty(scheduleConfig)) {
             String fileName = "ScheduleConfig Export" + ".xlsx";
 
             ByteArrayInputStream in = ExcelUtils.export(scheduleConfig, fileName, ExportConfig.scheduleConfigExport);
-
             InputStreamResource inputStreamResource = new InputStreamResource(in);
 
             return ResponseEntity.ok()
@@ -85,11 +83,8 @@ public class ScheduleConfigController {
                     .body(inputStreamResource);
         } else {
             throw new Exception("No data");
-
         }
     }
-
-
 
     @PostMapping("/configs/import")
     public ResponseEntity<Object> importScheduleConfigData(@RequestParam("file") MultipartFile importFile) {

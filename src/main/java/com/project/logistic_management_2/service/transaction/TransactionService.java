@@ -15,6 +15,6 @@ public interface TransactionService {
     Optional<TransactionDTO> updateTransaction(String id, TransactionDTO dto);
     String deleteTransaction(String id);
     TransactionDTO getTransactionById(String id);
-    List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate);
+    List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, String fromDateStr, String toDateStr);
     List<Transaction> importTransactionData(MultipartFile importFile);
 }

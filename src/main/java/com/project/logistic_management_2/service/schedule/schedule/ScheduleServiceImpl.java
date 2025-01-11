@@ -12,7 +12,7 @@ import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import com.project.logistic_management_2.enums.truck.TruckStatus;
 import com.project.logistic_management_2.enums.truck.TruckType;
-import com.project.logistic_management_2.exception.def.*;
+import com.project.logistic_management_2.exception.define.*;
 import com.project.logistic_management_2.mapper.schedule.ScheduleMapper;
 import com.project.logistic_management_2.repository.schedule.schedule.ScheduleRepo;
 import com.project.logistic_management_2.repository.truck.TruckRepo;
@@ -22,6 +22,7 @@ import com.project.logistic_management_2.service.notification.NotificationServic
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
+import com.project.logistic_management_2.utils.Utils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -29,10 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.rmi.ServerException;
-import java.sql.Timestamp;
-import java.time.DateTimeException;
-import java.time.LocalDate;
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,17 +80,21 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
     // Pagination
     @Override
-    public List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    public List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, String fromDateStr, String toDateStr) {
         checkPermission(type, PermissionKey.VIEW);
         if (page <= 0) {
             throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
         }
+        Date fromDate = Utils.convertToDateOfTimestamp(fromDateStr);
+        Date toDate = Utils.convertToDateOfTimestamp(toDateStr);
         return scheduleRepo.getAll(page, driverId, truckLicense, fromDate, toDate);
     }
 
     @Override
-    public List<ScheduleDTO> getAll(String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    public List<ScheduleDTO> getAll(String driverId, String truckLicense, String fromDateStr, String toDateStr) {
         checkPermission(type, PermissionKey.VIEW);
+        Date fromDate = Utils.convertToDateOfTimestamp(fromDateStr);
+        Date toDate = Utils.convertToDateOfTimestamp(toDateStr);
         return scheduleRepo.getAll(driverId, truckLicense, fromDate, toDate);
     }
 
@@ -200,40 +202,29 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     }
 
     @Override
-    public List<ScheduleDTO> report(String license, int year, int month) {
+    public List<ScheduleDTO> report(String license, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        Date fromDate = convertToDate(year, month);
-        Date toDate = convertToDate(year, (month % 12) + 1);
+        Date fromDate = Utils.convertToDate(period);
+        Date toDate = Utils.convertToDateOfNextMonth(period);
         return scheduleRepo.exportReport(license, fromDate, toDate);
     }
 
     @Override
-    public List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, int year, int month) {
+    public List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        Date fromDate = convertToDate(year, month);
-        Date toDate = convertToDate(year, (month % 12) + 1);
+        Date fromDate = Utils.convertToDate(period);
+        Date toDate = Utils.convertToDateOfNextMonth(period);
         return scheduleRepo.exportScheduleSalary(driverId, fromDate, toDate);
-    }
-
-    private Date convertToDate(int year, int month) {
-        try {
-            LocalDate localDate = LocalDate.of(year, month, 1);
-            return Date.valueOf(localDate);
-        } catch (DateTimeException ex) {
-            throw new InvalidParameterException("Chu kỳ đã chọn không hợp lệ!");
-        }
     }
 
     @Override
     public List<Schedule> importScheduleData(MultipartFile importFile) {
-
         checkPermission(type, PermissionKey.WRITE);
 
         Workbook workbook = FileFactory.getWorkbookStream(importFile);
         List<ScheduleDTO> scheduleDTOList = ExcelUtils.getImportData(workbook, ImportConfig.scheduleImport);
 
         List<Schedule> schedule = scheduleMapper.toScheduleList(scheduleDTOList);
-
         return scheduleRepo.saveAll(schedule);
     }
 }

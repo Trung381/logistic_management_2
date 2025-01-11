@@ -21,14 +21,12 @@ import java.util.List;
 public class RolePermissionServiceImpl extends BaseService implements RolePermissionService {
 
     private final RolePermissionRepo rolePermissionRepo;
-    private PermissionType type = PermissionType.PERMISSIONS;
+    private final PermissionType type = PermissionType.PERMISSIONS;
 
     @Override
     public boolean hasPermission(PermissionType type, PermissionKey key){
         return checkPermission(type, key);
     }
-
-
 
     @Override
     @Transactional

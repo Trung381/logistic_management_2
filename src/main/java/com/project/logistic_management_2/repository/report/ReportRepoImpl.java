@@ -25,6 +25,7 @@ import static com.project.logistic_management_2.entity.QSchedule.schedule;
 import static com.project.logistic_management_2.entity.QScheduleConfig.scheduleConfig;
 import static com.project.logistic_management_2.entity.QSalary.salary;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -38,11 +39,7 @@ public class ReportRepoImpl extends BaseRepo implements ReportRepo {
     }
 
     @Override
-    public ReportDetailSalaryDTO getReport(String userId, String period) {
-        YearMonth ym = YearMonth.parse(period);
-        Date startDate = Date.from(ym.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date endDate = Date.from(ym.atEndOfMonth().atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
-
+    public ReportDetailSalaryDTO getReport(String userId, String period, Date fromDate, Date toDate) {
         NumberExpression<Float> minAmount = scheduleConfig.amount.min().coalesce(0F).as("minAmount");
         NumberExpression<Long> scheduleCount = schedule.id.count().coalesce(0L).as("scheduleCount");
         NumberExpression<Float> total = scheduleConfig.amount.min().multiply(schedule.id.count()).coalesce(0F).as("total");
@@ -74,10 +71,10 @@ public class ReportRepoImpl extends BaseRepo implements ReportRepo {
                 .join(truck).on(user.id.eq(truck.driverId))
                 .join(schedule).on(truck.licensePlate.eq(schedule.truckLicense))
                 .join(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
-                .leftJoin(salary).on(user.id.eq(salary.userId).and(salary.period.eq(String.valueOf(ym))))
+                .leftJoin(salary).on(user.id.eq(salary.userId).and(salary.period.eq(period)))
                 .where(
                         user.id.eq(userId)
-                                .and(schedule.departureTime.between(startDate, endDate))
+                                .and(schedule.departureTime.between(fromDate, toDate))
                 )
                 .groupBy(
                         user.fullName,
@@ -144,14 +141,10 @@ public class ReportRepoImpl extends BaseRepo implements ReportRepo {
     }
 
     @Override
-    public List<SummarySalaryDTO> getSummarySalary(String period) {
-        YearMonth ym = YearMonth.parse(period);
-        Date startDate = Date.from(ym.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date endDate = Date.from(ym.atEndOfMonth().atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
-
+    public List<SummarySalaryDTO> getSummarySalary(String period, Date fromDate, Date toDate) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(truck.driverId.eq(user.id))
-                .and(schedule.departureTime.between(startDate, endDate))
+                .and(schedule.departureTime.between(fromDate, toDate))
                 .and(schedule.type.eq(ScheduleType.PAYROLL.getValue()))
                 .and(truck.deleted.eq(false))
                 .and(scheduleConfig.deleted.eq(false))

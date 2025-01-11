@@ -60,10 +60,7 @@ public class TransactionController {
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) {
 
-        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
-
-        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(page, warehouseId, origin, dateRange.getFirst(), dateRange.getSecond());
-
+        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(page, warehouseId, origin, fromDate, toDate);
         return ResponseEntity.ok(BaseResponse.ok(transactions));
     }
 
@@ -74,16 +71,13 @@ public class TransactionController {
             @RequestParam(required = false) Boolean origin,
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) throws Exception {
-        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
 
-        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(page, warehouseId, origin, dateRange.getFirst(), dateRange.getSecond());
-
+        List<TransactionDTO> transactions = transactionService.getTransactionByFilter(page, warehouseId, origin, fromDate, toDate);
 
         if (!CollectionUtils.isEmpty(transactions)) {
             String fileName = "Transactions Export" + ".xlsx";
 
             ByteArrayInputStream in = ExcelUtils.export(transactions, fileName, ExportConfig.transactionExport);
-
             InputStreamResource inputStreamResource = new InputStreamResource(in);
 
             return ResponseEntity.ok()
@@ -94,7 +88,6 @@ public class TransactionController {
                     .body(inputStreamResource);
         } else {
             throw new Exception("No data");
-
         }
     }
 
@@ -104,28 +97,5 @@ public class TransactionController {
                 BaseResponse.ok(transactionService.importTransactionData(importFile)),
                 HttpStatus.CREATED
         );
-    }
-
-    private Pair<Timestamp, Timestamp> parseAndValidateDates(String fromDate, String toDate) throws IllegalArgumentException {
-        Timestamp fromTimestamp = null;
-        Timestamp toTimestamp = null;
-
-        if (fromDate != null) {
-            try {
-                fromTimestamp = Timestamp.valueOf(fromDate.replace("T", " ") + ".000");
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid fromDate format.");
-            }
-        }
-
-        if (toDate != null) {
-            try {
-                toTimestamp = Timestamp.valueOf(toDate.replace("T", " ") + ".000");
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid toDate format.");
-            }
-        }
-
-        return Pair.of(fromTimestamp, toTimestamp);
     }
 }

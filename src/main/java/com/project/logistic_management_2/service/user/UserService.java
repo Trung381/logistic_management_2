@@ -16,7 +16,6 @@ public interface UserService {
     List<User> getAllUsers(int page);
     User getUserById(String id);
     String deleteById(String id);
-    User findByUsername(String username);
     List<UserDTO> getDriver(int page);
     List<UserDTO> getAdmin(int page);
     List<User> importUserData(MultipartFile importFile);

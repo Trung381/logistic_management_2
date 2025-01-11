@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.controller.goods;
 
 import com.project.logistic_management_2.dto.BaseResponse;
-import com.project.logistic_management_2.dto.request.GoodsDTO;
+import com.project.logistic_management_2.dto.goods.GoodsDTO;
 import com.project.logistic_management_2.service.goods.GoodsService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
@@ -39,7 +39,6 @@ public class GoodsController {
 
         List<GoodsDTO> goods = goodsService.getGoodsByFilter(warehouseId);
 
-
         if (!CollectionUtils.isEmpty(goods)) {
             String fileName = "Goods Export" + ".xlsx";
 
@@ -55,7 +54,6 @@ public class GoodsController {
                     .body(inputStreamResource);
         } else {
             throw new Exception("No data");
-
         }
     }
 }

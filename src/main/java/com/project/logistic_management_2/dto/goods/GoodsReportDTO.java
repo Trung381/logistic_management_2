@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.dto.request;
+package com.project.logistic_management_2.dto.goods;
 
 import com.project.logistic_management_2.annotations.ExportColumn;
 import jakarta.validation.constraints.NotBlank;
@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.text.DecimalFormat;
 import java.util.Date;
 
 @Data

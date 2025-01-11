@@ -3,16 +3,15 @@ package com.project.logistic_management_2.service.expenses.expenses;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
-import com.project.logistic_management_2.entity.AttachedImage;
 import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.enums.attached.AttachedType;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
-import com.project.logistic_management_2.exception.def.ConflictException;
-import com.project.logistic_management_2.exception.def.InvalidParameterException;
-import com.project.logistic_management_2.exception.def.NotFoundException;
-import com.project.logistic_management_2.exception.def.NotModifiedException;
+import com.project.logistic_management_2.exception.define.ConflictException;
+import com.project.logistic_management_2.exception.define.InvalidParameterException;
+import com.project.logistic_management_2.exception.define.NotFoundException;
+import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
 import com.project.logistic_management_2.repository.expenses.expenses.ExpensesRepo;
 import com.project.logistic_management_2.service.BaseService;
@@ -21,6 +20,7 @@ import com.project.logistic_management_2.service.notification.NotificationServic
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
+import com.project.logistic_management_2.utils.Utils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -28,15 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.rmi.ServerException;
-import java.sql.Timestamp;
-import java.time.DateTimeException;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -48,17 +42,21 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     private final PermissionType type = PermissionType.EXPENSES;
 
     @Override
-    public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, String fromDateStr, String toDateStr) {
         checkPermission(type, PermissionKey.VIEW);
         if (page <= 0) {
             throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
         }
+        Date fromDate = Utils.convertToDateOfTimestamp(fromDateStr);
+        Date toDate = Utils.convertToDateOfTimestamp(toDateStr);
         return expensesRepo.getAll(page, expensesConfigId, truckLicense, fromDate, toDate);
     }
 
     @Override
-    public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, String fromDateStr, String toDateStr) {
         checkPermission(type, PermissionKey.VIEW);
+        Date fromDate = Utils.convertToDateOfTimestamp(fromDateStr);
+        Date toDate = Utils.convertToDateOfTimestamp(toDateStr);
         return expensesRepo.getAll(expensesConfigId, truckLicense, fromDate, toDate);
     }
 
@@ -137,30 +135,17 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     }
 
     @Override
-    public List<ExpensesIncurredDTO> report(String driverId, int year, int month) {
+    public List<ExpensesIncurredDTO> report(String driverId, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        java.sql.Date fromDate = convertToDate(year, month);
-        java.sql.Date toDate = convertToDate(year, (month % 12) + 1);
-        return expensesRepo.getByFilter(driverId, fromDate, toDate);
+        Date fromDate = Utils.convertToDate(period);
+        Date toDate = Utils.convertToDateOfNextMonth(period);
+        return expensesRepo.getExpenseIncurredByDriverID(driverId, fromDate, toDate);
     }
 
     @Override
-    public List<ExpensesReportDTO> reportForAll(int year, int month) {
+    public List<ExpensesReportDTO> reportForAll(String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        if (month < 1 || month > 12) {
-            throw new InvalidParameterException("Chu kỳ đã chọn không hợp lệ!");
-        }
-        String period = year + "-" + month;
         return expensesRepo.reportForAll(period);
-    }
-
-    private java.sql.Date convertToDate(int year, int month) {
-        try {
-            LocalDate localDate = LocalDate.of(year, month, 1);
-            return java.sql.Date.valueOf(localDate);
-        } catch (DateTimeException ex) {
-            throw new InvalidParameterException("Chu kỳ đã chọn không hợp lệ!");
-        }
     }
 
     @Override

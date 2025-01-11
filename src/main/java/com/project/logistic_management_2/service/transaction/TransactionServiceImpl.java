@@ -5,8 +5,8 @@ import com.project.logistic_management_2.entity.Goods;
 import com.project.logistic_management_2.entity.Transaction;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
-import com.project.logistic_management_2.exception.def.ConflictException;
-import com.project.logistic_management_2.exception.def.NotFoundException;
+import com.project.logistic_management_2.exception.define.ConflictException;
+import com.project.logistic_management_2.exception.define.NotFoundException;
 import com.project.logistic_management_2.mapper.transaction.TransactionMapper;
 import com.project.logistic_management_2.repository.goods.GoodsRepo;
 import com.project.logistic_management_2.repository.transaction.TransactionRepo;
@@ -14,15 +14,15 @@ import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
+import com.project.logistic_management_2.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -37,7 +37,6 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
 
     @Override
     public TransactionDTO createTransaction(TransactionDTO transactionDTO) {
-
         checkPermission(type, PermissionKey.WRITE);
 
         Goods goods = goodsRepo.findById(transactionDTO.getGoodsId())
@@ -97,7 +96,6 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
 
     @Override
     public String deleteTransaction(String id) {
-
         checkPermission(type, PermissionKey.DELETE);
 
         repository.findById(id)
@@ -115,10 +113,10 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
     }
 
     @Override
-    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
-
+    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, String fromDateStr, String toDateStr) {
         checkPermission(type, PermissionKey.VIEW);
-
+        Date fromDate = Utils.convertToDateOfTimestamp(fromDateStr);
+        Date toDate = Utils.convertToDateOfTimestamp(toDateStr);
         return repository.getTransactionByFilter(page, warehouseId, origin, fromDate, toDate);
     }
 
@@ -147,7 +145,6 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
                 goodsRepo.save(goods);
             }
         }
-        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return repository.saveAll(transactions);
     }
 }

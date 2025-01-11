@@ -41,11 +41,8 @@ public class ReportController {
     }
 
     @GetMapping("/export/summary-salary-report")
-    public ResponseEntity<Object> exportReportSummarySalary(
-            @RequestParam String period) throws Exception {
-
+    public ResponseEntity<Object> exportReportSummarySalary(@RequestParam String period) throws Exception {
         List<SummarySalaryDTO> summarySalaryReport = reportService.getSummarySalaryReport(period);
-
 
         if (!CollectionUtils.isEmpty(summarySalaryReport)) {
             String fileName = "SummarySalary Export" + ".xlsx";
@@ -62,38 +59,30 @@ public class ReportController {
                     .body(inputStreamResource);
         } else {
             throw new Exception("No data");
-
         }
     }
 
     @GetMapping("/export/detail-salary-report")
     public ResponseEntity<Object> exportReportDetailSalary(
             @RequestParam String userId,
-            @RequestParam String period) throws Exception {
+            @RequestParam String period
+    ) throws Exception {
 
-        // Lấy báo cáo chi tiết lương từ service
         ReportDetailSalaryDTO detailSalaryReport = reportService.getReport(userId, period);
 
-        // Kiểm tra dữ liệu hợp lệ
         if (detailSalaryReport == null ||
                 (detailSalaryReport.getSalary() == null && CollectionUtils.isEmpty(detailSalaryReport.getSchedules()))) {
             throw new Exception("No data available for the specified user and period.");
         }
 
-        // Tên file Excel
         String fileName = "DetailSalaryReport_" + userId + "_" + period + ".xlsx";
-
-        // Xuất file Excel
         ByteArrayInputStream in = ExcelUtils.export(List.of(detailSalaryReport), fileName, null);
 
-        // Trả về file Excel dưới dạng ResponseEntity
         InputStreamResource inputStreamResource = new InputStreamResource(in);
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8))
                 .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
                 .body(inputStreamResource);
     }
-
 }

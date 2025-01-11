@@ -4,8 +4,8 @@ import com.project.logistic_management_2.dto.transaction.TransactionDTO;
 import com.project.logistic_management_2.entity.Transaction;
 import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.enums.transaction.TransactionType;
-import com.project.logistic_management_2.exception.def.EditNotAllowedException;
-import com.project.logistic_management_2.exception.def.InvalidFieldException;
+import com.project.logistic_management_2.exception.define.EditNotAllowedException;
+import com.project.logistic_management_2.exception.define.InvalidFieldException;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -19,15 +19,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.YearMonth;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import static com.project.logistic_management_2.entity.QGoods.goods;
-import static com.project.logistic_management_2.entity.QSchedule.schedule;
 import static com.project.logistic_management_2.entity.QTransaction.transaction;
 import static com.project.logistic_management_2.entity.QUser.user;
 
@@ -162,7 +158,7 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
     }
 
     @Override
-    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
+    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, java.util.Date fromDate, java.util.Date toDate) {
 
         BooleanBuilder builder = new BooleanBuilder()
                 .and(transaction.deleted.eq(false));
@@ -207,20 +203,13 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
     }
 
     @Override
-    public Float getQuantityByOrigin(String goodsId, Boolean origin , YearMonth yearMonth) {
-        Date startDate = Date.valueOf(LocalDate.now().atStartOfDay().toLocalDate());
-        Date endDate = Date.valueOf(LocalDate.now().plusMonths(1).atStartOfDay().toLocalDate());
-
-        if (yearMonth != null) {
-            startDate = Date.valueOf(yearMonth.atDay(1).atStartOfDay().toLocalDate());
-            endDate = Date.valueOf(yearMonth.atDay(yearMonth.lengthOfMonth()).atStartOfDay().toLocalDate());
-
-        }
-
+    public Float getQuantityByOrigin(String goodsId, Boolean origin , Date fromDate, Date toDate) {
         BooleanBuilder builder = new BooleanBuilder()
-                .and(transaction.createdAt.between(startDate, endDate))
                 .and(transaction.origin.eq(origin))
                 .and(transaction.goodsId.eq(goodsId));
+        if (fromDate != null && toDate != null) {
+            builder.and(transaction.createdAt.between(fromDate, toDate));
+        }
 
         Float totalQuantity = query.from(transaction)
                 .where(builder)

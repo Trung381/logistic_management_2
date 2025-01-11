@@ -34,7 +34,6 @@ public class ExpensesDTO {
 
     @NotEmpty(message = "Vui lòng cung cấp ít nhất một ảnh minh chứng!")
     @ExportColumn(name = "Hóa đơn")
-//    private String attachedPaths;
     private String[] attachedPaths = {};
 
     @NotBlank(message = "Thông tin lịch trình không được để trống!")

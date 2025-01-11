@@ -4,10 +4,8 @@ import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
-import com.project.logistic_management_2.enums.schedule.ScheduleType;
-import com.project.logistic_management_2.exception.def.InvalidFieldException;
-import com.project.logistic_management_2.exception.def.NotModifiedException;
-import com.project.logistic_management_2.service.schedule.schedule.ScheduleServiceImpl;
+import com.project.logistic_management_2.exception.define.InvalidFieldException;
+import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 

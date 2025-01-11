@@ -40,10 +40,8 @@ public class ScheduleController {
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) {
 
-        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
-
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.getAll(page, driverId, truckLicense, dateRange.getFirst(), dateRange.getSecond()))
+                BaseResponse.ok(scheduleService.getAll(page, driverId, truckLicense, fromDate, toDate))
         );
     }
 
@@ -94,17 +92,17 @@ public class ScheduleController {
     }
 
     @GetMapping("/reports")
-    public ResponseEntity<Object> exportReport(@RequestParam String license, @RequestParam int year, @RequestParam int month) {
+    public ResponseEntity<Object> exportReport(@RequestParam String license, @RequestParam String period) {
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.report(license, year, month))
+                BaseResponse.ok(scheduleService.report(license, period))
         );
     }
 
     //Xuất lương lịch trình của một tài xế trong 1 chu kỳ
     @GetMapping("/reports/salary")
-    public ResponseEntity<Object> exportScheduleSalary(@RequestParam String driverId, @RequestParam int year, @RequestParam int month) {
+    public ResponseEntity<Object> exportScheduleSalary(@RequestParam String driverId, @RequestParam String period) {
         return ResponseEntity.ok(
-                BaseResponse.ok(scheduleService.exportScheduleSalary(driverId, year, month))
+                BaseResponse.ok(scheduleService.exportScheduleSalary(driverId, period))
         );
     }
 
@@ -113,16 +111,15 @@ public class ScheduleController {
             @RequestParam(required = false) String driverId,
             @RequestParam(required = false) String truckLicense,
             @RequestParam(required = false) String fromDate,
-            @RequestParam(required = false) String toDate) throws Exception {
-        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
+            @RequestParam(required = false) String toDate
+    ) throws Exception {
 
-        List<ScheduleDTO> schedule = scheduleService.getAll(driverId, truckLicense, dateRange.getFirst(), dateRange.getSecond());
+        List<ScheduleDTO> schedule = scheduleService.getAll(driverId, truckLicense, fromDate, toDate);
 
         if (!CollectionUtils.isEmpty(schedule)) {
             String fileName = "Schedule Export" + ".xlsx";
 
             ByteArrayInputStream in = ExcelUtils.export(schedule, fileName, ExportConfig.scheduleExport);
-
             InputStreamResource inputStreamResource = new InputStreamResource(in);
 
             return ResponseEntity.ok()
@@ -142,28 +139,5 @@ public class ScheduleController {
                 BaseResponse.ok(scheduleService.importScheduleData(importFile)),
                 HttpStatus.CREATED
         );
-    }
-
-    private Pair<Timestamp, Timestamp> parseAndValidateDates(String fromDate, String toDate) throws IllegalArgumentException {
-        Timestamp fromTimestamp = null;
-        Timestamp toTimestamp = null;
-
-        if (fromDate != null) {
-            try {
-                fromTimestamp = Timestamp.valueOf(fromDate.replace("T", " ") + ".000");
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid fromDate format.");
-            }
-        }
-
-        if (toDate != null) {
-            try {
-                toTimestamp = Timestamp.valueOf(toDate.replace("T", " ") + ".000");
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid toDate format.");
-            }
-        }
-
-        return Pair.of(fromTimestamp, toTimestamp);
     }
 }

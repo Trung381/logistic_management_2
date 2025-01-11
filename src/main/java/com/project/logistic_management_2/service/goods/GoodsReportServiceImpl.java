@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.service.goods;
 
-import com.project.logistic_management_2.dto.request.GoodsReportDTO;
+import com.project.logistic_management_2.dto.goods.GoodsReportDTO;
 import com.project.logistic_management_2.entity.Goods;
 import com.project.logistic_management_2.entity.GoodsReport;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
@@ -9,11 +9,10 @@ import com.project.logistic_management_2.repository.goods.GoodsRepo;
 import com.project.logistic_management_2.repository.goods.GoodsReportRepo;
 import com.project.logistic_management_2.repository.transaction.TransactionRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.utils.Utils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
 
@@ -27,17 +26,16 @@ public class GoodsReportServiceImpl extends BaseService implements GoodsReportSe
     private final PermissionType type = PermissionType.REPORTS;
 
     @Override
-    @Scheduled(cron = "0 0 0 1 * *")
-    public void createGoodsReport() {
-        YearMonth currentMonth = YearMonth.now().minusMonths(1); // Tháng hiện tại
-        YearMonth previousMonth = currentMonth.minusMonths(2);
+    public void createGoodsReport(String period) {
+        Date fromDate = Utils.convertToDate(period);
+        Date toDate = Utils.convertToDateOfNextMonth(period);
 
         List<Goods> goodsList = goodsRepo.findAll();
         for (Goods goods : goodsList) {
-            GoodsReport goodsReportMinusMonths = goodsReportRepo.getGoodReportByYearMonth(goods.getId(), previousMonth);
+            GoodsReport goodsReportMinusMonths = goodsReportRepo.getGoodReport(goods.getId(), fromDate, toDate);
             GoodsReport goodsReportCurrentMonths = new GoodsReport();
-            float inboundQuantity = transactionRepo.getQuantityByOrigin(goods.getId(), true, currentMonth);
-            float outboundQuantity = transactionRepo.getQuantityByOrigin(goods.getId(), false, currentMonth);
+            float inboundQuantity = transactionRepo.getQuantityByOrigin(goods.getId(), true, fromDate, toDate);
+            float outboundQuantity = transactionRepo.getQuantityByOrigin(goods.getId(), false, fromDate, toDate);
             if(goodsReportMinusMonths == null) {
                 goodsReportCurrentMonths.setBeginningInventory(goods.getQuantity() - inboundQuantity + outboundQuantity);
                 goodsReportCurrentMonths.setEndingInventory(goods.getQuantity());
@@ -54,10 +52,10 @@ public class GoodsReportServiceImpl extends BaseService implements GoodsReportSe
         }
     }
 
-    public List<GoodsReportDTO> getGoodsReportByYearMonth(YearMonth yearMonth) {
-
+    public List<GoodsReportDTO> getGoodsReport(String period) {
         checkPermission(type, PermissionKey.VIEW);
-
-        return goodsReportRepo.getGoodReportDTOByYearMonth(yearMonth);
+        Date fromDate = Utils.convertToDate(period);
+        Date toDate = Utils.convertToDateOfNextMonth(period);
+        return goodsReportRepo.getGoodReportDTO(fromDate, toDate);
     }
 }

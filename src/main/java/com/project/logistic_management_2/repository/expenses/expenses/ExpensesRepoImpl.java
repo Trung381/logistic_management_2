@@ -24,7 +24,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
+import java.util.Date;
 import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.List;
@@ -58,7 +58,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         );
     }
 
-    BooleanBuilder initGetAllBuilder(String configId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    BooleanBuilder initGetAllBuilder(String configId, String truckLicense, Date fromDate, Date toDate) {
         BooleanBuilder builder = new BooleanBuilder().and(expenses.deleted.eq(false));
         if (configId != null) {
             builder.and(expenses.expensesConfigId.eq(configId));
@@ -88,7 +88,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     @Override
-    public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, Date fromDate, Date toDate) {
         BooleanBuilder builder = initGetAllBuilder(expensesConfigId, truckLicense, fromDate, toDate);
         long offset = (long) (page - 1) * Pagination.TEN.getSize();
         return query.from(expenses)
@@ -103,7 +103,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     @Override
-    public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Date fromDate, Date toDate) {
         BooleanBuilder builder = initGetAllBuilder(expensesConfigId, truckLicense, fromDate, toDate);
         return query.from(expenses)
                 .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
@@ -115,7 +115,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     @Override
-    public List<ExpensesIncurredDTO> getByFilter(String driverId, Date fromDate, Date toDate) {
+    public List<ExpensesIncurredDTO> getExpenseIncurredByDriverID(String driverId, Date fromDate, Date toDate) {
         BooleanBuilder builder = initBuilder();
 
         if (driverId != null && !driverId.isBlank()) {

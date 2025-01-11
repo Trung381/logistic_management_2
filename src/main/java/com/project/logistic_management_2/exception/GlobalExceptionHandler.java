@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.exception;
 
 import com.project.logistic_management_2.dto.BaseResponse;
-import com.project.logistic_management_2.exception.def.*;
+import com.project.logistic_management_2.exception.define.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
