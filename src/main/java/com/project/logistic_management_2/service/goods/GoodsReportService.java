@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.service.goods;
 
 import com.project.logistic_management_2.dto.goods.GoodsReportDTO;
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,4 +10,5 @@ import java.util.List;
 public interface GoodsReportService {
     void createGoodsReport(String period);
     List<GoodsReportDTO> getGoodsReport(String period);
+    ExportExcelResponse exportGoodsReport(String period) throws Exception;
 }

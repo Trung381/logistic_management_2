@@ -1,30 +1,22 @@
 package com.project.logistic_management_2.controller.schedule;
 
-import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.BaseResponse;
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.attached.AttachedImagePathsDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
-import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 import com.project.logistic_management_2.service.schedule.schedule.ScheduleService;
-import com.project.logistic_management_2.utils.ExcelUtils;
-import com.project.logistic_management_2.utils.ExportConfig;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.rmi.ServerException;
-import java.sql.Timestamp;
-import java.util.List;
 
 @RestController
 @RequestMapping("/schedules")
@@ -113,24 +105,14 @@ public class ScheduleController {
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate
     ) throws Exception {
+        ExportExcelResponse exportExcelResponse = scheduleService.exportSchedule(driverId, truckLicense, fromDate, toDate);
 
-        List<ScheduleDTO> schedule = scheduleService.getAll(null, driverId, truckLicense, fromDate, toDate);
-
-        if (!CollectionUtils.isEmpty(schedule)) {
-            String fileName = "Schedule Export" + ".xlsx";
-
-            ByteArrayInputStream in = ExcelUtils.export(schedule, fileName, ExportConfig.scheduleExport);
-            InputStreamResource inputStreamResource = new InputStreamResource(in);
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8)
-                    )
-                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
-                    .body(inputStreamResource);
-        } else {
-            throw new Exception("No data");
-        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + URLEncoder.encode(exportExcelResponse.getFileName(), StandardCharsets.UTF_8)
+                )
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
+                .body(exportExcelResponse.getResource());
     }
 
     @PostMapping("/import")

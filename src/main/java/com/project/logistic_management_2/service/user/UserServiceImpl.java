@@ -1,6 +1,8 @@
 package com.project.logistic_management_2.service.user;
 
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
+import com.project.logistic_management_2.dto.user.UpdateUserDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.User;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
@@ -10,15 +12,19 @@ import com.project.logistic_management_2.mapper.user.UserMapper;
 import com.project.logistic_management_2.repository.user.UserRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.ExportConfig;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -53,7 +59,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 
         entityManager.clear();
-        if (!userRepo.updateUser(existingUser,id, updateUserDTO)) {
+        if (!userRepo.updateUser(existingUser, id, updateUserDTO)) {
             throw new RuntimeException("Failed to update user with ID: " + id);
         }
 
@@ -70,8 +76,8 @@ public class UserServiceImpl extends BaseService implements UserService {
     public User getUserById(String id) {
         checkPermission(type, PermissionKey.VIEW);
         User user = userRepo.getUserById(id);
-        if(user == null){
-            throw new NotFoundException("User not found with ID: "+id);
+        if (user == null) {
+            throw new NotFoundException("User not found with ID: " + id);
         }
         return user;
     }
@@ -104,5 +110,35 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         List<User> users = userMapper.toUserList(userDTOList);
         return userRepo.saveAll(users);
+    }
+
+    @Override
+    public ExportExcelResponse exportDriver(int page) throws Exception {
+        List<UserDTO> users = userRepo.getDriver(page);
+
+        if (CollectionUtils.isEmpty(users)) {
+            throw new Exception("No data");
+        }
+        String fileName = "Driver Export" + ".xlsx";
+
+        ByteArrayInputStream in = ExcelUtils.export(users, fileName, ExportConfig.userExport);
+
+        InputStreamResource inputStreamResource = new InputStreamResource(in);
+        return new ExportExcelResponse(fileName, inputStreamResource);
+    }
+
+    @Override
+    public ExportExcelResponse exportAdmin(int page) throws Exception {
+        List<UserDTO> users = userRepo.getAdmin(page);
+
+        if (!CollectionUtils.isEmpty(users)) {
+            throw new Exception("No data");
+        }
+        String fileName = "Admin Export" + ".xlsx";
+
+        ByteArrayInputStream in = ExcelUtils.export(users, fileName, ExportConfig.userExport);
+
+        InputStreamResource inputStreamResource = new InputStreamResource(in);
+        return new ExportExcelResponse(fileName, inputStreamResource);
     }
 }

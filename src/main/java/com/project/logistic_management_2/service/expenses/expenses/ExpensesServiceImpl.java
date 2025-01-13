@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.service.expenses.expenses;
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
@@ -18,15 +19,19 @@ import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.attached.AttachedImageService;
 import com.project.logistic_management_2.service.notification.NotificationService;
 import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.ExportConfig;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
 import com.project.logistic_management_2.utils.Utils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.rmi.ServerException;
 import java.util.Date;
 import java.util.List;
@@ -186,7 +191,38 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
 
         List<Expenses> expenses = expensesMapper.toExpensesList(expensesDTOList);
 
-        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return expensesRepo.saveAll(expenses);
+    }
+
+    @Override
+    public ExportExcelResponse exportExpenses(String expensesConfigId, String truckLicense, String fromDate, String toDate) throws Exception {
+        Date[] range = Utils.createDateRange(fromDate, toDate);
+        List<ExpensesDTO> expenses = expensesRepo.getAll(expensesConfigId, truckLicense, range[0], range[1]);
+
+        if (CollectionUtils.isEmpty(expenses)) {
+            throw new NotFoundException("No data");
+        }
+        String fileName = "Expenses Export" + ".xlsx";
+
+        ByteArrayInputStream in = ExcelUtils.export(expenses, fileName, ExportConfig.expensesExport);
+
+        InputStreamResource inputStreamResource = new InputStreamResource(in);
+        return new ExportExcelResponse(fileName, inputStreamResource);
+    }
+
+    @Override
+    public ExportExcelResponse exportReportExpenses(String driverId, String period) throws Exception {
+        Date[] range = Utils.createDateRange(period);
+        List<ExpensesIncurredDTO> expensesReport = expensesRepo.getExpenseIncurredByDriverID(driverId, range[0], range[1]);
+
+        if (CollectionUtils.isEmpty(expensesReport)) {
+            throw new NotFoundException("No data");
+        }
+        String fileName = "ExpensesReport Export" + ".xlsx";
+
+        ByteArrayInputStream in = ExcelUtils.export(expensesReport, fileName, ExportConfig.expenseReportByDriverExport);
+
+        InputStreamResource inputStreamResource = new InputStreamResource(in);
+        return new ExportExcelResponse(fileName, inputStreamResource);
     }
 }

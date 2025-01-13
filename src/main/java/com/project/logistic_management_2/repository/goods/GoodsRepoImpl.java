@@ -47,5 +47,4 @@ public class GoodsRepoImpl extends BaseRepo implements GoodsRepoCustom {
                 .select(goodsProjection())
                 .fetch();
     }
-
 }

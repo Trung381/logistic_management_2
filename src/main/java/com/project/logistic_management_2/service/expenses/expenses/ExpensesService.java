@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.service.expenses.expenses;
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
@@ -20,4 +21,6 @@ public interface ExpensesService {
     List<ExpensesIncurredDTO> report(String driverId, String period);
     List<ExpensesReportDTO> reportForAll(String period);
     List<Expenses> importExpensesData(MultipartFile importFile);
+    ExportExcelResponse exportExpenses(String expensesConfigId, String truckLicense, String fromDate, String toDate) throws Exception;
+    ExportExcelResponse exportReportExpenses(String driverId, String period) throws Exception;
 }

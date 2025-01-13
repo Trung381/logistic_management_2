@@ -14,9 +14,6 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GoodsReportDTO {
-
-//    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,##0.00");
-
     private Long id;
 
     @NotBlank(message = "ID hàng hóa không được để trống")
@@ -49,48 +46,4 @@ public class GoodsReportDTO {
     private Float unitAmount;
 
     private Date createdAt;
-
-//    public String getBeginingInventoryQuantity() {
-//        return formatFloat(beginingInventoryQuantity);
-//    }
-//
-//    public String getBeginingInventoryTotalAmount() {
-//        return formatFloat(beginingInventoryTotalAmount);
-//    }
-//
-//    public String getInboundTransactionQuantity() {
-//        return formatFloat(inboundTransactionQuantity);
-//    }
-//
-//    public String getInboundTransactionTotalAmount() {
-//        return formatFloat(inboundTransactionTotalAmount);
-//    }
-//
-//    public String getOutboundTransactionQuantity() {
-//        return formatFloat(outboundTransactionQuantity);
-//    }
-//
-//    public String getOutboundTransactionTotalAmount() {
-//        return formatFloat(outboundTransactionTotalAmount);
-//    }
-//
-//    public String getEndingInventoryQuantity() {
-//        return formatFloat(endingInventoryQuantity);
-//    }
-//
-//    public String getEndingInventoryTotalAmount() {
-//        return formatFloat(endingInventoryTotalAmount);
-//    }
-//
-//    public String getUnitAmount() {
-//        return formatFloat(unitAmount);
-//    }
-//
-//    // Hàm định dạng Float
-//    private String formatFloat(Float value) {
-//        if (value == null) {
-//            return "";
-//        }
-//        return DECIMAL_FORMAT.format(value);
-//    }
 }

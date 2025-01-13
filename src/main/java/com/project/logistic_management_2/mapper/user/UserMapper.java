@@ -5,7 +5,6 @@ import com.project.logistic_management_2.entity.User;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.utils.Utils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 

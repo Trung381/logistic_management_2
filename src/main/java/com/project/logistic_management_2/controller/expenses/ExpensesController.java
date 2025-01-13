@@ -1,27 +1,21 @@
 package com.project.logistic_management_2.controller.expenses;
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.BaseResponse;
-import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.service.expenses.expenses.ExpensesService;
-import com.project.logistic_management_2.utils.ExcelUtils;
-import com.project.logistic_management_2.utils.ExportConfig;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.rmi.ServerException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/expenses")
@@ -101,25 +95,15 @@ public class ExpensesController {
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) throws Exception {
 
-        List<ExpensesDTO> expenses = expensesService.getAll(null, expensesConfigId, truckLicense, fromDate, toDate);
+        ExportExcelResponse exportExcelResponse = expensesService.exportExpenses(expensesConfigId, truckLicense, fromDate, toDate);
 
-        if (!CollectionUtils.isEmpty(expenses)) {
-            String fileName = "Expenses Export" + ".xlsx";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + URLEncoder.encode(exportExcelResponse.getFileName(), StandardCharsets.UTF_8)
+                )
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
+                .body(exportExcelResponse.getResource());
 
-            ByteArrayInputStream in = ExcelUtils.export(expenses, fileName, ExportConfig.expensesExport);
-
-            InputStreamResource inputStreamResource = new InputStreamResource(in);
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8)
-                    )
-                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
-                    .body(inputStreamResource);
-        } else {
-            throw new Exception("No data");
-
-        }
     }
 
     @GetMapping("/export/reports")
@@ -127,25 +111,14 @@ public class ExpensesController {
             @RequestParam(required = false) String driverId,
             @RequestParam(required = false) String period
     ) throws Exception {
+        ExportExcelResponse exportExcelResponse = expensesService.exportReportExpenses(driverId, period);
 
-        List<ExpensesIncurredDTO> expensesReport = expensesService.report(driverId, period);
-
-        if (!CollectionUtils.isEmpty(expensesReport)) {
-            String fileName = "ExpensesReport Export" + ".xlsx";
-
-            ByteArrayInputStream in = ExcelUtils.export(expensesReport, fileName, ExportConfig.expenseReportByDriverExport);
-
-            InputStreamResource inputStreamResource = new InputStreamResource(in);
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8)
-                    )
-                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
-                    .body(inputStreamResource);
-        } else {
-            throw new Exception("No data");
-        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + URLEncoder.encode(exportExcelResponse.getFileName(), StandardCharsets.UTF_8)
+                )
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
+                .body(exportExcelResponse.getResource());
     }
 
     @PostMapping("/import")

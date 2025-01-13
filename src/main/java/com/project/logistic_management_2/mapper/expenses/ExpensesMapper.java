@@ -42,12 +42,6 @@ public class ExpensesMapper {
                 .build();
     }
 
-    /**
-     * Update the fields that need to be updated of the expenses
-     *
-     * @param expenses: object to be updated
-     * @param dto: object contain the values to be updated
-     */
     public void updateExpenses(Expenses expenses, ExpensesDTO dto) {
         if (dto == null) return;
         boolean isUpdated = false, isValidField = false;

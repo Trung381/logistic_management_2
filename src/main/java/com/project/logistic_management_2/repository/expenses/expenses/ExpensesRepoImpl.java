@@ -25,7 +25,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
-import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;

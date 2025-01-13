@@ -7,16 +7,15 @@ import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.service.rolepermisson.RolePermissionService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/role-permission")
+@RequiredArgsConstructor
 public class AuthorizationController {
-
-    @Autowired
-    private RolePermissionService rolePermissionService;
+    private final RolePermissionService rolePermissionService;
 
     @PostMapping("/check-permission")
     public ResponseEntity<BaseResponse<Boolean>> checkPermisson(@RequestParam PermissionType permissionName, @RequestParam PermissionKey key){

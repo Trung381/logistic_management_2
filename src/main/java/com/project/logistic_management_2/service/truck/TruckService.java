@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.service.truck;
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.truck.TruckDTO;
 import com.project.logistic_management_2.entity.Truck;
 import com.project.logistic_management_2.enums.truck.TruckType;
@@ -15,5 +16,5 @@ public interface TruckService {
     TruckDTO updateTruck(Integer id,TruckDTO truckDTO);
     long deleteTruck(Integer id);
     List<Truck> importTruckData(MultipartFile importFile);
-
+    ExportExcelResponse exportTruckData() throws Exception;
 }

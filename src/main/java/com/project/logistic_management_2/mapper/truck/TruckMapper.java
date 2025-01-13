@@ -3,7 +3,6 @@ package com.project.logistic_management_2.mapper.truck;
 import com.project.logistic_management_2.dto.truck.TruckDTO;
 import com.project.logistic_management_2.entity.Truck;
 import com.project.logistic_management_2.enums.truck.TruckStatus;
-import com.project.logistic_management_2.enums.truck.TruckType;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;

@@ -133,7 +133,7 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
         }
 
         if (isUpdated) {
-            updateClause.set(transaction.updatedAt, new java.util.Date());
+            updateClause.set(transaction.updatedAt, new Date());
         } else {
             throw new InvalidFieldException("No data fields are updated!!!");
         }
@@ -158,7 +158,7 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
     }
 
     @Override
-    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, java.util.Date fromDate, java.util.Date toDate) {
+    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, Date fromDate, Date toDate) {
 
         BooleanBuilder builder = new BooleanBuilder()
                 .and(transaction.deleted.eq(false));

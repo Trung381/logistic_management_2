@@ -48,3 +48,5 @@ out/
 ### env ###
 .env
 .env[.properties]
+
+mysql-data/

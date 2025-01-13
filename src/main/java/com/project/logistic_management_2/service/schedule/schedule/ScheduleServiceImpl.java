@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.service.schedule.schedule;
 
 import com.project.logistic_management_2.dto.attached.AttachedImagePathsDTO;
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.entity.Schedule;
@@ -20,15 +21,19 @@ import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.attached.AttachedImageService;
 import com.project.logistic_management_2.service.notification.NotificationService;
 import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.ExportConfig;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
 import com.project.logistic_management_2.utils.Utils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.rmi.ServerException;
 import java.util.Date;
 import java.util.List;
@@ -249,5 +254,21 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
         List<Schedule> schedule = scheduleMapper.toScheduleList(scheduleDTOList);
         return scheduleRepo.saveAll(schedule);
+    }
+
+    @Override
+    public ExportExcelResponse exportSchedule(String driverId, String truckLicense, String fromDate, String toDate) throws Exception {
+        Date[] range = Utils.createDateRange(fromDate, toDate);
+        List<ScheduleDTO> schedule = scheduleRepo.getAll(driverId, truckLicense, range[0], range[1]);
+
+        if (CollectionUtils.isEmpty(schedule)) {
+            throw new NotFoundException("No data");
+        }
+        String fileName = "Schedule Export" + ".xlsx";
+
+        ByteArrayInputStream in = ExcelUtils.export(schedule, fileName, ExportConfig.scheduleExport);
+
+        InputStreamResource inputStreamResource = new InputStreamResource(in);
+        return new ExportExcelResponse(fileName, inputStreamResource);
     }
 }
