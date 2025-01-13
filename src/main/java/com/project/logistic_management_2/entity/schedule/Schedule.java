@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.entity.schedule;
 
+import com.project.logistic_management_2.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @Table(name = "schedules")
-public class Schedule {
+public class Schedule extends BaseEntity {
     @Id
     private String id;
 
@@ -39,13 +40,4 @@ public class Schedule {
 
     @Column(name = "status")
     private Integer status;
-
-    @Column(name = "deleted")
-    private Boolean deleted;
-
-    @Column(name = "created_at")
-    private Date createdAt;
-
-    @Column(name = "updated_at")
-    private Date updatedAt;
 }

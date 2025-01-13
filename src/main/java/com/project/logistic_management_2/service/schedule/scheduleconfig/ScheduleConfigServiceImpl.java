@@ -50,9 +50,8 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
     @Override
     public ScheduleConfigDTO getByID(String id) {
         checkPermission(type, PermissionKey.VIEW);
-        ScheduleConfig config = scheduleConfigRepo.getByID(id)
+        return scheduleConfigRepo.getByID(id)
                 .orElseThrow(() -> new NotFoundException("Cấu hình lịch trình không tồn tại!"));
-        return scheduleConfigMapper.toScheduleConfigDTO(null, config);
     }
 
     @Override
@@ -60,18 +59,19 @@ public class ScheduleConfigServiceImpl extends BaseService implements ScheduleCo
         checkPermission(type, PermissionKey.WRITE);
         ScheduleConfig config = scheduleConfigMapper.toScheduleConfig(dto);
         scheduleConfigRepo.save(config);
-        return scheduleConfigMapper.toScheduleConfigDTO(dto, config);
+        return getByID(config.getId());
     }
 
     @Override
     public ScheduleConfigDTO update(String id, ScheduleConfigDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
 
-        ScheduleConfig config = scheduleConfigRepo.getByID(id)
+        ScheduleConfig config = scheduleConfigRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Cấu hình lịch trình không tồn tại hoặc đã bị xóa trước đó!"));
 
         scheduleConfigMapper.updateScheduleConfig(config, dto);
-        return scheduleConfigMapper.toScheduleConfigDTO(dto, scheduleConfigRepo.save(config));
+        scheduleConfigRepo.save(config);
+        return getByID(config.getId());
     }
 
     @Override
