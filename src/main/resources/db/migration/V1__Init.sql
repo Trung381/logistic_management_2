@@ -21,6 +21,8 @@ INSERT INTO `permissions` (`id`, `title`, `name`, `created_at`, `updated_at`) VA
     (9, 'Báo cáo', 'REPORTS', NOW(), NOW()),
     (10, 'Quản lý hàng hoá', 'GOODS', NOW(), NOW()),
     (11, 'Quản lý kho hàng', 'WAREHOUSES', NOW(), NOW());
+    
+select * from permissions where name = "SCHEDULE";
 
 CREATE TABLE `roles` (
  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -167,7 +169,7 @@ CREATE TABLE `trucks` (
   `capacity` FLOAT NOT NULL DEFAULT 0 COMMENT "Tải trọng của xe",
   `note` TEXT COMMENT "Ghi chú thêm",
   `type` INT NOT NULL DEFAULT 0 COMMENT "Loại: 0 - xe tải, 1 - mooc",
-  `status` INT NOT NULL DEFAULT 1 COMMENT "Trạng thái của xe: -1: Bảo trì, 0 - Không có sẵn, 1 - Có sẵn",
+  `status` INT NOT NULL DEFAULT 1 COMMENT "Trạng thái của xe: -1: Bảo trì, 0 - Đang trong hành trình, 1 - Có sẵn, 2 - Chờ duyệt lịch trình",
   `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Đã xóa: 0 - false, 1 - true",
   `created_at` TIMESTAMP NOT NULL DEFAULT now(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT now(),

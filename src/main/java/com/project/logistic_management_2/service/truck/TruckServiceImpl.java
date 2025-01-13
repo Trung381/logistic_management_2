@@ -6,6 +6,7 @@ import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.entity.Truck;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
+import com.project.logistic_management_2.enums.truck.TruckType;
 import com.project.logistic_management_2.exception.def.ConflictException;
 import com.project.logistic_management_2.exception.def.ForbiddenException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
@@ -61,11 +62,11 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
     }
 
     @Override
-    public List<TruckDTO> getTrucksByType(Integer Type) {
+    public List<TruckDTO> getTrucksByType(TruckType type) {
 //        checkPermission(type, PermissionKey.VIEW);
-        List<TruckDTO> trucks = repository.getTrucksByType(Type);
+        List<TruckDTO> trucks = repository.getTrucksByType(type.getValue());
         if (trucks.isEmpty()) {
-            throw new NotFoundException("Không tìm thấy xe với loại: " + Type);
+            throw new NotFoundException("Không tìm thấy xe với loại: " + type.getDescription());
         }
         return trucks;
     }
