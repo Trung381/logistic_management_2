@@ -20,11 +20,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static com.project.logistic_management_2.entity.QSchedule.schedule;
-import static com.project.logistic_management_2.entity.QScheduleConfig.scheduleConfig;
-import static com.project.logistic_management_2.entity.QUser.user;
-import static com.project.logistic_management_2.entity.QTruck.truck;
-import static com.project.logistic_management_2.entity.QAttachedImage.attachedImage;
+import static com.project.logistic_management_2.entity.schedule.QSchedule.schedule;
+import static com.project.logistic_management_2.entity.schedule.QScheduleConfig.scheduleConfig;
+import static com.project.logistic_management_2.entity.user.QUser.user;
+import static com.project.logistic_management_2.entity.truck.QTruck.truck;
+import static com.project.logistic_management_2.entity.attached.QAttachedImage.attachedImage;
 
 @Repository
 public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {

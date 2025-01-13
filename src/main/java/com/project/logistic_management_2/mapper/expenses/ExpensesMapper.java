@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.mapper.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
-import com.project.logistic_management_2.entity.Expenses;
+import com.project.logistic_management_2.entity.expenses.Expenses;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
 import com.project.logistic_management_2.exception.define.InvalidFieldException;
@@ -10,7 +10,6 @@ import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,9 +35,6 @@ public class ExpensesMapper {
                 .amount(dto.getAmount())
                 .note(dto.getNote())
                 .status(ExpensesStatus.PENDING.getValue())
-                .deleted(false)
-                .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
-                .updatedAt(new Date())
                 .build();
     }
 
@@ -76,7 +72,6 @@ public class ExpensesMapper {
         }
 
         if (isUpdated) {
-            expenses.setUpdatedAt(new Date());
         } else if (isValidField) {
             throw new NotModifiedException("Không có sự thay đổi nào của chi phí!");
         } else {

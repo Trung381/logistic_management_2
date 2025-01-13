@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.mapper.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpenseAdvancesDTO;
-import com.project.logistic_management_2.entity.ExpenseAdvances;
+import com.project.logistic_management_2.entity.expenses.ExpenseAdvances;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;

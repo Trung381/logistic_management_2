@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.mapper.transaction;
 
 import com.project.logistic_management_2.dto.transaction.TransactionDTO;
-import com.project.logistic_management_2.entity.Transaction;
+import com.project.logistic_management_2.entity.transaction.Transaction;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.utils.Utils;
 import lombok.extern.slf4j.Slf4j;

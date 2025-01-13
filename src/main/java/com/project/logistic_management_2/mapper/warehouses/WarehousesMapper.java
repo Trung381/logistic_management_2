@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.mapper.warehouses;
 
 import com.project.logistic_management_2.dto.warehouse.WarehousesDTO;
-import com.project.logistic_management_2.entity.Warehouses;
+import com.project.logistic_management_2.entity.warehouse.Warehouses;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

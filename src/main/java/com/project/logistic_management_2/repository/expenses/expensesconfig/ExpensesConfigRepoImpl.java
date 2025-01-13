@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.repository.expenses.expensesconfig;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
-import com.project.logistic_management_2.entity.ExpensesConfig;
+import com.project.logistic_management_2.entity.expenses.ExpensesConfig;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-import static com.project.logistic_management_2.entity.QExpensesConfig.expensesConfig;
+import static com.project.logistic_management_2.entity.expenses.QExpensesConfig.expensesConfig;
 
 @Repository
 public class ExpensesConfigRepoImpl extends BaseRepo implements ExpensesConfigRepoCustom {

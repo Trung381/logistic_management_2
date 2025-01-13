@@ -2,9 +2,9 @@ package com.project.logistic_management_2.repository.rolepermission;
 
 
 import com.project.logistic_management_2.dto.rolepermission.RolePermissionResponse;
-import com.project.logistic_management_2.entity.QPermission;
-import com.project.logistic_management_2.entity.QRole;
-import com.project.logistic_management_2.entity.QRolePermission;
+import com.project.logistic_management_2.entity.permission.QPermission;
+import com.project.logistic_management_2.entity.role.QRole;
+import com.project.logistic_management_2.entity.rolepermission.QRolePermission;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.repository.BaseRepo;

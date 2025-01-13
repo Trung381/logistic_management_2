@@ -2,8 +2,8 @@ package com.project.logistic_management_2.service.goods;
 
 import com.project.logistic_management_2.dto.goods.GoodsReportDTO;
 import com.project.logistic_management_2.dto.ExportExcelResponse;
-import com.project.logistic_management_2.entity.Goods;
-import com.project.logistic_management_2.entity.GoodsReport;
+import com.project.logistic_management_2.entity.goods.Goods;
+import com.project.logistic_management_2.entity.goods.GoodsReport;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.define.NotFoundException;

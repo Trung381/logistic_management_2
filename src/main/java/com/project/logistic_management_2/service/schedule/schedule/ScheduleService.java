@@ -4,7 +4,7 @@ import com.project.logistic_management_2.dto.attached.AttachedImagePathsDTO;
 import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
-import com.project.logistic_management_2.entity.Schedule;
+import com.project.logistic_management_2.entity.schedule.Schedule;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.rmi.ServerException;

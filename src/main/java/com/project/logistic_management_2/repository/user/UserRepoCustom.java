@@ -1,8 +1,7 @@
 package com.project.logistic_management_2.repository.user;
 
-import com.project.logistic_management_2.dto.user.UpdateUserDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
-import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.entity.user.User;
 
 import java.util.List;
 

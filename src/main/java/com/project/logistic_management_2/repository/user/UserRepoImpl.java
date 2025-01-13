@@ -1,8 +1,8 @@
 package com.project.logistic_management_2.repository.user;
 
 import com.project.logistic_management_2.dto.user.UserDTO;
-import com.project.logistic_management_2.entity.QUser;
-import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.entity.user.QUser;
+import com.project.logistic_management_2.entity.user.User;
 import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.enums.role.UserRole;
 import com.project.logistic_management_2.exception.define.EditNotAllowedException;
@@ -21,8 +21,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 
-import static com.project.logistic_management_2.entity.QRole.role;
-import static com.project.logistic_management_2.entity.QUser.user;
+import static com.project.logistic_management_2.entity.role.QRole.role;
+import static com.project.logistic_management_2.entity.user.QUser.user;
 
 @Repository
 public class UserRepoImpl extends BaseRepo implements UserRepoCustom {

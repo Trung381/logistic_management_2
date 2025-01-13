@@ -1,12 +1,12 @@
 package com.project.logistic_management_2.repository.warehouses;
 
-import com.project.logistic_management_2.entity.Warehouses;
+import com.project.logistic_management_2.entity.warehouse.Warehouses;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 
-import static com.project.logistic_management_2.entity.QWarehouses.warehouses;
+import static com.project.logistic_management_2.entity.warehouse.QWarehouses.warehouses;
 
 import java.util.Optional;
 

@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.repository.role;
 
-import com.project.logistic_management_2.entity.Role;
+import com.project.logistic_management_2.entity.role.Role;
 
 import java.util.List;
 

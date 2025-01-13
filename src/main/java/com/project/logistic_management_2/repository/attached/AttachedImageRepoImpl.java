@@ -7,7 +7,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
-import static com.project.logistic_management_2.entity.QAttachedImage.attachedImage;
+import static com.project.logistic_management_2.entity.attached.QAttachedImage.attachedImage;
 
 @Repository
 public class AttachedImageRepoImpl extends BaseRepo implements AttachedImageRepoCustom {

@@ -10,16 +10,14 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import static com.project.logistic_management_2.entity.QTransaction.transaction;
-import static com.project.logistic_management_2.entity.QTruck.truck;
-import static com.project.logistic_management_2.entity.QUser.user;
+import static com.project.logistic_management_2.entity.truck.QTruck.truck;
+import static com.project.logistic_management_2.entity.user.QUser.user;
 
 @Repository
 public class TruckRepoImpl extends BaseRepo implements TruckRepoCustom {

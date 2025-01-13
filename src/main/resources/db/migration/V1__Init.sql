@@ -241,8 +241,6 @@ CREATE TABLE `expenses` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
-select * from attached_images;
-
 CREATE TABLE `expense_advances` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `driver_id`  VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến tài xế (bảng user)",

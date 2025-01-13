@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.repository.goods;
 
 import com.project.logistic_management_2.dto.goods.GoodsReportDTO;
-import com.project.logistic_management_2.entity.GoodsReport;
+import com.project.logistic_management_2.entity.goods.GoodsReport;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 
-import static com.project.logistic_management_2.entity.QGoods.goods;
-import static com.project.logistic_management_2.entity.QGoodsReport.goodsReport;
-import static com.project.logistic_management_2.entity.QTransaction.transaction;
+import static com.project.logistic_management_2.entity.goods.QGoods.goods;
+import static com.project.logistic_management_2.entity.goods.QGoodsReport.goodsReport;
+import static com.project.logistic_management_2.entity.transaction.QTransaction.transaction;
 
 @Repository
 public class GoodsReportRepoImpl extends BaseRepo implements GoodsReportRepoCustom {

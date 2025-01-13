@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.repository.expenses.expenses;
 
-import com.project.logistic_management_2.entity.Expenses;
+import com.project.logistic_management_2.entity.expenses.Expenses;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;

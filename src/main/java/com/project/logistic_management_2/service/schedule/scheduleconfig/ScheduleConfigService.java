@@ -2,7 +2,7 @@ package com.project.logistic_management_2.service.schedule.scheduleconfig;
 
 import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
-import com.project.logistic_management_2.entity.ScheduleConfig;
+import com.project.logistic_management_2.entity.schedule.ScheduleConfig;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.rmi.ServerException;

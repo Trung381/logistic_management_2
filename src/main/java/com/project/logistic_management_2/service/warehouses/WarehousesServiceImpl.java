@@ -2,7 +2,7 @@ package com.project.logistic_management_2.service.warehouses;
 
 import com.project.logistic_management_2.dto.warehouse.WarehousesDTO;
 import com.project.logistic_management_2.dto.ExportExcelResponse;
-import com.project.logistic_management_2.entity.Warehouses;
+import com.project.logistic_management_2.entity.warehouse.Warehouses;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.define.NotFoundException;

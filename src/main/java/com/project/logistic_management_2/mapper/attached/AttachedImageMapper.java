@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.mapper.attached;
 
-import com.project.logistic_management_2.entity.AttachedImage;
+import com.project.logistic_management_2.entity.attached.AttachedImage;
 import com.project.logistic_management_2.enums.attached.AttachedType;
 import org.springframework.stereotype.Component;
 

@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.mapper.schedule;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
-import com.project.logistic_management_2.entity.ScheduleConfig;
+import com.project.logistic_management_2.entity.schedule.ScheduleConfig;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.exception.define.InvalidFieldException;
 import com.project.logistic_management_2.exception.define.NotModifiedException;

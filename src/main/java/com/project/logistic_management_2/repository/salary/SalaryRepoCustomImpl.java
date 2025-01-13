@@ -14,8 +14,8 @@ import org.springframework.stereotype.Repository;
 import java.time.YearMonth;
 import java.util.List;
 
-import static com.project.logistic_management_2.entity.QSalary.salary;
-import static com.project.logistic_management_2.entity.QUser.user;
+import static com.project.logistic_management_2.entity.salary.QSalary.salary;
+import static com.project.logistic_management_2.entity.user.QUser.user;
 
 @Repository
 public class SalaryRepoCustomImpl extends BaseRepo implements SalaryRepoCustom {

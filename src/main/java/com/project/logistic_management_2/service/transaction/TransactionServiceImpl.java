@@ -2,8 +2,8 @@ package com.project.logistic_management_2.service.transaction;
 
 import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.transaction.TransactionDTO;
-import com.project.logistic_management_2.entity.Goods;
-import com.project.logistic_management_2.entity.Transaction;
+import com.project.logistic_management_2.entity.goods.Goods;
+import com.project.logistic_management_2.entity.transaction.Transaction;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.define.ConflictException;

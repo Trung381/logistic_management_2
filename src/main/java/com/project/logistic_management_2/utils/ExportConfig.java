@@ -12,7 +12,7 @@ import com.project.logistic_management_2.dto.warehouse.WarehousesDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.truck.TruckDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
-import com.project.logistic_management_2.entity.ScheduleConfig;
+import com.project.logistic_management_2.entity.schedule.ScheduleConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

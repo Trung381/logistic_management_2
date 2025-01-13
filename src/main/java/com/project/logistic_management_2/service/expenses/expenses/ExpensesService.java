@@ -4,11 +4,10 @@ import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
-import com.project.logistic_management_2.entity.Expenses;
+import com.project.logistic_management_2.entity.expenses.Expenses;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.rmi.ServerException;
-import java.sql.Timestamp;
 import java.util.List;
 
 public interface ExpensesService {

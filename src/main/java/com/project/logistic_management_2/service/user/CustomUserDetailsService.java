@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.service.user;
 
-import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.entity.user.User;
 import com.project.logistic_management_2.repository.user.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

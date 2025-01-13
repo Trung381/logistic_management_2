@@ -2,7 +2,7 @@ package com.project.logistic_management_2.service.expenses.expensesconfig;
 
 import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
-import com.project.logistic_management_2.entity.ExpensesConfig;
+import com.project.logistic_management_2.entity.expenses.ExpensesConfig;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.define.InvalidParameterException;

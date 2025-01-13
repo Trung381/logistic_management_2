@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.repository.goods;
 
 import com.project.logistic_management_2.dto.goods.GoodsReportDTO;
-import com.project.logistic_management_2.entity.GoodsReport;
+import com.project.logistic_management_2.entity.goods.GoodsReport;
 
 import java.util.Date;
 import java.util.List;

@@ -1,10 +1,8 @@
 package com.project.logistic_management_2.repository.transaction;
 
 import com.project.logistic_management_2.dto.transaction.TransactionDTO;
-import com.project.logistic_management_2.entity.Transaction;
+import com.project.logistic_management_2.entity.transaction.Transaction;
 
-import java.sql.Timestamp;
-import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;

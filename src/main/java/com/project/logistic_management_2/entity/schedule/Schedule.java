@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.entity;
+package com.project.logistic_management_2.entity.schedule;
 
 import jakarta.persistence.*;
 import lombok.*;

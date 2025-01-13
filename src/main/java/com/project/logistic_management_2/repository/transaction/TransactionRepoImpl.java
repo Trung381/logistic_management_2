@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.repository.transaction;
 
 import com.project.logistic_management_2.dto.transaction.TransactionDTO;
-import com.project.logistic_management_2.entity.Transaction;
+import com.project.logistic_management_2.entity.transaction.Transaction;
 import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.enums.transaction.TransactionType;
 import com.project.logistic_management_2.exception.define.EditNotAllowedException;
@@ -23,9 +23,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static com.project.logistic_management_2.entity.QGoods.goods;
-import static com.project.logistic_management_2.entity.QTransaction.transaction;
-import static com.project.logistic_management_2.entity.QUser.user;
+import static com.project.logistic_management_2.entity.goods.QGoods.goods;
+import static com.project.logistic_management_2.entity.transaction.QTransaction.transaction;
+import static com.project.logistic_management_2.entity.user.QUser.user;
 
 @Repository
 public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCustom {

@@ -4,7 +4,7 @@ package com.project.logistic_management_2.service.authentication;
 import com.project.logistic_management_2.dto.authentication.AuthRequest;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.dto.authentication.AuthResponse;
-import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.entity.user.User;
 import com.project.logistic_management_2.exception.define.ConflictException;
 import com.project.logistic_management_2.exception.define.NotFoundException;
 import com.project.logistic_management_2.mapper.user.UserMapper;

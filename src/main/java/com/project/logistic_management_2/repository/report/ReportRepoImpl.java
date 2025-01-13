@@ -19,15 +19,12 @@ import jakarta.persistence.EntityManager;
 
 import org.springframework.stereotype.Repository;
 
-import static com.project.logistic_management_2.entity.QUser.user;
-import static com.project.logistic_management_2.entity.QTruck.truck;
-import static com.project.logistic_management_2.entity.QSchedule.schedule;
-import static com.project.logistic_management_2.entity.QScheduleConfig.scheduleConfig;
-import static com.project.logistic_management_2.entity.QSalary.salary;
+import static com.project.logistic_management_2.entity.user.QUser.user;
+import static com.project.logistic_management_2.entity.truck.QTruck.truck;
+import static com.project.logistic_management_2.entity.schedule.QSchedule.schedule;
+import static com.project.logistic_management_2.entity.schedule.QScheduleConfig.scheduleConfig;
+import static com.project.logistic_management_2.entity.salary.QSalary.salary;
 
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

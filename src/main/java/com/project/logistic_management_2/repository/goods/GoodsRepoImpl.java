@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static com.project.logistic_management_2.entity.QGoods.goods;
-import static com.project.logistic_management_2.entity.QWarehouses.warehouses;
+import static com.project.logistic_management_2.entity.goods.QGoods.goods;
+import static com.project.logistic_management_2.entity.warehouse.QWarehouses.warehouses;
 
 @Repository
 public class GoodsRepoImpl extends BaseRepo implements GoodsRepoCustom {

@@ -15,8 +15,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseAdvances;
-import static com.project.logistic_management_2.entity.QUser.user;
+import static com.project.logistic_management_2.entity.expenses.QExpenseAdvances.expenseAdvances;
+import static com.project.logistic_management_2.entity.user.QUser.user;
 
 @Repository
 public class ExpenseAdvancesRepoImpl extends BaseRepo implements ExpenseAdvancesRepoCustom {

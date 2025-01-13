@@ -2,13 +2,13 @@ package com.project.logistic_management_2.repository.expenses.expenses;
 
 import com.project.logistic_management_2.dto.expenses.*;
 
-import static com.project.logistic_management_2.entity.QAttachedImage.attachedImage;
-import static com.project.logistic_management_2.entity.QExpenses.expenses;
-import static com.project.logistic_management_2.entity.QExpensesConfig.expensesConfig;
-import static com.project.logistic_management_2.entity.QSchedule.schedule;
-import static com.project.logistic_management_2.entity.QTruck.truck;
-import static com.project.logistic_management_2.entity.QUser.user;
-import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseAdvances;
+import static com.project.logistic_management_2.entity.attached.QAttachedImage.attachedImage;
+import static com.project.logistic_management_2.entity.expenses.QExpenses.expenses;
+import static com.project.logistic_management_2.entity.expenses.QExpensesConfig.expensesConfig;
+import static com.project.logistic_management_2.entity.schedule.QSchedule.schedule;
+import static com.project.logistic_management_2.entity.truck.QTruck.truck;
+import static com.project.logistic_management_2.entity.user.QUser.user;
+import static com.project.logistic_management_2.entity.expenses.QExpenseAdvances.expenseAdvances;
 
 import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;

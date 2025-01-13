@@ -1,9 +1,9 @@
 package com.project.logistic_management_2.repository.permission;
 
 
-import com.project.logistic_management_2.entity.Permission;
-import com.project.logistic_management_2.entity.QPermission;
-import com.project.logistic_management_2.entity.QRolePermission;
+import com.project.logistic_management_2.entity.permission.Permission;
+import com.project.logistic_management_2.entity.permission.QPermission;
+import com.project.logistic_management_2.entity.rolepermission.QRolePermission;
 import com.project.logistic_management_2.repository.BaseRepo;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;

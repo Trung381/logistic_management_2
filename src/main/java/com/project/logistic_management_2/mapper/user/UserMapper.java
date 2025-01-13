@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.mapper.user;
 
 import com.project.logistic_management_2.dto.user.UserDTO;
-import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.entity.user.User;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.utils.Utils;
 import lombok.RequiredArgsConstructor;

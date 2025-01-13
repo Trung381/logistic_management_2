@@ -2,9 +2,8 @@ package com.project.logistic_management_2.service.user;
 
 
 import com.project.logistic_management_2.dto.ExportExcelResponse;
-import com.project.logistic_management_2.dto.user.UpdateUserDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
-import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.entity.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

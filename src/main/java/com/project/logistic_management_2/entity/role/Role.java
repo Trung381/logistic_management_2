@@ -1,4 +1,4 @@
-package com.project.logistic_management_2.entity;
+package com.project.logistic_management_2.entity.role;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,14 +11,11 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "permissions")
-public class Permission {
+@Table(name = "roles")
+public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Column(name = "title")
-    private String title;
 
     @Column(name = "name")
     private String name;

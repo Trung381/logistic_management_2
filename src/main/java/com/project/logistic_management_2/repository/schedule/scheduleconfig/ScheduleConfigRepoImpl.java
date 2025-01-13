@@ -1,9 +1,9 @@
 package com.project.logistic_management_2.repository.schedule.scheduleconfig;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
-import static com.project.logistic_management_2.entity.QScheduleConfig.scheduleConfig;
+import static com.project.logistic_management_2.entity.schedule.QScheduleConfig.scheduleConfig;
 
-import com.project.logistic_management_2.entity.ScheduleConfig;
+import com.project.logistic_management_2.entity.schedule.ScheduleConfig;
 import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;

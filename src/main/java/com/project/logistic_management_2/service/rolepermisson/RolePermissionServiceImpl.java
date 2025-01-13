@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.service.rolepermisson;
 
 import com.project.logistic_management_2.dto.rolepermission.UpdateRolePermissionRequest;
-import com.project.logistic_management_2.entity.QRolePermission;
+import com.project.logistic_management_2.entity.rolepermission.QRolePermission;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.repository.rolepermission.RolePermissionRepo;

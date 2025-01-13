@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.mapper.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
-import com.project.logistic_management_2.entity.ExpensesConfig;
+import com.project.logistic_management_2.entity.expenses.ExpensesConfig;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.exception.define.InvalidFieldException;
 import com.project.logistic_management_2.exception.define.NotModifiedException;

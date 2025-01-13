@@ -1,24 +1,27 @@
-package com.project.logistic_management_2.entity;
+package com.project.logistic_management_2.entity.warehouse;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
-@Getter
-@Setter
 @Entity
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "roles")
-public class Role {
+public class Warehouses {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String id;
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "note")
+    private String note;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")

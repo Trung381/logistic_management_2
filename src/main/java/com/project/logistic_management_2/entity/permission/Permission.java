@@ -1,27 +1,27 @@
-package com.project.logistic_management_2.entity;
+package com.project.logistic_management_2.entity.permission;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
+@Getter
+@Setter
 @Entity
-@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Warehouses {
+@Table(name = "permissions")
+public class Permission {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "title")
+    private String title;
 
     @Column(name = "name")
     private String name;
-
-    @Column(name = "note")
-    private String note;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")

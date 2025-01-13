@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.repository.rolepermission;
 
-import com.project.logistic_management_2.entity.RolePermission;
+import com.project.logistic_management_2.entity.rolepermission.RolePermission;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

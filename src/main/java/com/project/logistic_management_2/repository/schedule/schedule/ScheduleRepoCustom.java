@@ -2,7 +2,6 @@ package com.project.logistic_management_2.repository.schedule.schedule;
 
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
-import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 
 import java.util.Date;

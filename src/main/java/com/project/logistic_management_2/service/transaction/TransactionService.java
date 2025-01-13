@@ -2,7 +2,7 @@ package com.project.logistic_management_2.service.transaction;
 
 import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.transaction.TransactionDTO;
-import com.project.logistic_management_2.entity.Transaction;
+import com.project.logistic_management_2.entity.transaction.Transaction;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
