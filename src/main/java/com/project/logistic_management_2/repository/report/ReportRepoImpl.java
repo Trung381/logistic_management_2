@@ -4,13 +4,12 @@ package com.project.logistic_management_2.repository.report;
 import com.project.logistic_management_2.dto.report.ReportDetailSalaryDTO;
 import com.project.logistic_management_2.dto.report.SummarySalaryDTO;
 import com.project.logistic_management_2.dto.salary.SalaryDTO;
-import com.project.logistic_management_2.dto.salarydeduction.SalaryDeductionDTO;
-import com.project.logistic_management_2.dto.salaryreceived.SalaryReceivedDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.entity.*;
+import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import com.project.logistic_management_2.repository.BaseRepo;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
@@ -20,6 +19,11 @@ import jakarta.persistence.EntityManager;
 
 import org.springframework.stereotype.Repository;
 
+import static com.project.logistic_management_2.entity.QUser.user;
+import static com.project.logistic_management_2.entity.QTruck.truck;
+import static com.project.logistic_management_2.entity.QSchedule.schedule;
+import static com.project.logistic_management_2.entity.QScheduleConfig.scheduleConfig;
+import static com.project.logistic_management_2.entity.QSalary.salary;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -28,42 +32,23 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
 @Repository
 public class ReportRepoImpl extends BaseRepo implements ReportRepo {
     public ReportRepoImpl(EntityManager entityManager) {
         super(entityManager);
     }
 
-
     @Override
-    public ReportDetailSalaryDTO getReport(String userId, String period) {
-        // Chuyển đổi period thành YearMonth
-        YearMonth ym = YearMonth.parse(period);
-        Date startDate = Date.from(ym.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date endDate = Date.from(ym.atEndOfMonth().atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+    public ReportDetailSalaryDTO getReport(String userId, String period, Date fromDate, Date toDate) {
+        NumberExpression<Float> minAmount = scheduleConfig.amount.min().coalesce(0F).as("minAmount");
+        NumberExpression<Long> scheduleCount = schedule.id.count().coalesce(0L).as("scheduleCount");
+        NumberExpression<Float> total = scheduleConfig.amount.min().multiply(schedule.id.count()).coalesce(0F).as("total");
 
-        // Khởi tạo các Q-class
-        QUser u = QUser.user;
-        QTruck t = QTruck.truck;
-        QSchedule s = QSchedule.schedule;
-        QScheduleConfig sc = QScheduleConfig.scheduleConfig;
-        QSalary salary = QSalary.salary; // Bảng salary mới
-
-        // Định nghĩa các biểu thức tổng hợp
-        NumberExpression<Float> minAmount = sc.amount.min().coalesce(0F).as("minAmount");
-        NumberExpression<Long> scheduleCount = s.id.count().coalesce(0L).as("scheduleCount");
-        NumberExpression<Float> total = sc.amount.min().multiply(s.id.count()).coalesce(0F).as("total");
-
-        System.err.println(period);
-
-        // Thực hiện truy vấn
         List<Tuple> results = query
                 .select(
-//                        u.id,
-                        u.fullName,
-                        sc.placeA,
-                        sc.placeB,
+                        user.fullName,
+                        scheduleConfig.placeA,
+                        scheduleConfig.placeB,
                         minAmount,
                         scheduleCount,
                         total,
@@ -82,21 +67,18 @@ public class ReportRepoImpl extends BaseRepo implements ReportRepo {
                         salary.errorOfDriver,
                         salary.deductionSnn
                 )
-                .from(u)
-                .join(t).on(u.id.eq(t.driverId))
-                .join(s).on(t.licensePlate.eq(s.truckLicense))
-                .join(sc).on(s.scheduleConfigId.eq(sc.id))
-                .leftJoin(salary).on(u.id.eq(salary.userId).and(salary.period.eq(String.valueOf(ym))))
+                .from(user)
+                .join(truck).on(user.id.eq(truck.driverId))
+                .join(schedule).on(truck.licensePlate.eq(schedule.truckLicense))
+                .join(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
+                .leftJoin(salary).on(user.id.eq(salary.userId).and(salary.period.eq(period)))
                 .where(
-                        u.id.eq(userId)
-//                                .and(s.arrivalTime.between(startDate, endDate))
-                                .and(s.departureTime.between(startDate, endDate))
-//                                .and(s.createdAt.between(startDate, endDate))
+                        user.id.eq(userId)
+                                .and(schedule.departureTime.between(fromDate, toDate))
                 )
                 .groupBy(
-//                        u.id, // Thêm driverId vào groupBy
-                        u.fullName,
-                        sc.placeA, sc.placeB,
+                        user.fullName,
+                        scheduleConfig.placeA, scheduleConfig.placeB,
                         salary.phoneAllowance, salary.basicSalary, salary.jobAllowance, salary.bonus,
                         salary.monthlyPaidLeave, salary.ot, salary.receivedSnn, salary.unionContribution,
                         salary.travelExpensesReimbursement,
@@ -105,45 +87,43 @@ public class ReportRepoImpl extends BaseRepo implements ReportRepo {
                 )
                 .fetch();
 
-        // Khởi tạo DTOs
         ReportDetailSalaryDTO report = new ReportDetailSalaryDTO();
         SalaryDTO salaryDTO = null;
         List<ScheduleSalaryDTO> schedules = new ArrayList<>();
 
-        // Xử lý kết quả truy vấn
         if (!results.isEmpty()) {
             for (Tuple tuple : results) {
                 if (salaryDTO == null) {
-                    // Khởi tạo SalaryDTO từ tuple đầu tiên
-                    salaryDTO = new SalaryDTO();
-                    salaryDTO.setPhoneAllowance(coalesce(tuple.get(salary.phoneAllowance), 0F));
-                    salaryDTO.setBasicSalary(coalesce(tuple.get(salary.basicSalary), 0F));
-                    salaryDTO.setJobAllowance(coalesce(tuple.get(salary.jobAllowance), 0F));
-                    salaryDTO.setBonus(coalesce(tuple.get(salary.bonus), 0F));
-                    salaryDTO.setMonthlyPaidLeave(coalesce(tuple.get(salary.monthlyPaidLeave), 0F));
-                    salaryDTO.setOt(coalesce(tuple.get(salary.ot), 0F));
-                    salaryDTO.setReceivedSnn(coalesce(tuple.get(salary.receivedSnn), 0F));
-                    salaryDTO.setUnionContribution(coalesce(tuple.get(salary.unionContribution), 0F));
-                    salaryDTO.setTravelExpensesReimbursement(coalesce(tuple.get(salary.travelExpensesReimbursement), 0F));
-                    salaryDTO.setMandatoryInsurance(coalesce(tuple.get(salary.mandatoryInsurance), 0F));
-                    salaryDTO.setTradeUnion(coalesce(tuple.get(salary.tradeUnion), 0F));
-                    salaryDTO.setAdvance(coalesce(tuple.get(salary.advance), 0F));
-                    salaryDTO.setErrorOfDriver(coalesce(tuple.get(salary.errorOfDriver), 0F));
-                    salaryDTO.setDeductionSnn(coalesce(tuple.get(salary.deductionSnn), 0F));
+                    salaryDTO = SalaryDTO.builder()
+                            .phoneAllowance(coalesce(tuple.get(salary.phoneAllowance), 0F))
+                            .basicSalary(coalesce(tuple.get(salary.basicSalary), 0F))
+                            .jobAllowance(coalesce(tuple.get(salary.jobAllowance), 0F))
+                            .bonus(coalesce(tuple.get(salary.bonus), 0F))
+                            .monthlyPaidLeave(coalesce(tuple.get(salary.monthlyPaidLeave), 0F))
+                            .ot(coalesce(tuple.get(salary.ot), 0F))
+                            .receivedSnn(coalesce(tuple.get(salary.receivedSnn), 0F))
+                            .unionContribution(coalesce(tuple.get(salary.unionContribution), 0F))
+                            .travelExpensesReimbursement(coalesce(tuple.get(salary.travelExpensesReimbursement), 0F))
+                            .mandatoryInsurance(coalesce(tuple.get(salary.mandatoryInsurance), 0F))
+                            .tradeUnion(coalesce(tuple.get(salary.tradeUnion), 0F))
+                            .advance(coalesce(tuple.get(salary.advance), 0F))
+                            .errorOfDriver(coalesce(tuple.get(salary.errorOfDriver), 0F))
+                            .deductionSnn(coalesce(tuple.get(salary.deductionSnn), 0F))
+                            .build();
                 }
 
                 ScheduleSalaryDTO schedule = new ScheduleSalaryDTO(
-                    tuple.get(u.fullName),
-                    tuple.get(sc.placeA),
-                    tuple.get(sc.placeB),
-                    coalesce(tuple.get(minAmount), 0F),
-                    coalesce(tuple.get(scheduleCount), 0L).intValue(),
-                    coalesce(tuple.get(total), 0F)
-            );
-            schedules.add(schedule);
+                        tuple.get(user.fullName),
+                        tuple.get(scheduleConfig.placeA),
+                        tuple.get(scheduleConfig.placeB),
+                        coalesce(tuple.get(minAmount), 0F),
+                        coalesce(tuple.get(scheduleCount), 0L).intValue(),
+                        coalesce(tuple.get(total), 0F)
+                );
+                schedules.add(schedule);
             }
         } else {
-            salaryDTO = new SalaryDTO();
+            salaryDTO = SalaryDTO.builder().build();
         }
 
         report.setSalary(salaryDTO);
@@ -151,8 +131,6 @@ public class ReportRepoImpl extends BaseRepo implements ReportRepo {
 
         return report;
     }
-
-
 
     /**
      * Phương thức hỗ trợ xử lý COALESCE
@@ -163,30 +141,21 @@ public class ReportRepoImpl extends BaseRepo implements ReportRepo {
     }
 
     @Override
-    public List<SummarySalaryDTO> getSummarySalary(String period) {
-        QUser user = QUser.user;
-        QTruck truck = QTruck.truck;
-        QSchedule schedule = QSchedule.schedule;
-        QScheduleConfig sc = QScheduleConfig.scheduleConfig;
-        QSalary salary = QSalary.salary; // Bảng salary mới
-
-        YearMonth ym = YearMonth.parse(period);
-        Date startDate = Date.from(ym.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date endDate = Date.from(ym.atEndOfMonth().atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+    public List<SummarySalaryDTO> getSummarySalary(String period, Date fromDate, Date toDate) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(truck.driverId.eq(user.id))
+                .and(schedule.departureTime.between(fromDate, toDate))
+                .and(schedule.type.eq(ScheduleType.PAYROLL.getValue()))
+                .and(truck.deleted.eq(false))
+                .and(scheduleConfig.deleted.eq(false))
+                .and(schedule.deleted.eq(false));
 
         Expression<Float> sumTotalSchedules = JPAExpressions
-                .select(sc.amount.sum().coalesce(0F))
+                .select(scheduleConfig.amount.sum().coalesce(0F))
                 .from(truck)
                 .join(schedule).on(truck.licensePlate.eq(schedule.truckLicense))
-                .join(sc).on(schedule.scheduleConfigId.eq(sc.id))
-                .where(
-                        truck.driverId.eq(user.id)
-                                .and(schedule.departureTime.between(startDate, endDate))
-                                .and(schedule.type.eq(1)) // Loại lịch trình: 1 - Tính lương
-                                .and(truck.deleted.eq(false))
-                                .and(sc.deleted.eq(false))
-                                .and(schedule.deleted.eq(false))
-                );
+                .join(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
+                .where(builder);
 
         Expression<Float> sumSalaryDeduction = JPAExpressions
                 .select(
@@ -242,12 +211,8 @@ public class ReportRepoImpl extends BaseRepo implements ReportRepo {
                 ))
                 .from(user)
                 .where(user.status.eq(1)) // Chỉ lấy người dùng đang hoạt động
-                .groupBy(
-                        user.id, user.fullName
-                )
+                .groupBy(user.id, user.fullName)
                 .fetch();
     }
-
-
 }
 

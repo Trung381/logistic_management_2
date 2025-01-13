@@ -4,8 +4,8 @@ import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.entity.Expenses;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
-import com.project.logistic_management_2.exception.def.InvalidFieldException;
-import com.project.logistic_management_2.exception.def.NotModifiedException;
+import com.project.logistic_management_2.exception.define.InvalidFieldException;
+import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -18,14 +18,23 @@ import java.util.stream.Collectors;
 public class ExpensesMapper {
     public Expenses toExpenses(ExpensesDTO dto) {
         if (dto == null) return null;
+        return createExpenses(dto);
+    }
 
+    public List<Expenses> toExpensesList(List<ExpensesDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::createExpenses).collect(Collectors.toList());
+    }
+
+    private Expenses createExpenses(ExpensesDTO dto) {
         return Expenses.builder()
                 .id(Utils.genID(IDKey.EXPENSES))
                 .scheduleId(dto.getScheduleId())
                 .expensesConfigId(dto.getExpensesConfigId())
                 .amount(dto.getAmount())
                 .note(dto.getNote())
-                .imgPath(dto.getImgPath())
                 .status(ExpensesStatus.PENDING.getValue())
                 .deleted(false)
                 .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
@@ -33,33 +42,6 @@ public class ExpensesMapper {
                 .build();
     }
 
-    public List<Expenses> toExpensesList(List<ExpensesDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return dtos.stream().map(dto ->
-                Expenses.builder()
-                        .id(Utils.genID(IDKey.EXPENSES))
-                        .scheduleId(dto.getScheduleId())
-                        .expensesConfigId(dto.getExpensesConfigId())
-                        .amount(dto.getAmount())
-                        .note(dto.getNote())
-                        .imgPath(dto.getImgPath())
-                        .status(ExpensesStatus.PENDING.getValue())
-                        .deleted(false)
-                        .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
-                        .updatedAt(new Date())
-                        .build()
-        ).collect(Collectors.toList());
-    }
-
-    /**
-     * Update the fields that need to be updated of the expenses
-     *
-     * @param expenses: object to be updated
-     * @param dto: object contain the values to be updated
-     */
     public void updateExpenses(Expenses expenses, ExpensesDTO dto) {
         if (dto == null) return;
         boolean isUpdated = false, isValidField = false;
@@ -88,13 +70,6 @@ public class ExpensesMapper {
         if (dto.getNote() != null) {
             if (!expenses.getNote().equals(dto.getNote())) {
                 expenses.setNote(dto.getNote());
-                isUpdated = true;
-            }
-            isValidField = true;
-        }
-        if (dto.getImgPath() != null) {
-            if (!expenses.getImgPath().equals(dto.getImgPath())) {
-                expenses.setImgPath(dto.getImgPath());
                 isUpdated = true;
             }
             isValidField = true;

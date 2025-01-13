@@ -11,6 +11,5 @@ public interface SalaryRepoCustom {
     List<SalaryUserDTO> getAllSalaryWithUserPeriod(String period);
     SalaryUserDTO getSalaryWithUser(Integer id);
     Boolean updateSalary(Integer id, UpdateSalaryDTO updateSalaryDTO);
-    void deleteSalary(Integer salaryId);
     void createSalaryForAllUsers();
 }

@@ -9,7 +9,6 @@ public enum UserRole {
     MANAGER(3),
     DRIVER(4);
 
-    @Getter
     private final Integer id;
 
     UserRole(int id) {

@@ -1,8 +1,8 @@
 package com.project.logistic_management_2.controller.goods;
 
 import com.project.logistic_management_2.dto.BaseResponse;
+import com.project.logistic_management_2.dto.goods.GoodsReportDTO;
 import com.project.logistic_management_2.dto.ExportExcelResponse;
-import com.project.logistic_management_2.dto.request.GoodsReportDTO;
 import com.project.logistic_management_2.service.goods.GoodsReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.YearMonth;
 import java.util.List;
 
 @RestController
@@ -23,21 +22,19 @@ public class GoodsReportController {
     private final GoodsReportService goodsReportService;
 
     @PostMapping("/create")
-    public void creatGoodsReport() {
-        goodsReportService.createGoodsReport();
+    public void creatGoodsReport(@RequestParam String period) {
+        goodsReportService.createGoodsReport(period);
     }
 
     @GetMapping("/by-month")
-    public ResponseEntity<Object> getGoodsReportByMonth(@RequestParam("year") int year, @RequestParam("month") int month) {
-        YearMonth yearMonth = YearMonth.of(year, month);
-        List<GoodsReportDTO> goodsReports = goodsReportService.getGoodsReportByYearMonth(yearMonth);
+    public ResponseEntity<Object> getGoodsReport(@RequestParam String period) {
+        List<GoodsReportDTO> goodsReports = goodsReportService.getGoodsReport(period);
         return ResponseEntity.ok(BaseResponse.ok(goodsReports));
     }
 
     @GetMapping("/export")
-    public ResponseEntity<Object> exportGoodsReport(@RequestParam("year") int year, @RequestParam("month") int month) throws Exception {
-        YearMonth yearMonth = YearMonth.of(year, month);
-        ExportExcelResponse exportExcelResponse = goodsReportService.exportGoodsReport(yearMonth);
+    public ResponseEntity<Object> exportGoodsReport(@RequestParam String period) throws Exception {
+        ExportExcelResponse exportExcelResponse = goodsReportService.exportGoodsReport(period);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,

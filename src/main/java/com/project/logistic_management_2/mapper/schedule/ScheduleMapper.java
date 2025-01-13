@@ -4,10 +4,8 @@ import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.enums.IDKey;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
-import com.project.logistic_management_2.enums.schedule.ScheduleType;
-import com.project.logistic_management_2.exception.def.InvalidFieldException;
-import com.project.logistic_management_2.exception.def.NotModifiedException;
-import com.project.logistic_management_2.service.schedule.schedule.ScheduleServiceImpl;
+import com.project.logistic_management_2.exception.define.InvalidFieldException;
+import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +23,6 @@ public class ScheduleMapper {
                 .scheduleConfigId(dto.getScheduleConfigId().isBlank() ? null : dto.getScheduleConfigId())
                 .truckLicense(dto.getTruckLicense())
                 .moocLicense(dto.getMoocLicense())
-                .attachDocument(dto.getAttachDocument())
                 .departureTime(dto.getDepartureTime())
                 .note(dto.getNote())
                 .type(dto.getType().getValue())
@@ -47,7 +44,6 @@ public class ScheduleMapper {
                         .scheduleConfigId(dto.getScheduleConfigId().isBlank() ? null : dto.getScheduleConfigId())
                         .truckLicense(dto.getTruckLicense())
                         .moocLicense(dto.getMoocLicense())
-                        .attachDocument(dto.getAttachDocument())
                         .departureTime(dto.getDepartureTime())
                         .arrivalTime(dto.getDepartureTime())
                         .note(dto.getNote())
@@ -81,13 +77,6 @@ public class ScheduleMapper {
         if (dto.getMoocLicense() != null) {
             if (!schedule.getMoocLicense().equals(dto.getMoocLicense())) {
                 schedule.setMoocLicense(dto.getMoocLicense());
-                isUpdated = true;
-            }
-            isValidField = true;
-        }
-        if (dto.getAttachDocument() != null) {
-            if (!schedule.getAttachDocument().equals(dto.getAttachDocument())) {
-                schedule.setAttachDocument(dto.getAttachDocument());
                 isUpdated = true;
             }
             isValidField = true;

@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CellConfig {
     private int columnIndex;
-
     private String headerName;
-
     private String fieldName;
 }

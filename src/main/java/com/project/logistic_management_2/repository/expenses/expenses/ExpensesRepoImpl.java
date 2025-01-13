@@ -2,6 +2,7 @@ package com.project.logistic_management_2.repository.expenses.expenses;
 
 import com.project.logistic_management_2.dto.expenses.*;
 
+import static com.project.logistic_management_2.entity.QAttachedImage.attachedImage;
 import static com.project.logistic_management_2.entity.QExpenses.expenses;
 import static com.project.logistic_management_2.entity.QExpensesConfig.expensesConfig;
 import static com.project.logistic_management_2.entity.QSchedule.schedule;
@@ -11,6 +12,7 @@ import static com.project.logistic_management_2.entity.QExpenseAdvances.expenseA
 
 import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
+import com.project.logistic_management_2.enums.role.UserRole;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -22,8 +24,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.util.Date;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
@@ -44,8 +45,11 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                         .from(expensesConfig)
                         .where(expensesConfig.id.eq(expenses.expensesConfigId)),
                 expenses.amount.as("amount"),
-                expenses.note.as("note"),
-                expenses.imgPath.as("imgPath"),
+                expenses.note.coalesce("").as("note"),
+                JPAExpressions.select(
+                                Expressions.stringTemplate("GROUP_CONCAT({0})", attachedImage.imgPath).as("attachedPaths"))
+                        .from(attachedImage)
+                        .where(attachedImage.referenceId.eq(expenses.id)),
                 expenses.scheduleId.as("scheduleId"),
                 expenses.status.as("status"),
                 expenses.createdAt.as("createdAt"),
@@ -53,19 +57,14 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         );
     }
 
-    @Override
-    public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(expenses.deleted.eq(false));
-
-        if (expensesConfigId != null) {
-            builder.and(expenses.expensesConfigId.eq(expensesConfigId));
+    BooleanBuilder initGetAllBuilder(String configId, String truckLicense, Date fromDate, Date toDate) {
+        BooleanBuilder builder = new BooleanBuilder().and(expenses.deleted.eq(false));
+        if (configId != null) {
+            builder.and(expenses.expensesConfigId.eq(configId));
         }
-
         if (truckLicense != null && !truckLicense.isBlank()) {
             builder.and(schedule.truckLicense.eq(truckLicense));
         }
-
         if (fromDate != null && toDate != null) {
             builder.and(expenses.createdAt.between(fromDate, toDate));
         } else if (fromDate != null) {
@@ -73,7 +72,23 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         } else if (toDate != null) {
             builder.and(expenses.createdAt.loe(toDate));
         }
+        return builder;
+    }
 
+    BooleanBuilder initGetOneBuilder(String id) {
+        return new BooleanBuilder()
+                .and(expenses.deleted.eq(false))
+                .and(expenses.id.eq(id));
+    }
+
+    BooleanBuilder initBuilder() {
+        return new BooleanBuilder()
+                .and(expenses.deleted.eq(false));
+    }
+
+    @Override
+    public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, Date fromDate, Date toDate) {
+        BooleanBuilder builder = initGetAllBuilder(expensesConfigId, truckLicense, fromDate, toDate);
         long offset = (long) (page - 1) * Pagination.TEN.getSize();
         return query.from(expenses)
                 .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
@@ -87,26 +102,8 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     @Override
-    public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(expenses.deleted.eq(false));
-
-        if (expensesConfigId != null) {
-            builder.and(expenses.expensesConfigId.eq(expensesConfigId));
-        }
-
-        if (truckLicense != null && !truckLicense.isBlank()) {
-            builder.and(schedule.truckLicense.eq(truckLicense));
-        }
-
-        if (fromDate != null && toDate != null) {
-            builder.and(expenses.createdAt.between(fromDate, toDate));
-        } else if (fromDate != null) {
-            builder.and(expenses.createdAt.goe(fromDate));
-        } else if (toDate != null) {
-            builder.and(expenses.createdAt.loe(toDate));
-        }
-
+    public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Date fromDate, Date toDate) {
+        BooleanBuilder builder = initGetAllBuilder(expensesConfigId, truckLicense, fromDate, toDate);
         return query.from(expenses)
                 .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
                 .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
@@ -117,14 +114,12 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     @Override
-    public List<ExpensesIncurredDTO> getByFilter(String driverId, Date fromDate, Date toDate) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(expenses.deleted.eq(false));
+    public List<ExpensesIncurredDTO> getExpenseIncurredByDriverID(String driverId, Date fromDate, Date toDate) {
+        BooleanBuilder builder = initBuilder();
 
         if (driverId != null && !driverId.isBlank()) {
             builder.and(truck.driverId.eq(driverId));
         }
-
         if (fromDate != null && toDate != null) {
             builder.and(expenses.createdAt.between(fromDate, toDate));
         }
@@ -147,10 +142,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
 
     @Override
     public Optional<ExpensesDTO> getByID(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(expenses.id.eq(id))
-                .and(expenses.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         return Optional.ofNullable(
                 query.from(expenses)
                         .innerJoin(schedule).on(expenses.scheduleId.eq(schedule.id))
@@ -166,10 +158,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     @Modifying
     @Transactional
     public long delete(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(expenses.id.eq(id))
-                .and(expenses.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         return query.update(expenses)
                 .where(builder)
                 .set(expenses.deleted, true)
@@ -180,11 +169,8 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     @Modifying
     @Transactional
     public long approve(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(expenses.id.eq(id))
-                .and(expenses.deleted.eq(false))
+        BooleanBuilder builder = initGetOneBuilder(id)
                 .and(expenses.status.eq(ExpensesStatus.PENDING.getValue()));
-
         return query.update(expenses)
                 .where(builder)
                 .set(expenses.status, ExpensesStatus.APPROVED.getValue())
@@ -228,24 +214,17 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
 
     @Override
     public long countByID(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(expenses.id.eq(id))
-                .and(expenses.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         Long res = query.from(expenses)
                 .where(builder)
                 .select(expenses.id.count().coalesce(0L))
                 .fetchOne();
-
         return res != null ? res : 0;
     }
 
     @Override
     public ExpensesStatus getStatusByID(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(expenses.id.eq(id))
-                .and(expenses.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         Integer statusNumber = query.from(expenses)
                 .where(builder)
                 .select(expenses.status)
@@ -260,8 +239,8 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     private List<ExpensesReportDTO> reportsQuery(String period, ConstructorExpression<ExpensesReportDTO> expression) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(user.roleId.eq(4))
+        BooleanBuilder builder = initBuilder()
+                .and(user.roleId.eq(UserRole.DRIVER.getId()))
                 .and(expenseAdvances.period.eq(period));
 
         return query.from(user)

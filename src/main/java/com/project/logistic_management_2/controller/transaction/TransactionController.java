@@ -55,7 +55,6 @@ public class TransactionController {
             @RequestParam(required = false) String toDate) {
 
         List<TransactionDTO> transactions = transactionService.getTransactionByFilter(page, warehouseId, origin, fromDate, toDate);
-
         return ResponseEntity.ok(BaseResponse.ok(transactions));
     }
 
@@ -84,5 +83,4 @@ public class TransactionController {
                 HttpStatus.CREATED
         );
     }
-
 }

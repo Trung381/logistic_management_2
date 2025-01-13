@@ -3,8 +3,8 @@ package com.project.logistic_management_2.mapper.expenses;
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.entity.ExpensesConfig;
 import com.project.logistic_management_2.enums.IDKey;
-import com.project.logistic_management_2.exception.def.InvalidFieldException;
-import com.project.logistic_management_2.exception.def.NotModifiedException;
+import com.project.logistic_management_2.exception.define.InvalidFieldException;
+import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +17,17 @@ import java.util.stream.Collectors;
 public class ExpensesConfigMapper {
     public ExpensesConfig toExpensesConfig(ExpensesConfigDTO dto) {
         if (dto == null) return null;
+        return createExpensesConfig(dto);
+    }
+
+    public List<ExpensesConfig> toExpensesConfigList(List<ExpensesConfigDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::createExpensesConfig).collect(Collectors.toList());
+    }
+
+    private ExpensesConfig createExpensesConfig(ExpensesConfigDTO dto) {
         return ExpensesConfig.builder()
                 .id(Utils.genID(IDKey.EXPENSES_CONFIG))
                 .type(dto.getType())
@@ -25,23 +36,6 @@ public class ExpensesConfigMapper {
                 .createdAt(new Date())
                 .updatedAt(new Date())
                 .build();
-    }
-
-    public List<ExpensesConfig> toExpensesConfigList(List<ExpensesConfigDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return dtos.stream().map(dto ->
-                ExpensesConfig.builder()
-                        .id(Utils.genID(IDKey.EXPENSES_CONFIG))
-                        .type(dto.getType())
-                        .note(dto.getNote())
-                        .deleted(false)
-                        .createdAt(new Date())
-                        .updatedAt(new Date())
-                        .build()
-        ).collect(Collectors.toList());
     }
 
     public void updateExpensesConfig(ExpensesConfig config, ExpensesConfigDTO dto) {

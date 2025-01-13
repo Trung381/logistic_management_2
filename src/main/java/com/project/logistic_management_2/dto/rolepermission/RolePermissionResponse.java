@@ -1,4 +1,3 @@
-// RolePermissionResponse.java
 package com.project.logistic_management_2.dto.rolepermission;
 
 import lombok.AllArgsConstructor;

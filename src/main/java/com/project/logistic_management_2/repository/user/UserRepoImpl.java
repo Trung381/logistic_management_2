@@ -1,12 +1,12 @@
 package com.project.logistic_management_2.repository.user;
 
-import com.project.logistic_management_2.dto.user.UpdateUserDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.QUser;
 import com.project.logistic_management_2.entity.User;
 import com.project.logistic_management_2.enums.Pagination;
-import com.project.logistic_management_2.exception.def.EditNotAllowedException;
-import com.project.logistic_management_2.exception.def.InvalidFieldException;
+import com.project.logistic_management_2.enums.role.UserRole;
+import com.project.logistic_management_2.exception.define.EditNotAllowedException;
+import com.project.logistic_management_2.exception.define.InvalidFieldException;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -21,10 +21,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 
-import static com.project.logistic_management_2.entity.QGoods.goods;
 import static com.project.logistic_management_2.entity.QRole.role;
 import static com.project.logistic_management_2.entity.QUser.user;
-import static com.project.logistic_management_2.entity.QTransaction.transaction;
 
 @Repository
 public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
@@ -55,11 +53,6 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
     public List<User> getAll(int page){
         QUser qUser = QUser.user;
         long offset = (long) (page - 1) * Pagination.TEN.getSize();
-//        BooleanBuilder builder = new BooleanBuilder();
-//        if(!all){
-//            builder.and(qUser.status.eq(1));
-//        }
-//        return query.selectFrom(qUser).where(builder).fetch();
         return query.selectFrom(qUser)
                 .offset(offset)
                 .limit(Pagination.TEN.getSize())
@@ -188,12 +181,10 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
 
     @Override
     public List<UserDTO> getDriver(int page) {
-
         long offset = (long) (page - 1) * Pagination.TEN.getSize();
-
         return query.from(user)
                 .leftJoin(role).on(role.id.eq(user.roleId))
-                .where(role.name.eq("Driver"))
+                .where(role.id.eq(UserRole.DRIVER.getId()))
                 .select(expression())
                 .offset(offset)
                 .limit(Pagination.TEN.getSize())
@@ -202,14 +193,11 @@ public class UserRepoImpl extends BaseRepo implements UserRepoCustom {
 
     @Override
     public List<UserDTO> getAdmin(int page) {
-
         BooleanBuilder builder = new BooleanBuilder()
-                .and(role.name.eq("Admin"))
-                .or(role.name.eq("Accountant"))
-                .or(role.name.eq("Manager"));
-
+                .and(role.id.eq(UserRole.ADMIN.getId()))
+                .or(role.id.eq(UserRole.ACCOUNTANT.getId()))
+                .or(role.id.eq(UserRole.MANAGER.getId()));
         long offset = (long) (page - 1) * Pagination.TEN.getSize();
-
         return query.from(user)
                 .leftJoin(role).on(role.id.eq(user.roleId))
                 .where(builder)

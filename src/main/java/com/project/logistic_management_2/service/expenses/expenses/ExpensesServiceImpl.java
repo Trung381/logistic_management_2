@@ -1,26 +1,29 @@
 package com.project.logistic_management_2.service.expenses.expenses;
 
-import com.mysema.commons.lang.Pair;
 import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
 import com.project.logistic_management_2.entity.Expenses;
+import com.project.logistic_management_2.enums.attached.AttachedType;
 import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
-import com.project.logistic_management_2.exception.def.ConflictException;
-import com.project.logistic_management_2.exception.def.InvalidParameterException;
-import com.project.logistic_management_2.exception.def.NotFoundException;
-import com.project.logistic_management_2.exception.def.NotModifiedException;
+import com.project.logistic_management_2.exception.define.ConflictException;
+import com.project.logistic_management_2.exception.define.InvalidParameterException;
+import com.project.logistic_management_2.exception.define.NotFoundException;
+import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
 import com.project.logistic_management_2.repository.expenses.expenses.ExpensesRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.service.attached.AttachedImageService;
 import com.project.logistic_management_2.service.notification.NotificationService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.ExportConfig;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
+import com.project.logistic_management_2.utils.Utils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.core.io.InputStreamResource;
@@ -30,16 +33,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.rmi.ServerException;
-import java.sql.Timestamp;
-import java.time.DateTimeException;
-import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
-
-import static com.project.logistic_management_2.utils.Utils.parseAndValidateDates;
 
 @Service
 @RequiredArgsConstructor
@@ -47,20 +43,23 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     private final ExpensesRepo expensesRepo;
     private final ExpensesMapper expensesMapper;
     private final NotificationService notificationService;
+    private final AttachedImageService attachedService;
     private final PermissionType type = PermissionType.EXPENSES;
 
     @Override
-    public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, String fromDate, String toDate) {
+    public List<ExpensesDTO> getAll(Integer page, String expensesConfigId, String truckLicense, String fromDateStr, String toDateStr) {
         checkPermission(type, PermissionKey.VIEW);
-        if (page <= 0) {
-            throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
+        Date[] range = Utils.createDateRange(fromDateStr, toDateStr);
+        if (page != null) {
+            if (page <= 0) {
+                throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
+            } else {
+                return expensesRepo.getAll(page, expensesConfigId, truckLicense, range[0], range[1]);
+            }
+        } else {
+            return expensesRepo.getAll(expensesConfigId, truckLicense, range[0], range[1]);
         }
-
-        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
-
-        return expensesRepo.getAll(page, expensesConfigId, truckLicense, dateRange.getFirst(), dateRange.getSecond());
     }
-
 
     @Override
     public ExpensesDTO getByID(String id) {
@@ -70,15 +69,32 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     }
 
     @Override
-    public ExpensesDTO create(ExpensesDTO dto) {
+    @Transactional
+    public ExpensesDTO create(ExpensesDTO dto) throws ServerException {
         checkPermission(type, PermissionKey.WRITE);
-        Expenses expenses = expensesMapper.toExpenses(dto);
-        expensesRepo.save(expenses);
+
+        Expenses expenses = createExpensesFromDTO(dto);
+        attachImages(expenses.getId(), dto);
 
         String notifyMsg = "Có một chi phí được tạo mới cần được phê duyệt lúc " + new Date();
         notificationService.sendNotification("{\"message\":\"" + notifyMsg + "\"}");
 
-        return expensesRepo.getByID(expenses.getId()).orElse(null);
+        Optional<ExpensesDTO> result = expensesRepo.getByID(expenses.getId());
+        if (result.isEmpty()) {
+            throw new ServerException("Có lỗi khi tạo chi phí mới. Vui lòng thử lại sau!");
+        }
+        return result.get();
+    }
+
+    private void attachImages(String referenceID, ExpensesDTO dto) {
+        String[] attachedImagePaths = dto.getAttachedPaths();
+        attachedService.addAttachedImages(referenceID, AttachedType.ATTACHED_OF_EXPENSES, attachedImagePaths);
+    }
+
+    private Expenses createExpensesFromDTO(ExpensesDTO dto) {
+        Expenses expenses = expensesMapper.toExpenses(dto);
+        expensesRepo.save(expenses);
+        return expenses;
     }
 
     @Override
@@ -87,36 +103,54 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
 
         Expenses expenses = expensesRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Chi phí cần cập nhật không tồn tại!"));
+        checkUpdateConditions(id);
 
+        updateExpensesFromDTO(expenses, dto);
+
+        Optional<ExpensesDTO> result = expensesRepo.getByID(expenses.getId());
+        return result.orElse(null);
+    }
+
+    private void checkUpdateConditions(String id) {
         ExpensesStatus status = expensesRepo.getStatusByID(id);
         if (status == ExpensesStatus.APPROVED) {
             throw new ConflictException("Chi phí đã được duyệt không thể chỉnh sửa!");
         }
+    }
 
+    private void updateExpensesFromDTO(Expenses expenses, ExpensesDTO dto) {
         expensesMapper.updateExpenses(expenses, dto);
         expensesRepo.save(expenses);
-
-        Optional<ExpensesDTO> res = expensesRepo.getByID(expenses.getId());
-        return res.orElse(null);
     }
 
     @Override
     public long deleteByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.DELETE);
-        if (expensesRepo.countByID(id) == 0)
-            throw new NotFoundException("Chi phí cần xóa không tồn tại hoặc đã được xóa trước đó!");
+        checkDeleteConditions(id);
+        return delete(id);
+    }
 
-        long numOfRowsDeleted = expensesRepo.delete(id);
-        if (numOfRowsDeleted == 0) {
-            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+    private void checkDeleteConditions(String id) {
+        if (expensesRepo.countByID(id) == 0)
+            throw new NotFoundException("Chi phí cần xóa không tồn tại!");
+    }
+
+    private long delete(String id) throws ServerException {
+        long result = expensesRepo.delete(id);
+        if (result == 0) {
+            throw new ServerException("Có lỗi khi xóa chi phí. Vui lòng thử lại sau!");
         }
-        return numOfRowsDeleted;
+        return result;
     }
 
     @Override
     public long approveByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.APPROVE);
+        checkApproveConditions(id);
+        return approve(id);
+    }
 
+    private void checkApproveConditions(String id) {
         if (expensesRepo.countByID(id) == 0)
             throw new NotFoundException("Chi phí cần duyệt không tồn tại!");
 
@@ -124,39 +158,27 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
         if (status == ExpensesStatus.APPROVED) {
             throw new NotModifiedException("Chi phí đã được duyệt trước đó!");
         }
+    }
 
-        long numOfRowsApproved = expensesRepo.approve(id);
-        if (numOfRowsApproved == 0) {
-            throw new ServerException("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+    private long approve(String id) throws ServerException {
+        long result = expensesRepo.approve(id);
+        if (result == 0) {
+            throw new ServerException("Có lỗi khi duyệt chi phí. Vui lòng thử lại sau!");
         }
-        return numOfRowsApproved;
+        return result;
     }
 
     @Override
-    public List<ExpensesIncurredDTO> report(String driverId, int year, int month) {
+    public List<ExpensesIncurredDTO> report(String driverId, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        java.sql.Date fromDate = convertToDate(year, month);
-        java.sql.Date toDate = convertToDate(year, (month % 12) + 1);
-        return expensesRepo.getByFilter(driverId, fromDate, toDate);
+        Date[] range = Utils.createDateRange(period);
+        return expensesRepo.getExpenseIncurredByDriverID(driverId, range[0], range[1]);
     }
 
     @Override
-    public List<ExpensesReportDTO> reportForAll(int year, int month) {
+    public List<ExpensesReportDTO> reportForAll(String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        if (month < 1 || month > 12) {
-            throw new InvalidParameterException("Chu kỳ đã chọn không hợp lệ!");
-        }
-        String period = year + "-" + month;
         return expensesRepo.reportForAll(period);
-    }
-
-    private java.sql.Date convertToDate(int year, int month) {
-        try {
-            LocalDate localDate = LocalDate.of(year, month, 1);
-            return java.sql.Date.valueOf(localDate);
-        } catch (DateTimeException ex) {
-            throw new InvalidParameterException("Chu kỳ đã chọn không hợp lệ!");
-        }
     }
 
     @Override
@@ -173,10 +195,9 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     }
 
     @Override
-    public ExportExcelResponse exportExpenses(int page, String expensesConfigId, String truckLicense, String fromDate, String toDate) throws Exception {
-        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
-
-        List<ExpensesDTO> expenses = expensesRepo.getAll(page, expensesConfigId, truckLicense, dateRange.getFirst(), dateRange.getSecond());
+    public ExportExcelResponse exportExpenses(String expensesConfigId, String truckLicense, String fromDate, String toDate) throws Exception {
+        Date[] range = Utils.createDateRange(fromDate, toDate);
+        List<ExpensesDTO> expenses = expensesRepo.getAll(expensesConfigId, truckLicense, range[0], range[1]);
 
         if (CollectionUtils.isEmpty(expenses)) {
             throw new NotFoundException("No data");
@@ -190,12 +211,9 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     }
 
     @Override
-    public ExportExcelResponse exportReportExpenses(String driverId, int year, int month) throws Exception {
-
-        java.sql.Date fromDate = convertToDate(year, month);
-        java.sql.Date toDate = convertToDate(year, (month % 12) + 1);
-        List<ExpensesIncurredDTO> expensesReport = expensesRepo.getByFilter(driverId, fromDate, toDate);
-
+    public ExportExcelResponse exportReportExpenses(String driverId, String period) throws Exception {
+        Date[] range = Utils.createDateRange(period);
+        List<ExpensesIncurredDTO> expensesReport = expensesRepo.getExpenseIncurredByDriverID(driverId, range[0], range[1]);
 
         if (CollectionUtils.isEmpty(expensesReport)) {
             throw new NotFoundException("No data");

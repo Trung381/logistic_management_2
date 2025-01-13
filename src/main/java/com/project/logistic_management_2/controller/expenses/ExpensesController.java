@@ -25,7 +25,7 @@ public class ExpensesController {
 
     @GetMapping()
     public ResponseEntity<Object> getExpenses(
-            @RequestParam int page,
+            @RequestParam Integer page,
             @RequestParam(required = false) String expensesConfigId,
             @RequestParam(required = false) String truckLicense,
             @RequestParam(required = false) String fromDate,
@@ -44,7 +44,7 @@ public class ExpensesController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Object> createExpenses(@Valid @RequestBody ExpensesDTO dto) {
+    public ResponseEntity<Object> createExpenses(@Valid @RequestBody ExpensesDTO dto) throws ServerException {
         return new ResponseEntity<>(
                 BaseResponse.ok(expensesService.create(dto)),
                 HttpStatus.CREATED
@@ -70,29 +70,32 @@ public class ExpensesController {
         return ResponseEntity.ok(BaseResponse.ok(res, "Đã duyệt thành công " + res + " chi phí!"));
     }
 
+    /**
+     * @param driverId id of driver
+     * @param period format: yyyy-MM
+     */
     @GetMapping("/reports")
-    public ResponseEntity<Object> exportReport(@RequestParam String driverId, @RequestParam int year, int month) {
+    public ResponseEntity<Object> exportReport(@RequestParam String driverId, @RequestParam String period) {
         return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.report(driverId, year, month))
+                BaseResponse.ok(expensesService.report(driverId, period))
         );
     }
 
     @GetMapping("/reports/all")
-    public ResponseEntity<Object> exportReportForAll(@RequestParam int year, int month) {
+    public ResponseEntity<Object> exportReportForAll(@RequestParam String period) {
         return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.reportForAll(year, month))
+                BaseResponse.ok(expensesService.reportForAll(period))
         );
     }
 
     @GetMapping("/export")
     public ResponseEntity<Object> exportExpenses(
-            @RequestParam(required = false) int page,
             @RequestParam(required = false) String expensesConfigId,
             @RequestParam(required = false) String truckLicense,
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) throws Exception {
 
-        ExportExcelResponse exportExcelResponse = expensesService.exportExpenses(page, expensesConfigId, truckLicense, fromDate, toDate);
+        ExportExcelResponse exportExcelResponse = expensesService.exportExpenses(expensesConfigId, truckLicense, fromDate, toDate);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -102,15 +105,13 @@ public class ExpensesController {
                 .body(exportExcelResponse.getResource());
 
     }
-
 
     @GetMapping("/export/reports")
     public ResponseEntity<Object> exportReportExpenses(
             @RequestParam(required = false) String driverId,
-            @RequestParam(required = false) int year,
-            @RequestParam(required = false) int month) throws Exception {
-
-        ExportExcelResponse exportExcelResponse = expensesService.exportReportExpenses(driverId, year, month);
+            @RequestParam(required = false) String period
+    ) throws Exception {
+        ExportExcelResponse exportExcelResponse = expensesService.exportReportExpenses(driverId, period);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -119,7 +120,6 @@ public class ExpensesController {
                 .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
                 .body(exportExcelResponse.getResource());
     }
-
 
     @PostMapping("/import")
     public ResponseEntity<Object> importExpensesData(@RequestParam("file") MultipartFile importFile) {
@@ -128,5 +128,4 @@ public class ExpensesController {
                 HttpStatus.CREATED
         );
     }
-
 }

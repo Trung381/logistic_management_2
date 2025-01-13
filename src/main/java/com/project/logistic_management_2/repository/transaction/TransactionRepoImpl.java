@@ -4,8 +4,8 @@ import com.project.logistic_management_2.dto.transaction.TransactionDTO;
 import com.project.logistic_management_2.entity.Transaction;
 import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.enums.transaction.TransactionType;
-import com.project.logistic_management_2.exception.def.EditNotAllowedException;
-import com.project.logistic_management_2.exception.def.InvalidFieldException;
+import com.project.logistic_management_2.exception.define.EditNotAllowedException;
+import com.project.logistic_management_2.exception.define.InvalidFieldException;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
@@ -19,15 +19,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.YearMonth;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import static com.project.logistic_management_2.entity.QGoods.goods;
-import static com.project.logistic_management_2.entity.QSchedule.schedule;
 import static com.project.logistic_management_2.entity.QTransaction.transaction;
 import static com.project.logistic_management_2.entity.QUser.user;
 
@@ -38,7 +34,6 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
     }
 
     private ConstructorExpression<TransactionDTO> transactionProjection() {
-
         return Projections.constructor(TransactionDTO.class,
                 transaction.id.as("id"),
                 transaction.refUserId.as("refUserId"),
@@ -63,13 +58,17 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
         );
     }
 
+    BooleanBuilder initGetOneBuilder(String id) {
+        return new BooleanBuilder()
+                .and(transaction.id.eq(id))
+                .and(transaction.deleted.eq(false));
+    }
+
     @Override
     @Modifying
     @Transactional
     public long updateTransaction(Transaction OldTransaction, String id, TransactionDTO dto) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(transaction.id.eq(id))
-                .and(transaction.deleted.eq(false));
+        BooleanBuilder builder = initGetOneBuilder(id);
 
         JPAUpdateClause updateClause = new JPAUpdateClause(entityManager, transaction);
 
@@ -134,7 +133,7 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
         }
 
         if (isUpdated) {
-            updateClause.set(transaction.updatedAt, new java.util.Date());
+            updateClause.set(transaction.updatedAt, new Date());
         } else {
             throw new InvalidFieldException("No data fields are updated!!!");
         }
@@ -148,9 +147,7 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
 
     @Override
     public Optional<TransactionDTO> getTransactionsById(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(transaction.id.eq(id))
-                .and(transaction.deleted.eq(false));
+        BooleanBuilder builder = initGetOneBuilder(id);
 
         return Optional.ofNullable(
                 query.from(transaction)
@@ -160,9 +157,8 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
         );
     }
 
-
     @Override
-    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
+    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, Date fromDate, Date toDate) {
 
         BooleanBuilder builder = new BooleanBuilder()
                 .and(transaction.deleted.eq(false));
@@ -199,10 +195,7 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
     @Modifying
     @Transactional
     public long deleteTransaction(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(transaction.id.eq(id))
-                .and(transaction.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         return query.update(transaction)
                 .where(builder)
                 .set(transaction.deleted, true)
@@ -210,27 +203,19 @@ public class TransactionRepoImpl extends BaseRepo implements TransactionRepoCust
     }
 
     @Override
-    public Float getQuantityByOrigin(String goodsId, Boolean origin , YearMonth yearMonth) {
-        Date startDate = Date.valueOf(LocalDate.now().atStartOfDay().toLocalDate());
-        Date endDate = Date.valueOf(LocalDate.now().plusMonths(1).atStartOfDay().toLocalDate());
-
-        if (yearMonth != null) {
-            startDate = Date.valueOf(yearMonth.atDay(1).atStartOfDay().toLocalDate());
-            endDate = Date.valueOf(yearMonth.atDay(yearMonth.lengthOfMonth()).atStartOfDay().toLocalDate());
-
-        }
-
+    public Float getQuantityByOrigin(String goodsId, Boolean origin , Date fromDate, Date toDate) {
         BooleanBuilder builder = new BooleanBuilder()
-                .and(transaction.createdAt.between(startDate, endDate))
                 .and(transaction.origin.eq(origin))
                 .and(transaction.goodsId.eq(goodsId));
+        if (fromDate != null && toDate != null) {
+            builder.and(transaction.createdAt.between(fromDate, toDate));
+        }
 
         Float totalQuantity = query.from(transaction)
                 .where(builder)
-                .select(transaction.quantity.sum())  // sum() trả về BigDecimal
+                .select(transaction.quantity.sum())
                 .fetchOne();
 
-        // Kiểm tra nếu totalQuantity là null, trả về 0f nếu không có kết quả
         return totalQuantity != null ? totalQuantity : 0f;
     }
 }

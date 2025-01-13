@@ -10,16 +10,24 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @Slf4j
 @Component
 public class TransactionMapper {
     public Transaction toTransaction(TransactionDTO dto) {
         if (dto == null) return null;
+        return createTransaction(dto);
+    }
 
+    public List<Transaction> toTransactions(List<TransactionDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::createTransaction).collect(Collectors.toList());
+    }
+
+    private Transaction createTransaction(TransactionDTO dto) {
         return Transaction.builder()
                 .id(Utils.genID(IDKey.TRANSACTION))
                 .refUserId(dto.getRefUserId())
@@ -35,32 +43,4 @@ public class TransactionMapper {
                 .updatedAt(new Date())
                 .build();
     }
-
-    public List<Transaction> toTransactions(List<TransactionDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return dtos.stream().map(dto ->
-            Transaction.builder()
-                    .id(Utils.genID(IDKey.TRANSACTION))
-                    .refUserId(dto.getRefUserId())
-                    .customerName(dto.getCustomerName())
-                    .goodsId(dto.getGoodsId())
-                    .quantity(dto.getQuantity())
-                    .transactionTime(dto.getTransactionTime())
-                    .origin(
-                            "Nhập hàng".equals(dto.getOriginDescription()) ? true :
-                            "Xuất hàng".equals(dto.getOriginDescription()) ? false : null
-                    )
-                    .destination(dto.getDestination())
-                    .image(dto.getImage())
-                    .deleted(false)
-                    .createdAt(new Date())
-                    .updatedAt(new Date())
-                    .build()
-        ).collect(Collectors.toList());
-    }
-
-
 }

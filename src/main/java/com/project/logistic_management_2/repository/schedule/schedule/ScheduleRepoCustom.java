@@ -4,14 +4,13 @@ import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
 
-import java.sql.Timestamp;
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 public interface ScheduleRepoCustom {
-    List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate);
-    List<ScheduleDTO> getAll(String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate);
+    List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, Date fromDate, Date toDate);
+    List<ScheduleDTO> getAll(String driverId, String truckLicense, Date fromDate, Date toDate);
     Optional<ScheduleDTO> getByID(String id);
     long delete(String id);
     long approve(String id, boolean approved);

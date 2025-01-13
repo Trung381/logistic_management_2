@@ -50,7 +50,8 @@ public class ReportController {
     @GetMapping("/export/detail-salary-report")
     public ResponseEntity<Object> exportReportDetailSalary(
             @RequestParam String userId,
-            @RequestParam String period) throws Exception {
+            @RequestParam String period
+    ) throws Exception {
 
         ExportExcelResponse exportExcelResponse = reportService.exportReport(period, userId);
 

@@ -20,15 +20,10 @@ import java.util.List;
 public class ImportConfig {
 
     private int sheetIndex;
-
     private int headerIndex;
-
     private int startRow;
-
     private Class dataClazz;
-
     private List<CellConfig> cellImportConfigs;
-
 
     public static final ImportConfig transactionImport;
     static{

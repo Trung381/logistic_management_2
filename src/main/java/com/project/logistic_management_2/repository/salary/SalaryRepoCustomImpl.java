@@ -1,13 +1,10 @@
 package com.project.logistic_management_2.repository.salary;
 
-import com.project.logistic_management_2.dto.salary.SalaryDTO;
 import com.project.logistic_management_2.dto.salary.SalaryUserDTO;
 import com.project.logistic_management_2.dto.salary.UpdateSalaryDTO;
-import com.project.logistic_management_2.entity.QSalary;
-import com.project.logistic_management_2.entity.QUser;
-import com.project.logistic_management_2.entity.Salary;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAUpdateClause;
 import jakarta.persistence.EntityManager;
@@ -17,6 +14,8 @@ import org.springframework.stereotype.Repository;
 import java.time.YearMonth;
 import java.util.List;
 
+import static com.project.logistic_management_2.entity.QSalary.salary;
+import static com.project.logistic_management_2.entity.QUser.user;
 
 @Repository
 public class SalaryRepoCustomImpl extends BaseRepo implements SalaryRepoCustom {
@@ -25,145 +24,89 @@ public class SalaryRepoCustomImpl extends BaseRepo implements SalaryRepoCustom {
         super(entityManager);
     }
 
-    public List<SalaryUserDTO> getAllSalaryWithUserPeriod(String period){
-        QSalary s = QSalary.salary;
-        QUser u = QUser.user;
+    private final Expression<SalaryUserDTO> expression = Projections.fields(SalaryUserDTO.class,
+            salary.id,
+            user.fullName,
+            salary.period,
+            salary.phoneAllowance,
+            salary.basicSalary,
+            salary.jobAllowance,
+            salary.bonus,
+            salary.monthlyPaidLeave,
+            salary.ot,
+            salary.receivedSnn,
+            salary.unionContribution,
+            salary.travelExpensesReimbursement,
+            salary.mandatoryInsurance,
+            salary.tradeUnion,
+            salary.advance,
+            salary.errorOfDriver,
+            salary.deductionSnn
+    );
 
-        return query.
-                select(Projections.fields(SalaryUserDTO.class,
-                        s.id,
-//                        s.userId,
-                        u.fullName,
-                        s.period,
-                        s.phoneAllowance,
-                        s.basicSalary,
-                        s.jobAllowance,
-                        s.bonus,
-                        s.monthlyPaidLeave,
-                        s.ot,
-                        s.receivedSnn,
-                        s.unionContribution,
-                        s.travelExpensesReimbursement,
-                        s.mandatoryInsurance,
-                        s.tradeUnion,
-                        s.advance,
-                        s.errorOfDriver,
-                        s.deductionSnn
-                ))
-                .from(s)
-                .join(u).on(s.userId.eq(u.id))
-                .where(s.period.eq(period))
+    public List<SalaryUserDTO> getAllSalaryWithUserPeriod(String period){
+        return query.select(expression)
+                .from(salary)
+                .join(user).on(salary.userId.eq(user.id))
+                .where(salary.period.eq(period))
                 .fetch();
     }
 
     public SalaryUserDTO getSalaryWithUser(Integer id){
-        QSalary s = QSalary.salary;
-        QUser u = QUser.user;
-
-        return query.
-                select(Projections.fields(SalaryUserDTO.class,
-                        s.id,
-//                        s.userId,
-                        u.fullName,
-                        s.period,
-                        s.phoneAllowance,
-                        s.basicSalary,
-                        s.jobAllowance,
-                        s.bonus,
-                        s.monthlyPaidLeave,
-                        s.ot,
-                        s.receivedSnn,
-                        s.unionContribution,
-                        s.travelExpensesReimbursement,
-                        s.mandatoryInsurance,
-                        s.tradeUnion,
-                        s.advance,
-                        s.errorOfDriver,
-                        s.deductionSnn
-                ))
-                .from(s)
-                .join(u).on(s.userId.eq(u.id))
-                .where(s.id.eq(id))
+        return query.select(expression)
+                .from(salary)
+                .join(user).on(salary.userId.eq(user.id))
+                .where(salary.id.eq(id))
                 .fetchOne();
     }
 
-//    @Transactional
-//    public Boolean updateSalary(Integer id, UpdateSalaryDTO updateSalaryDTO){
-//        QSalary s = QSalary.salary;
-//        long rowsAffected = query.update(s)
-//                .where(s.id.eq(id))
-//                .set(s.phoneAllowance, updateSalaryDTO.getPhoneAllowance())
-//                .set( s.basicSalary, updateSalaryDTO.getBasicSalary())
-//                .set(s.jobAllowance, updateSalaryDTO.getJobAllowance())
-//                .set(s.bonus, updateSalaryDTO.getBonus())
-//                .set(s.monthlyPaidLeave,  updateSalaryDTO.getMonthlyPaidLeave())
-//                .set(s.ot, updateSalaryDTO.getOt())
-//                .set(s.receivedSnn, updateSalaryDTO.getReceivedSnn())
-//                .set(s.unionContribution, updateSalaryDTO.getUnionContribution())
-//                .set(s.travelExpensesReimbursement, updateSalaryDTO.getTravelExpensesReimbursement())
-//                .set(s.mandatoryInsurance, updateSalaryDTO.getBasicSalary()*0.105F)
-//                .set(s.tradeUnion, updateSalaryDTO.getBasicSalary()*0.01F)
-//                .set(s.advance, updateSalaryDTO.getAdvance())
-//                .set(s.errorOfDriver, updateSalaryDTO.getErrorOfDriver())
-//                .set(s.deductionSnn, updateSalaryDTO.getDeductionSnn())
-//                .execute();
-//
-//        return (rowsAffected > 0) ? true : false;
-//    }
     @Transactional
     public Boolean updateSalary(Integer id, UpdateSalaryDTO updateSalaryDTO) {
-        QSalary s = QSalary.salary;
         BooleanBuilder whereClause = new BooleanBuilder();
-        whereClause.and(s.id.eq(id));
+        whereClause.and(salary.id.eq(id));
 
-        JPAUpdateClause updateClause = query.update(s).where(whereClause);
+        JPAUpdateClause updateClause = query.update(salary).where(whereClause);
 
         if (updateSalaryDTO.getPhoneAllowance() != null) {
-            updateClause.set(s.phoneAllowance, updateSalaryDTO.getPhoneAllowance());
+            updateClause.set(salary.phoneAllowance, updateSalaryDTO.getPhoneAllowance());
         }
         if (updateSalaryDTO.getBasicSalary() != null) {
-            updateClause.set(s.basicSalary, updateSalaryDTO.getBasicSalary());
-            updateClause.set(s.mandatoryInsurance, updateSalaryDTO.getBasicSalary() * 0.105F);
-            updateClause.set(s.tradeUnion, updateSalaryDTO.getBasicSalary() * 0.01F);
+            updateClause.set(salary.basicSalary, updateSalaryDTO.getBasicSalary());
+            updateClause.set(salary.mandatoryInsurance, updateSalaryDTO.getBasicSalary() * 0.105F);
+            updateClause.set(salary.tradeUnion, updateSalaryDTO.getBasicSalary() * 0.01F);
         }
         if (updateSalaryDTO.getJobAllowance() != null) {
-            updateClause.set(s.jobAllowance, updateSalaryDTO.getJobAllowance());
+            updateClause.set(salary.jobAllowance, updateSalaryDTO.getJobAllowance());
         }
         if (updateSalaryDTO.getBonus() != null) {
-            updateClause.set(s.bonus, updateSalaryDTO.getBonus());
+            updateClause.set(salary.bonus, updateSalaryDTO.getBonus());
         }
         if (updateSalaryDTO.getMonthlyPaidLeave() != null) {
-            updateClause.set(s.monthlyPaidLeave, updateSalaryDTO.getMonthlyPaidLeave());
+            updateClause.set(salary.monthlyPaidLeave, updateSalaryDTO.getMonthlyPaidLeave());
         }
         if (updateSalaryDTO.getOt() != null) {
-            updateClause.set(s.ot, updateSalaryDTO.getOt());
+            updateClause.set(salary.ot, updateSalaryDTO.getOt());
         }
         if (updateSalaryDTO.getReceivedSnn() != null) {
-            updateClause.set(s.receivedSnn, updateSalaryDTO.getReceivedSnn());
+            updateClause.set(salary.receivedSnn, updateSalaryDTO.getReceivedSnn());
         }
         if (updateSalaryDTO.getUnionContribution() != null) {
-            updateClause.set(s.unionContribution, updateSalaryDTO.getUnionContribution());
+            updateClause.set(salary.unionContribution, updateSalaryDTO.getUnionContribution());
         }
         if (updateSalaryDTO.getTravelExpensesReimbursement() != null) {
-            updateClause.set(s.travelExpensesReimbursement, updateSalaryDTO.getTravelExpensesReimbursement());
+            updateClause.set(salary.travelExpensesReimbursement, updateSalaryDTO.getTravelExpensesReimbursement());
         }
         if (updateSalaryDTO.getAdvance() != null) {
-            updateClause.set(s.advance, updateSalaryDTO.getAdvance());
+            updateClause.set(salary.advance, updateSalaryDTO.getAdvance());
         }
         if (updateSalaryDTO.getErrorOfDriver() != null) {
-            updateClause.set(s.errorOfDriver, updateSalaryDTO.getErrorOfDriver());
+            updateClause.set(salary.errorOfDriver, updateSalaryDTO.getErrorOfDriver());
         }
         if (updateSalaryDTO.getDeductionSnn() != null) {
-            updateClause.set(s.deductionSnn, updateSalaryDTO.getDeductionSnn());
+            updateClause.set(salary.deductionSnn, updateSalaryDTO.getDeductionSnn());
         }
 
         return updateClause.execute() > 0;
-    }
-
-    public void deleteSalary(Integer salaryId) {
-        query.delete(QSalary.salary)
-                .where(QSalary.salary.id.eq(salaryId))
-                .execute();
     }
 
     @Transactional
@@ -180,5 +123,4 @@ public class SalaryRepoCustomImpl extends BaseRepo implements SalaryRepoCustom {
                 .setParameter(1, period)
                 .executeUpdate();
     }
-
 }

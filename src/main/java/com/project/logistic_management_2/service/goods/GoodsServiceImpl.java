@@ -1,10 +1,10 @@
 package com.project.logistic_management_2.service.goods;
 
+import com.project.logistic_management_2.dto.goods.GoodsDTO;
 import com.project.logistic_management_2.dto.ExportExcelResponse;
-import com.project.logistic_management_2.dto.request.GoodsDTO;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
-import com.project.logistic_management_2.exception.def.NotFoundException;
+import com.project.logistic_management_2.exception.define.NotFoundException;
 import com.project.logistic_management_2.repository.goods.GoodsRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.utils.ExcelUtils;
