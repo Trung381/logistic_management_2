@@ -5,10 +5,10 @@ import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.report.SummarySalaryDTO;
-import com.project.logistic_management_2.dto.request.GoodsDTO;
-import com.project.logistic_management_2.dto.request.GoodsReportDTO;
-import com.project.logistic_management_2.dto.request.TransactionDTO;
-import com.project.logistic_management_2.dto.request.WarehousesDTO;
+import com.project.logistic_management_2.dto.goods.GoodsDTO;
+import com.project.logistic_management_2.dto.goods.GoodsReportDTO;
+import com.project.logistic_management_2.dto.transaction.TransactionDTO;
+import com.project.logistic_management_2.dto.warehouse.WarehousesDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.truck.TruckDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
@@ -27,34 +27,9 @@ import java.util.List;
 public class ExportConfig {
 
     private int sheetIndex;
-
     private int startRow;
-
     private Class dataClazz;
-
     private List<CellConfig> cellExportConfigList;
-
-//    public static final ExportConfig transactionExport;
-//    static {
-//        transactionExport = new ExportConfig();
-//        transactionExport.setSheetIndex(0);
-//        transactionExport.setStartRow(1);
-//        transactionExport.setDataClazz(TransactionDTO.class);
-//        List<CellConfig> transactionCellConfig = new ArrayList<>();
-//        transactionCellConfig.add(new CellConfig(0, "id"));
-//        transactionCellConfig.add(new CellConfig(1, "fullNameRefUser"));
-//        transactionCellConfig.add(new CellConfig(2, "customerName"));
-//        transactionCellConfig.add(new CellConfig(3, "goodsName"));
-//        transactionCellConfig.add(new CellConfig(4, "quantity"));
-//        transactionCellConfig.add(new CellConfig(5, "transactionTime"));
-//        transactionCellConfig.add(new CellConfig(6, "originDescription"));
-//        transactionCellConfig.add(new CellConfig(7, "destination"));
-//        transactionCellConfig.add(new CellConfig(8, "image"));
-//        transactionCellConfig.add(new CellConfig(9, "createdAt"));
-//        transactionCellConfig.add(new CellConfig(10, "updatedAt"));
-//
-//        transactionExport.setCellExportConfigList(transactionCellConfig);
-//    }
 
     public static ExportConfig createExportConfig(Class<?> dataClazz, int sheetIndex, int startRow) {
         ExportConfig exportConfig = new ExportConfig();

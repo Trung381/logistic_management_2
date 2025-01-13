@@ -15,6 +15,17 @@ import java.util.stream.Collectors;
 public class TruckMapper {
     public Truck toTruck(TruckDTO truckDTO) {
         if(truckDTO==null)  return null;
+        return createTruck(truckDTO);
+    }
+
+    public List<Truck> toTruckList(List<TruckDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::createTruck).collect(Collectors.toList());
+    }
+
+    private Truck createTruck(TruckDTO truckDTO) {
         return Truck.builder()
                 .id(truckDTO.getId() != null ? truckDTO.getId() : null)
                 .driverId(truckDTO.getDriverId())
@@ -27,36 +38,6 @@ public class TruckMapper {
                 .createdAt(new Date())
                 .updatedAt(new Date())
                 .build();
-    }
-    public List<Truck> toTruckList(List<TruckDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return dtos.stream().map(truckDTO ->
-                Truck.builder()
-                        .id(truckDTO.getId() != null ? truckDTO.getId() : null)
-                        .driverId(truckDTO.getDriverId())
-                        .licensePlate(truckDTO.getLicensePlate())
-                        .capacity(truckDTO.getCapacity())
-                        .type(truckDTO.getType().getValue())
-                        .note(truckDTO.getNote())
-                        .status(TruckStatus.AVAILABLE.getValue())
-                        .deleted(false)
-                        .createdAt(new Date())
-                        .updatedAt(new Date())
-                        .build()
-        ).collect(Collectors.toList());
-    }
-
-    public void updateTruck(Truck truck, TruckDTO truckDTO) {
-        if (truckDTO == null) return;
-        truck.setLicensePlate(truckDTO.getLicensePlate());
-        truck.setCapacity(truckDTO.getCapacity());
-        truck.setNote(truckDTO.getNote());
-        truck.setType(truckDTO.getType().getValue());
-        truck.setStatus(truck.getStatus());
-        truck.setUpdatedAt(new Date());
     }
 
     public TruckDTO toTruckDTO(Truck truck) {

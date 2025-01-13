@@ -15,27 +15,25 @@ public class Truck {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
     @Column(name = "driver_id", nullable = false)
     private String driverId;
+
     @Column(name = "license_plate", nullable = false)
     private String licensePlate;
+
     @Column(name = "capacity", nullable = false)
     private Float capacity;
+
     @Column(name = "note")
     private String note;
-    @Column(name = "deleted", nullable = false)
-    private Boolean deleted; //0 là chưa xóa, 1 là đã xóa
 
-    /*
-    Trạng thái của xe:
-    -1: Bảo trì
-     0: Không có sẵn
-     1: Có sẵn (Mặc định)
-    */
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted;
+
     @Column(name = "status", nullable = false)
     private Integer status;
 
-    //Loai xe: 0 - xe tải, 1 - mooc
     @Column(name = "type", nullable = false)
     private Integer type;
 

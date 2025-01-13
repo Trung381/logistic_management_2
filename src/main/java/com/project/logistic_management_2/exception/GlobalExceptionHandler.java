@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.exception;
 
 import com.project.logistic_management_2.dto.BaseResponse;
-import com.project.logistic_management_2.exception.def.*;
+import com.project.logistic_management_2.exception.define.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -90,6 +90,21 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 BaseResponse.fail("Đã có lỗi xảy ra. Vui lòng thử lại sau!"),
                 HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
+
+    @ExceptionHandler(InvalidFieldException.class)
+    public ResponseEntity<Object> handleInvalidFieldException(InvalidFieldException ex) {
+        return new ResponseEntity<>(
+                BaseResponse.fail(ex.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(NotModifiedException.class)
+    public ResponseEntity<Object> handleNotModifiedException(NotModifiedException ex) {
+        return ResponseEntity.ok(
+                BaseResponse.ok(null, ex.getMessage())
         );
     }
 }

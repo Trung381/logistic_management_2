@@ -36,9 +36,9 @@ public class SecurityConfig {
                     return configuration;
                 }))
                 .authorizeHttpRequests(request -> request
-                                .requestMatchers("/auth/**").permitAll() // Cho phép truy cập không xác thực đến /auth/**
+                                .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/files/**").permitAll()
                                 .anyRequest().authenticated()
-//                                .anyRequest().permitAll()
                 )
                 .exceptionHandling(e -> e
                         .accessDeniedHandler((request, response, accessDeniedException) -> {

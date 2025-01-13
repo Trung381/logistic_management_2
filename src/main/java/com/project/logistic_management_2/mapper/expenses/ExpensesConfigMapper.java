@@ -3,6 +3,8 @@ package com.project.logistic_management_2.mapper.expenses;
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.entity.ExpensesConfig;
 import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.exception.define.InvalidFieldException;
+import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,17 @@ import java.util.stream.Collectors;
 public class ExpensesConfigMapper {
     public ExpensesConfig toExpensesConfig(ExpensesConfigDTO dto) {
         if (dto == null) return null;
+        return createExpensesConfig(dto);
+    }
+
+    public List<ExpensesConfig> toExpensesConfigList(List<ExpensesConfigDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::createExpensesConfig).collect(Collectors.toList());
+    }
+
+    private ExpensesConfig createExpensesConfig(ExpensesConfigDTO dto) {
         return ExpensesConfig.builder()
                 .id(Utils.genID(IDKey.EXPENSES_CONFIG))
                 .type(dto.getType())
@@ -25,35 +38,32 @@ public class ExpensesConfigMapper {
                 .build();
     }
 
-    public List<ExpensesConfig> toExpensesConfigList(List<ExpensesConfigDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return dtos.stream().map(dto ->
-                ExpensesConfig.builder()
-                        .id(Utils.genID(IDKey.EXPENSES_CONFIG))
-                        .type(dto.getType())
-                        .note(dto.getNote())
-                        .deleted(false)
-                        .createdAt(new Date())
-                        .updatedAt(new Date())
-                        .build()
-        ).collect(Collectors.toList());
-    }
-
     public void updateExpensesConfig(ExpensesConfig config, ExpensesConfigDTO dto) {
         if (dto == null) return;
+        boolean isUpdated = false, isValidField = false;
 
-        //update type
-        if (dto.getType() != null)
-            config.setType(dto.getType());
+        if (dto.getType() != null) {
+            if (!config.getType().equals(dto.getType())) {
+                config.setType(dto.getType());
+                isUpdated = true;
+            }
+            isValidField = true;
+        }
+        if (dto.getNote() != null) {
+            if (!config.getNote().equals(dto.getNote())) {
+                config.setNote(dto.getNote());
+                isUpdated = true;
+            }
+            isValidField = true;
+        }
 
-        //Update note
-        if (dto.getNote() != null)
-            config.setNote(dto.getNote());
-
-        config.setUpdatedAt(new Date());
+        if (isUpdated) {
+            config.setUpdatedAt(new Date());
+        } else if (isValidField) {
+            throw new NotModifiedException("Không có sự thay đổi nào của cấu hình chi phí!");
+        } else {
+            throw new InvalidFieldException("Trường cần cập nhật không tồn tại trong cấu hình chi phí!");
+        }
     }
 
     public ExpensesConfigDTO toExpensesConfigDTO(ExpensesConfigDTO dto, ExpensesConfig config) {

@@ -1,25 +1,20 @@
 package com.project.logistic_management_2.controller.user;
 
 
-import com.project.logistic_management_2.dto.user.UpdateUserDTO;
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.entity.User;
 import com.project.logistic_management_2.service.user.UserService;
-import com.project.logistic_management_2.utils.ExcelUtils;
-import com.project.logistic_management_2.utils.ExportConfig;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -42,14 +37,14 @@ public class UserController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<BaseResponse<User>> updateUser(@PathVariable String id, @Valid @RequestBody UpdateUserDTO updateUserDTO) {
+    public ResponseEntity<BaseResponse<User>> updateUser(@PathVariable String id, @RequestBody UserDTO updateUserDTO) {
         User updatedUser = userService.updateUser(id, updateUserDTO);
         return ResponseEntity.ok(BaseResponse.ok(updatedUser));
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponse<List<User>>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<BaseResponse<List<User>>> getAllUsers(@RequestParam int page) {
+        List<User> users = userService.getAllUsers(page);
         return ResponseEntity.ok(BaseResponse.ok(users));
     }
 
@@ -66,61 +61,41 @@ public class UserController {
     }
 
     @GetMapping("/driver")
-    public ResponseEntity<BaseResponse<List<UserDTO>>> getDriver() {
-        List<UserDTO> users = userService.getDriver();
+    public ResponseEntity<BaseResponse<List<UserDTO>>> getDriver(@RequestParam int page) {
+        List<UserDTO> users = userService.getDriver(page);
         return ResponseEntity.ok(BaseResponse.ok(users));
     }
 
     @GetMapping("/admin")
-    public ResponseEntity<BaseResponse<List<UserDTO>>> getAdmin() {
-        List<UserDTO> users = userService.getAdmin();
+    public ResponseEntity<BaseResponse<List<UserDTO>>> getAdmin(@RequestParam int page) {
+        List<UserDTO> users = userService.getAdmin(page);
         return ResponseEntity.ok(BaseResponse.ok(users));
     }
 
     @GetMapping("/export/driver")
-    public ResponseEntity<Object> exportDriver() throws Exception {
-        List<UserDTO> users = userService.getDriver();
+    public ResponseEntity<Object> exportDriver(@RequestParam int page) throws Exception {
 
-        if (!CollectionUtils.isEmpty(users)) {
-            String fileName = "Driver Export" + ".xlsx";
+        ExportExcelResponse exportExcelResponse = userService.exportDriver(page);
 
-            ByteArrayInputStream in = ExcelUtils.export(users, fileName, ExportConfig.userExport);
-
-            InputStreamResource inputStreamResource = new InputStreamResource(in);
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8)
-                    )
-                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
-                    .body(inputStreamResource);
-        } else {
-            throw new Exception("No data");
-
-        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + URLEncoder.encode(exportExcelResponse.getFileName(), StandardCharsets.UTF_8)
+                )
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
+                .body(exportExcelResponse.getResource());
     }
 
     @GetMapping("/export/admin")
-    public ResponseEntity<Object> exportAdmin() throws Exception {
-        List<UserDTO> users = userService.getAdmin();
+    public ResponseEntity<Object> exportAdmin(@RequestParam int page) throws Exception {
 
-        if (!CollectionUtils.isEmpty(users)) {
-            String fileName = "Admin Export" + ".xlsx";
+        ExportExcelResponse exportExcelResponse = userService.exportAdmin(page);
 
-            ByteArrayInputStream in = ExcelUtils.export(users, fileName, ExportConfig.userExport);
-
-            InputStreamResource inputStreamResource = new InputStreamResource(in);
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8)
-                    )
-                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
-                    .body(inputStreamResource);
-        } else {
-            throw new Exception("No data");
-
-        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + URLEncoder.encode(exportExcelResponse.getFileName(), StandardCharsets.UTF_8)
+                )
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
+                .body(exportExcelResponse.getResource());
     }
 
     @PostMapping("/import")

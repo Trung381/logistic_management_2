@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.repository.goods;
 
-import com.project.logistic_management_2.dto.request.GoodsReportDTO;
+import com.project.logistic_management_2.dto.goods.GoodsReportDTO;
 import com.project.logistic_management_2.entity.GoodsReport;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
@@ -10,8 +10,7 @@ import com.querydsl.jpa.JPAExpressions;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Timestamp;
-import java.time.YearMonth;
+import java.util.Date;
 import java.util.List;
 
 import static com.project.logistic_management_2.entity.QGoods.goods;
@@ -24,17 +23,15 @@ public class GoodsReportRepoImpl extends BaseRepo implements GoodsReportRepoCust
         super(entityManager);
     }
 
+    BooleanBuilder initBuilder(Date fromDate, Date toDate) {
+        return new BooleanBuilder()
+                .and(goodsReport.createdAt.between(fromDate, toDate));
+    }
+
     @Override
-    public GoodsReport getGoodReportByYearMonth(String goodsId, YearMonth yearMonth) {
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(goodsReport.goodsId.eq(goodsId));
-
-        Timestamp startOfMonth = Timestamp.valueOf(yearMonth.atDay(1).atStartOfDay());
-        Timestamp endOfMonth = Timestamp.valueOf(yearMonth.atEndOfMonth().atTime(23, 59, 59, 999999999));
-
-        builder.and(goodsReport.createdAt.goe(startOfMonth))
-                .and(goodsReport.createdAt.loe(endOfMonth));
-
+    public GoodsReport getGoodReport(String goodsId, Date fromDate, Date toDate) {
+        BooleanBuilder builder = initBuilder(fromDate, toDate)
+                .and(goodsReport.goodsId.eq(goodsId));
         return query.from(goodsReport)
                 .where(builder)
                 .select(goodsReport)
@@ -42,14 +39,8 @@ public class GoodsReportRepoImpl extends BaseRepo implements GoodsReportRepoCust
     }
 
     @Override
-    public List<GoodsReportDTO> getGoodReportDTOByYearMonth(YearMonth yearMonth) {
-        BooleanBuilder builder = new BooleanBuilder();
-
-        Timestamp startOfMonth = Timestamp.valueOf(yearMonth.atDay(1).atStartOfDay());
-        Timestamp endOfMonth = Timestamp.valueOf(yearMonth.atEndOfMonth().atTime(23, 59, 59, 999999999));
-
-        builder.and(goodsReport.createdAt.goe(startOfMonth))
-                .and(goodsReport.createdAt.loe(endOfMonth));
+    public List<GoodsReportDTO> getGoodReportDTO(Date fromDate, Date toDate) {
+        BooleanBuilder builder = initBuilder(fromDate, toDate);
 
         ConstructorExpression<GoodsReportDTO> expression = Projections.constructor(GoodsReportDTO.class,
                 goodsReport.id.as("id"),

@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.controller.upload;
 
-
 import com.project.logistic_management_2.service.upload.FileStorageServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -11,22 +11,26 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/files")
+@RequiredArgsConstructor
 public class FileController {
+    private final FileStorageServiceImpl fileStorageService;
 
-    @Autowired
-    private FileStorageServiceImpl fileStorageService;
+    // API Upload Multiple Files
+    @PostMapping("/upload/multiple")
+    public ResponseEntity<Map<String, String[]>> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
+        return ResponseEntity.ok(fileStorageService.storeFiles(files));
+    }
 
     // API Upload File
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        String fileName = fileStorageService.storeFile(file);
-        return ResponseEntity.ok("/uploads/" + fileName);
+    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(fileStorageService.storeFileAndReturnResponse(file));
     }
 
-    // API Download File
     @GetMapping("/download/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) {
         Resource resource = fileStorageService.loadFileAsResource(fileName);
@@ -52,5 +56,11 @@ public class FileController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, contentType)
                 .body(resource);
+    }
+
+    @PostMapping("/delete/multiple")
+    public ResponseEntity<String> deleteMultipleFiles(@RequestBody String[] fileNames) {
+        fileStorageService.deleteFiles(fileNames);
+        return ResponseEntity.ok("Đã xoá các file được yêu cầu.");
     }
 }

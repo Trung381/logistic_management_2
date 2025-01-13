@@ -4,20 +4,19 @@ import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.enums.Pagination;
 import com.project.logistic_management_2.enums.schedule.ScheduleStatus;
+import com.project.logistic_management_2.enums.schedule.ScheduleType;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.YearMonth;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +24,7 @@ import static com.project.logistic_management_2.entity.QSchedule.schedule;
 import static com.project.logistic_management_2.entity.QScheduleConfig.scheduleConfig;
 import static com.project.logistic_management_2.entity.QUser.user;
 import static com.project.logistic_management_2.entity.QTruck.truck;
+import static com.project.logistic_management_2.entity.QAttachedImage.attachedImage;
 
 @Repository
 public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
@@ -36,26 +36,22 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
         return Projections.constructor(ScheduleDTO.class,
                 schedule.id.as("id"),
                 schedule.scheduleConfigId.as("scheduleConfigId"),
-                //Địa điểm A
                 scheduleConfig.placeA.as("placeA"),
-                //Địa điểm B
                 scheduleConfig.placeB.as("placeB"),
-                //Gia tien
                 scheduleConfig.amount.as("amount"),
-                // Thong tin tai xe
                 truck.driverId.as("driverId"),
                 JPAExpressions.select(user.fullName.as("driverName"))
                         .from(user)
                         .where(truck.driverId.eq(user.id)),
-                //Bien so xe tai
                 schedule.truckLicense.as("truckLicense"),
                 schedule.moocLicense.as("moocLicense"),
-                //Thoi gian giao nhan hang
                 schedule.departureTime.as("departureTime"),
                 schedule.arrivalTime.as("arrivalTime"),
-
-                schedule.note.as("note"),
-                schedule.attachDocument.as("attachDocument"),
+                schedule.note.coalesce("").as("note"),
+                JPAExpressions.select(
+                                Expressions.stringTemplate("GROUP_CONCAT({0})", attachedImage.imgPath).as("attachedPaths"))
+                        .from(attachedImage)
+                        .where(attachedImage.referenceId.eq(schedule.id)),
                 schedule.type.as("type"),
                 schedule.status.as("status"),
                 schedule.createdAt.as("createdAt"),
@@ -63,29 +59,36 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
         );
     }
 
-    @Override
-    public List<ScheduleDTO> getAll(int page, String driverid, String truckLicense, Timestamp fromDate, Timestamp toDate) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(schedule.deleted.eq(false));
+    private BooleanBuilder initGetAllBuilder(String driverId, String truckLicense, Date fromDate, Date toDate) {
+        BooleanBuilder builder = new BooleanBuilder().and(schedule.deleted.eq(false));
 
-        if (driverid != null && !driverid.isBlank()) {
-            builder.and(user.id.eq(driverid));
+        if (driverId != null && !driverId.isBlank()) {
+            builder.and(user.id.eq(driverId));
         }
-
         if (truckLicense != null && !truckLicense.isBlank()) {
             builder.and(schedule.truckLicense.eq(truckLicense));
         }
-
         if (fromDate != null && toDate != null) {
-            builder.and(schedule.createdAt.between(fromDate, toDate));
+            builder.and(schedule.departureTime.between(fromDate, toDate));
         } else if (fromDate != null) {
-            builder.and(schedule.createdAt.goe(fromDate));
+            builder.and(schedule.departureTime.goe(fromDate));
         } else if (toDate != null) {
-            builder.and(schedule.createdAt.loe(toDate));
+            builder.and(schedule.departureTime.loe(toDate));
         }
 
-        long offset = (long) (page - 1) * Pagination.TEN.getSize();
+        return builder;
+    }
 
+    BooleanBuilder initGetOneBuilder(String id) {
+        return new BooleanBuilder()
+                .and(schedule.deleted.eq(false))
+                .and(schedule.id.eq(id));
+    }
+
+    @Override
+    public List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, Date fromDate, Date toDate) {
+        BooleanBuilder builder = initGetAllBuilder(driverId, truckLicense, fromDate, toDate);
+        long offset = (long) (page - 1) * Pagination.TEN.getSize();
         return query.from(schedule)
                 .innerJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
                 .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
@@ -99,26 +102,8 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     }
 
     @Override
-    public List<ScheduleDTO> getAll(String driverid, String truckLicense, Timestamp fromDate, Timestamp toDate) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(schedule.deleted.eq(false));
-
-        if (driverid != null && !driverid.isBlank()) {
-            builder.and(user.id.eq(driverid));
-        }
-
-        if (truckLicense != null && !truckLicense.isBlank()) {
-            builder.and(schedule.truckLicense.eq(truckLicense));
-        }
-
-        if (fromDate != null && toDate != null) {
-            builder.and(schedule.createdAt.between(fromDate, toDate));
-        } else if (fromDate != null) {
-            builder.and(schedule.createdAt.goe(fromDate));
-        } else if (toDate != null) {
-            builder.and(schedule.createdAt.loe(toDate));
-        }
-
+    public List<ScheduleDTO> getAll(String driverId, String truckLicense, Date fromDate, Date toDate) {
+        BooleanBuilder builder = initGetAllBuilder(driverId, truckLicense, fromDate, toDate);
         return query.from(schedule)
                 .innerJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
                 .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
@@ -130,35 +115,8 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     }
 
     @Override
-    public List<ScheduleDTO> getByFilter(String license, YearMonth period) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(schedule.deleted.eq(false));
-
-        if (license != null && !license.isBlank()) {
-            builder.and(schedule.truckLicense.eq(license).or(schedule.moocLicense.eq(license)));
-        }
-        //Tìm theo chu kỳ nếu period hợp lệ
-        if (period != null) {
-            Date startDate = Date.valueOf(period.atDay(1).atStartOfDay().toLocalDate());
-            Date endDate = Date.valueOf(period.plusMonths(1).atDay(1).atStartOfDay().toLocalDate());
-            builder.and(schedule.createdAt.between(startDate, endDate));
-        }
-
-        return query.from(schedule)
-                .innerJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
-                .innerJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
-                .where(builder)
-                .select(scheduleProjection())
-                .orderBy(schedule.updatedAt.desc())
-                .fetch();
-    }
-
-    @Override
     public Optional<ScheduleDTO> getByID(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(schedule.id.eq(id))
-                .and(schedule.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         return Optional.ofNullable(
                 query.from(schedule)
                         .leftJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
@@ -173,10 +131,7 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     @Modifying
     @Transactional
     public long delete(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(schedule.id.eq(id))
-                .and(schedule.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         return query.update(schedule)
                 .where(builder)
                 .set(schedule.deleted, true)
@@ -186,15 +141,13 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     @Override
     @Modifying
     @Transactional
-    public long approve(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(schedule.id.eq(id))
-                .and(schedule.deleted.eq(false))
-                .and(schedule.status.eq(0));
-
+    public long approve(String id, boolean approved) {
+        BooleanBuilder builder = initGetOneBuilder(id)
+                .and(schedule.status.eq(ScheduleStatus.PENDING.getValue()));
+        ScheduleStatus status = approved ? ScheduleStatus.APPROVED : ScheduleStatus.REJECTED;
         return query.update(schedule)
                 .where(builder)
-                .set(schedule.status, 1)
+                .set(schedule.status, status.getValue())
                 .execute();
     }
 
@@ -202,29 +155,21 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     @Modifying
     @Transactional
     public long markComplete(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(schedule.id.eq(id))
-                .and(schedule.deleted.eq(false));
+        BooleanBuilder builder = initGetOneBuilder(id);
         return query.update(schedule)
                 .where(builder)
-                .set(schedule.status, 2) //đã hoàn thành
+                .set(schedule.status, ScheduleStatus.COMPLETED.getValue())
                 .set(schedule.arrivalTime, new java.util.Date())
                 .execute();
     }
 
     @Override
-    public List<ScheduleSalaryDTO> exportScheduleSalary(String driverId, YearMonth period) {
-        Date startDate = Date.valueOf(LocalDate.now().atStartOfDay().toLocalDate());
-        Date endDate = Date.valueOf(LocalDate.now().plusMonths(1).atStartOfDay().toLocalDate());
-
-        if (period != null) {
-            startDate = Date.valueOf(period.atDay(1).atStartOfDay().toLocalDate());
-            endDate = Date.valueOf(period.plusMonths(1).atDay(1).atStartOfDay().toLocalDate());
-        }
-
+    public List<ScheduleSalaryDTO> exportScheduleSalary(String driverId, Date fromDate, Date toDate) {
         BooleanBuilder builder = new BooleanBuilder()
-                .and(schedule.createdAt.between(startDate, endDate))
                 .and(user.id.eq(driverId));
+        if (fromDate != null && toDate != null) {
+            builder.and(schedule.createdAt.between(fromDate, toDate));
+        }
 
         ConstructorExpression<ScheduleSalaryDTO> expression = Projections.constructor(ScheduleSalaryDTO.class,
                 user.fullName.as("driverName"),
@@ -247,11 +192,9 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
 
     @Override
     public List<ScheduleDTO> findByLicensePlate(String licensePlate) {
-        // Xây dựng điều kiện tìm kiếm
         BooleanBuilder builder = new BooleanBuilder()
-                .and(schedule.deleted.eq(false)); // Chỉ tìm lịch trình không bị xóa
+                .and(schedule.deleted.eq(false));
 
-        // Thêm điều kiện tìm theo truckLicense hoặc moocLicense
         if (licensePlate != null && !licensePlate.isBlank()) {
             builder.and(schedule.truckLicense.eq(licensePlate)
                     .or(schedule.moocLicense.eq(licensePlate)));
@@ -261,18 +204,16 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
                 .leftJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
                 .leftJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
                 .leftJoin(user).on(truck.driverId.eq(user.id))
-                .where(builder) // Áp dụng điều kiện tìm kiếm
-                .select(scheduleProjection()) // Chọn các trường cần thiết
-                .orderBy(schedule.updatedAt.desc()) // Sắp xếp theo thời gian cập nhật mới nhất
+                .where(builder)
+                .select(scheduleProjection())
+                .orderBy(schedule.updatedAt.desc())
                 .fetch(); // Lấy dữ liệu
     }
 
-
-
     @Override
-    public List<ScheduleDTO> exportReport(String license, YearMonth period) {
+    public List<ScheduleDTO> exportReport(String license, Date fromDate, Date toDate) {
         ConstructorExpression<ScheduleDTO> expression = Projections.constructor(ScheduleDTO.class,
-                schedule.scheduleConfigId.coalesce("Chạy nội bộ").as("scheduleConfigId"),
+                schedule.scheduleConfigId.coalesce(ScheduleType.INTERNAL.getDescription()).as("scheduleConfigId"),
                 scheduleConfig.placeA.as("placeA"),
                 scheduleConfig.placeB.as("placeB"),
                 JPAExpressions.select(truck.driverId.as("driverId"))
@@ -292,11 +233,8 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
 
         BooleanBuilder builder = new BooleanBuilder()
                 .and(schedule.truckLicense.eq(license));
-
-        if (period != null) {
-            Date startDate = Date.valueOf(period.atDay(1).atStartOfDay().toLocalDate());
-            Date endDate = Date.valueOf(period.plusMonths(1).atDay(1).atStartOfDay().toLocalDate());
-            builder.and(schedule.createdAt.between(startDate, endDate));
+        if (fromDate != null && toDate != null) {
+            builder.and(schedule.createdAt.between(fromDate, toDate));
         }
 
         return query.from(schedule)
@@ -309,24 +247,17 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
 
     @Override
     public long countByID(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(schedule.id.eq(id))
-                .and(schedule.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         Long res = query.from(schedule)
                 .where(builder)
                 .select(schedule.id.count().coalesce(0L))
                 .fetchOne();
-
         return res != null ? res : 0;
     }
 
     @Override
     public ScheduleStatus getStatusByID(String id) {
-        BooleanBuilder builder = new BooleanBuilder()
-                .and(schedule.id.eq(id))
-                .and(schedule.deleted.eq(false));
-
+        BooleanBuilder builder = initGetOneBuilder(id);
         Integer statusNumber = query.from(schedule)
                 .where(builder)
                 .select(schedule.status)
