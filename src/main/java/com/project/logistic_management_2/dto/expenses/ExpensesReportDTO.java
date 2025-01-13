@@ -10,20 +10,25 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExpensesReportDTO {
+    //Thong tin tai xe
     private String driverId;
     private String driverName;
 
+    //Thong tin xe
     private String truckLicense;
     private String moocLicense;
 
     //Du dau ky (Du cuoi ky cua chu ky truoc)
     private Float prevRemainingBalance;
 
+    //Ung trong ky
     private Float advance;
 
+    //Cac chi phi phat sinh
+//    private ExpensesIncurredDTO expensesIncurred;
     private List<ExpensesIncurredDTO> expensesIncurred;
 
-    // Dư cuối kỳ
+    //Du cuoi ky
     private Float remainingBalance;
 
     public ExpensesReportDTO(String driverId, String driverName, String truckLicense, String moocLicense, Float prevRemainingBalance, Float advance, Float remainingBalance) {

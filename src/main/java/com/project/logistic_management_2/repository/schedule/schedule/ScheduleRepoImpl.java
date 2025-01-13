@@ -191,6 +191,26 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     }
 
     @Override
+    public List<ScheduleDTO> findByLicensePlate(String licensePlate) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(schedule.deleted.eq(false));
+
+        if (licensePlate != null && !licensePlate.isBlank()) {
+            builder.and(schedule.truckLicense.eq(licensePlate)
+                    .or(schedule.moocLicense.eq(licensePlate)));
+        }
+
+        return query.from(schedule)
+                .leftJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
+                .leftJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
+                .leftJoin(user).on(truck.driverId.eq(user.id))
+                .where(builder)
+                .select(scheduleProjection())
+                .orderBy(schedule.updatedAt.desc())
+                .fetch(); // Lấy dữ liệu
+    }
+
+    @Override
     public List<ScheduleDTO> exportReport(String license, Date fromDate, Date toDate) {
         ConstructorExpression<ScheduleDTO> expression = Projections.constructor(ScheduleDTO.class,
                 schedule.scheduleConfigId.coalesce(ScheduleType.INTERNAL.getDescription()).as("scheduleConfigId"),

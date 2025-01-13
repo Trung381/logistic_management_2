@@ -1,7 +1,9 @@
 package com.project.logistic_management_2.service.truck;
 
 import com.project.logistic_management_2.dto.ExportExcelResponse;
+import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.truck.TruckDTO;
+import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.entity.Truck;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
@@ -9,7 +11,9 @@ import com.project.logistic_management_2.enums.role.UserRole;
 import com.project.logistic_management_2.enums.truck.TruckType;
 import com.project.logistic_management_2.exception.define.ConflictException;
 import com.project.logistic_management_2.exception.define.NotFoundException;
+import com.project.logistic_management_2.mapper.schedule.ScheduleMapper;
 import com.project.logistic_management_2.mapper.truck.TruckMapper;
+import com.project.logistic_management_2.repository.schedule.schedule.ScheduleRepo;
 import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.repository.user.UserRepo;
 import com.project.logistic_management_2.service.BaseService;
@@ -25,6 +29,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -35,6 +40,8 @@ public class TruckServiceImpl extends BaseService implements TruckService {
     private final TruckMapper mapper;
     private final PermissionType type = PermissionType.TRUCKS;
     private final UserRepo userRepo;
+    private final ScheduleRepo scheduleRepo;
+    private final ScheduleMapper scheduleMapper;
 
     @Override
     public TruckDTO createTruck(TruckDTO truckDTO) {
@@ -69,17 +76,58 @@ public class TruckServiceImpl extends BaseService implements TruckService {
                 .orElseThrow(() -> new NotFoundException("Xe có biển số " + licensePlate + " không tồn tại!"));
     }
 
-    @Override
-    public TruckDTO updateTruck(Integer id, TruckDTO dto) {
-        checkPermission(type, PermissionKey.WRITE);
-        TruckDTO truckDTO = repository.getTruckById(id)
-                .orElseThrow(() -> new NotFoundException("Xe cần cập nhật không tồn tại!"));
-
-        Truck truck = mapper.toTruck(truckDTO);
-        mapper.updateTruck(truck, dto);
-        repository.save(truck);
-        return repository.getTruckById(id).get();
+@Override
+public TruckDTO updateTruck(Integer id, TruckDTO dto) {
+    checkPermission(type, PermissionKey.WRITE);
+    // Lấy thông tin xe hiện tại
+    Truck existingTruck = mapper.toTruck(repository.getTruckById(id)
+            .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe cần tìm!")));
+    // Cập nhật các trường từ body (chỉ cập nhật nếu không null)
+    if (dto.getDriverId() != null) {
+        existingTruck.setDriverId(dto.getDriverId());
     }
+    if (dto.getLicensePlate() != null) {
+        // Kiểm tra xem license_plate có bị trùng không
+        if (repository.existsByLicensePlate(dto.getLicensePlate()) &&
+                !existingTruck.getLicensePlate().equals(dto.getLicensePlate())) {
+            throw new IllegalArgumentException("Biển số xe đã tồn tại!");
+        }
+        String oldLicense = existingTruck.getLicensePlate();
+        existingTruck.setLicensePlate(dto.getLicensePlate());
+
+        List<ScheduleDTO> schedules = scheduleRepo.findByLicensePlate(oldLicense);
+        if (!schedules.isEmpty()) {
+            for (ScheduleDTO scheduleDTO : schedules) {
+                // Lấy bản ghi Schedule hiện tại từ DB
+                Schedule existingSchedule = scheduleRepo.findById(scheduleDTO.getId())
+                        .orElseThrow(() -> new NotFoundException("Không tìm thấy lịch trình với ID: " + scheduleDTO.getId()));
+                if(existingSchedule.getTruckLicense().equals(oldLicense)) {
+                    existingSchedule.setTruckLicense(dto.getLicensePlate());
+                }
+                if(existingSchedule.getMoocLicense().equals(oldLicense)) {
+                    existingSchedule.setMoocLicense(dto.getLicensePlate());
+                }
+                scheduleRepo.save(existingSchedule);
+            }
+        }
+    }
+    if (dto.getCapacity() != null) {
+        existingTruck.setCapacity(dto.getCapacity());
+    }
+    if (dto.getNote() != null) {
+        existingTruck.setNote(dto.getNote());
+    }
+    if (dto.getType() != null) {
+        existingTruck.setType(dto.getType().getValue());
+    }
+    if (dto.getStatus() != null) {
+        existingTruck.setStatus(dto.getStatus().getValue());
+    }
+    existingTruck.setUpdatedAt(new Date());
+    repository.save(existingTruck);
+    return mapper.toTruckDTO(existingTruck);
+}
+
 
     @Override
     public long deleteTruck(Integer id) {

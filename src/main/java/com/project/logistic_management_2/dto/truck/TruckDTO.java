@@ -3,8 +3,6 @@ package com.project.logistic_management_2.dto.truck;
 import com.project.logistic_management_2.annotations.ExportColumn;
 import com.project.logistic_management_2.enums.truck.TruckStatus;
 import com.project.logistic_management_2.enums.truck.TruckType;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -26,7 +24,7 @@ public class TruckDTO {
 
     @NotNull(message = "Dung tích xe không được để trống")
     @ExportColumn(name = "Dung tích")
-    private float capacity;
+    private Float capacity;
 
     @NotNull(message = "ID tài xế không được để trống")
     private String driverId;
