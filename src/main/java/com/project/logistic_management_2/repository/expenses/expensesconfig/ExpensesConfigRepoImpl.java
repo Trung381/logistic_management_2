@@ -4,6 +4,7 @@ import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.entity.expenses.ExpensesConfig;
 import com.project.logistic_management_2.repository.BaseRepo;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -21,18 +22,20 @@ public class ExpensesConfigRepoImpl extends BaseRepo implements ExpensesConfigRe
         super(entityManager);
     }
 
+    Expression<ExpensesConfigDTO> expression = Projections.fields(
+            ExpensesConfigDTO.class,
+            expensesConfig.id.as("id"),
+            expensesConfig.type.as("type"),
+            expensesConfig.note.as("note"),
+            expensesConfig.createdAt.as("createdAt"),
+            expensesConfig.updatedAt.as("updatedAt")
+    );
+
     @Override
     public List<ExpensesConfigDTO> getAll() {
         return query.from(expensesConfig)
                 .where(expensesConfig.deleted.eq(false))
-                .select(
-                        Projections.fields(ExpensesConfigDTO.class,
-                                expensesConfig.id.as("id"),
-                                expensesConfig.type.as("type"),
-                                expensesConfig.note.as("note"),
-                                expensesConfig.createdAt.as("createdAt"),
-                                expensesConfig.updatedAt.as("updatedAt"))
-                )
+                .select(expression)
                 .fetch();
     }
 
@@ -43,12 +46,12 @@ public class ExpensesConfigRepoImpl extends BaseRepo implements ExpensesConfigRe
     }
 
     @Override
-    public Optional<ExpensesConfig> getByID(String id) {
+    public Optional<ExpensesConfigDTO> getByID(String id) {
         BooleanBuilder builder = initBuilder(id);
         return Optional.ofNullable(
                 query.from(expensesConfig)
                         .where(builder)
-                        .select(expensesConfig)
+                        .select(expression)
                         .fetchOne()
         );
     }

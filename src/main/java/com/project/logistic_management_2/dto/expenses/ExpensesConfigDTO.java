@@ -16,12 +16,10 @@ public class ExpensesConfigDTO {
     @ExportColumn(name = "Mã loại chi phí")
     private String id;
 
-    //loại chi phí
     @NotBlank(message = "Loại chi phí không được để trống!")
     @ExportColumn(name = "Loại chi phí")
     private String type;
 
-    //ghi chú
     @ExportColumn(name = "Ghi chú")
     private String note;
 
