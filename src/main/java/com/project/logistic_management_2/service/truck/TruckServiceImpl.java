@@ -131,10 +131,10 @@ public TruckDTO updateTruck(Integer id, TruckDTO dto) {
         existingTruck.setNote(dto.getNote());
     }
     if (dto.getType() != null) {
-        existingTruck.setType(dto.getType());
+        existingTruck.setType(dto.getType().getValue());
     }
     if (dto.getStatus() != null) {
-        existingTruck.setStatus(dto.getStatus());
+        existingTruck.setStatus(dto.getStatus().getValue());
     }
     existingTruck.setUpdatedAt(new Date());
     repository.save(existingTruck);
