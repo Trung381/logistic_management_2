@@ -59,12 +59,12 @@ public class ScheduleConfigRepoImpl extends BaseRepo implements ScheduleConfigRe
     }
 
     @Override
-    public Optional<ScheduleConfig> getByID(String id) {
+    public Optional<ScheduleConfigDTO> getByID(String id) {
         BooleanBuilder builder = initGetOneBuilder(id);
         return Optional.ofNullable(
                 query.from(scheduleConfig)
                         .where(builder)
-                        .select(scheduleConfig)
+                        .select(constructorExpression)
                         .fetchOne()
         );
     }

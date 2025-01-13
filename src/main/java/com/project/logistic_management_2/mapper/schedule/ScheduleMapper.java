@@ -27,9 +27,6 @@ public class ScheduleMapper {
                 .note(dto.getNote())
                 .type(dto.getType().getValue())
                 .status(ScheduleStatus.PENDING.getValue())
-                .deleted(false)
-                .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
-                .updatedAt(new Date())
                 .build();
     }
 
@@ -49,9 +46,6 @@ public class ScheduleMapper {
                         .note(dto.getNote())
                         .type(dto.getType().getValue())
                         .status(ScheduleStatus.PENDING.getValue())
-                        .deleted(false)
-                        .createdAt(dto.getCreatedAt() == null ? new Date() : dto.getCreatedAt())
-                        .updatedAt(new Date())
                         .build()
         ).collect(Collectors.toList());
     }
@@ -111,7 +105,6 @@ public class ScheduleMapper {
         }
 
         if (isUpdated) {
-            schedule.setUpdatedAt(new Date());
         } else if (isValidField) {
             throw new NotModifiedException("Không có sự thay đổi nào của lịch trình!");
         } else {
