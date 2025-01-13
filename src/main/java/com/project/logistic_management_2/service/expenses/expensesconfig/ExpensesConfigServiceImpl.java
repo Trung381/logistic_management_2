@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.service.expenses.expensesconfig;
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.entity.ExpensesConfig;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
@@ -10,13 +11,17 @@ import com.project.logistic_management_2.mapper.expenses.ExpensesConfigMapper;
 import com.project.logistic_management_2.repository.expenses.expensesconfig.ExpensesConfigRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.ExportConfig;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 @Service
@@ -98,5 +103,21 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
 
         // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return expensesConfigRepo.saveAll(expensesConfigs);
+    }
+
+    @Override
+    public ExportExcelResponse exportExpensesConfig() throws Exception {
+        List<ExpensesConfigDTO> expensesConfig = expensesConfigRepo.getAll();
+
+        if (!CollectionUtils.isEmpty(expensesConfig)) {
+            String fileName = "ExpensesConfig Export" + ".xlsx";
+
+            ByteArrayInputStream in = ExcelUtils.export(expensesConfig, fileName, ExportConfig.expensesConfigExport);
+
+            InputStreamResource inputStreamResource = new InputStreamResource(in);
+            return new ExportExcelResponse(fileName, inputStreamResource);
+        } else {
+            throw new NotFoundException("No data");
+        }
     }
 }

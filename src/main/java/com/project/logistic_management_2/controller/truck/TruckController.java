@@ -1,26 +1,21 @@
 package com.project.logistic_management_2.controller.truck;
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.truck.TruckDTO;
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.enums.truck.TruckType;
 import com.project.logistic_management_2.service.truck.TruckService;
-import com.project.logistic_management_2.utils.ExcelUtils;
-import com.project.logistic_management_2.utils.ExportConfig;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 @RestController
 @RequestMapping("/trucks")
@@ -73,25 +68,15 @@ public class TruckController {
 
     @GetMapping("/export")
     public ResponseEntity<Object> exportTruck() throws Exception {
-        List<TruckDTO> trucks = truckService.getAllTrucks();
 
-        if (!CollectionUtils.isEmpty(trucks)) {
-            String fileName = "Trucks Export" + ".xlsx";
+        ExportExcelResponse exportExcelResponse = truckService.exportTruckData();
 
-            ByteArrayInputStream in = ExcelUtils.export(trucks, fileName, ExportConfig.truckExport);
-
-            InputStreamResource inputStreamResource = new InputStreamResource(in);
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8)
-                    )
-                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
-                    .body(inputStreamResource);
-        } else {
-            throw new Exception("No data");
-
-        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + URLEncoder.encode(exportExcelResponse.getFileName(), StandardCharsets.UTF_8)
+                )
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
+                .body(exportExcelResponse.getResource());
     }
 
     @PostMapping("/import")

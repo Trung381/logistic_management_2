@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.service.user;
 
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.user.UpdateUserDTO;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.entity.User;
@@ -20,4 +21,6 @@ public interface UserService {
     List<UserDTO> getDriver(int page);
     List<UserDTO> getAdmin(int page);
     List<User> importUserData(MultipartFile importFile);
+    ExportExcelResponse exportDriver(int page) throws Exception;
+    ExportExcelResponse exportAdmin(int page) throws Exception;
 }

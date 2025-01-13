@@ -1,18 +1,25 @@
 package com.project.logistic_management_2.service.goods;
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.request.GoodsReportDTO;
 import com.project.logistic_management_2.entity.Goods;
 import com.project.logistic_management_2.entity.GoodsReport;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
+import com.project.logistic_management_2.exception.def.NotFoundException;
 import com.project.logistic_management_2.repository.goods.GoodsRepo;
 import com.project.logistic_management_2.repository.goods.GoodsReportRepo;
 import com.project.logistic_management_2.repository.transaction.TransactionRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.ExportConfig;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.io.ByteArrayInputStream;
 import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
@@ -38,7 +45,7 @@ public class GoodsReportServiceImpl extends BaseService implements GoodsReportSe
             GoodsReport goodsReportCurrentMonths = new GoodsReport();
             float inboundQuantity = transactionRepo.getQuantityByOrigin(goods.getId(), true, currentMonth);
             float outboundQuantity = transactionRepo.getQuantityByOrigin(goods.getId(), false, currentMonth);
-            if(goodsReportMinusMonths == null) {
+            if (goodsReportMinusMonths == null) {
                 goodsReportCurrentMonths.setBeginningInventory(goods.getQuantity() - inboundQuantity + outboundQuantity);
                 goodsReportCurrentMonths.setEndingInventory(goods.getQuantity());
                 goodsReportCurrentMonths.setGoodsId(goods.getId());
@@ -59,5 +66,20 @@ public class GoodsReportServiceImpl extends BaseService implements GoodsReportSe
         checkPermission(type, PermissionKey.VIEW);
 
         return goodsReportRepo.getGoodReportDTOByYearMonth(yearMonth);
+    }
+
+    @Override
+    public ExportExcelResponse exportGoodsReport(YearMonth yearMonth) throws Exception {
+        List<GoodsReportDTO> goodsReports = goodsReportRepo.getGoodReportDTOByYearMonth(yearMonth);
+
+        if (CollectionUtils.isEmpty(goodsReports)) {
+            throw new NotFoundException("No data");
+        }
+        String fileName = "GoodsReport Export" + ".xlsx";
+
+        ByteArrayInputStream in = ExcelUtils.export(goodsReports, fileName, ExportConfig.goodsReportExport);
+
+        InputStreamResource inputStreamResource = new InputStreamResource(in);
+        return new ExportExcelResponse(fileName, inputStreamResource);
     }
 }

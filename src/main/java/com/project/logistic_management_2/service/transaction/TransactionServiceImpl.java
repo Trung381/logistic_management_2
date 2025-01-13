@@ -1,5 +1,7 @@
 package com.project.logistic_management_2.service.transaction;
 
+import com.mysema.commons.lang.Pair;
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.transaction.TransactionDTO;
 import com.project.logistic_management_2.entity.Goods;
 import com.project.logistic_management_2.entity.Transaction;
@@ -12,18 +14,23 @@ import com.project.logistic_management_2.repository.goods.GoodsRepo;
 import com.project.logistic_management_2.repository.transaction.TransactionRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.ExportConfig;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+
+import static com.project.logistic_management_2.utils.Utils.parseAndValidateDates;
 
 @Service
 @RequiredArgsConstructor
@@ -43,11 +50,11 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
         Goods goods = goodsRepo.findById(transactionDTO.getGoodsId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng hóa"));
 
-        if(transactionDTO.getOrigin().getValue()) {
+        if (transactionDTO.getOrigin().getValue()) {
             goods.setQuantity(goods.getQuantity() + transactionDTO.getQuantity());
             goodsRepo.save(goods);
         } else {
-            if(goods.getQuantity() < transactionDTO.getQuantity()) {
+            if (goods.getQuantity() < transactionDTO.getQuantity()) {
                 throw new ConflictException("Không đủ " + goods.getName() + "trong kho");
             }
             goods.setQuantity(goods.getQuantity() - transactionDTO.getQuantity());
@@ -89,7 +96,7 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
 
         long updatedCount = repository.updateTransaction(transaction, id, dto);
         if (updatedCount == 0) {
-            throw new NotFoundException("Transaction update failed");
+            throw new NotFoundException("Cập nhật giao dịch thất bại");
         }
 
         return repository.getTransactionsById(id);
@@ -102,7 +109,11 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
 
         repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy giao dịch"));
-        return repository.deleteTransaction(id) > 0 ? "Xoá thành công" : "Xoá thất bại";
+        if (repository.deleteTransaction(id) > 0) {
+            return "Xóa thành công";
+        } else {
+            throw new ConflictException("Xóa thất bại");
+        }
     }
 
     @Override
@@ -115,11 +126,13 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
     }
 
     @Override
-    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, Timestamp fromDate, Timestamp toDate) {
+    public List<TransactionDTO> getTransactionByFilter(int page, String warehouseId, Boolean origin, String fromDate, String toDate) {
 
         checkPermission(type, PermissionKey.VIEW);
 
-        return repository.getTransactionByFilter(page, warehouseId, origin, fromDate, toDate);
+        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
+
+        return repository.getTransactionByFilter(page, warehouseId, origin, dateRange.getFirst(), dateRange.getSecond());
     }
 
     @Override
@@ -132,15 +145,15 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
 
         List<Transaction> transactions = mapper.toTransactions(transactionDTOList);
 
-        for(Transaction transaction : transactions) {
+        for (Transaction transaction : transactions) {
             Goods goods = goodsRepo.findById(transaction.getGoodsId())
                     .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng hóa"));
 
-            if(transaction.getOrigin()) {
+            if (transaction.getOrigin()) {
                 goods.setQuantity(goods.getQuantity() + transaction.getQuantity());
                 goodsRepo.save(goods);
             } else {
-                if(goods.getQuantity() < transaction.getQuantity()) {
+                if (goods.getQuantity() < transaction.getQuantity()) {
                     throw new ConflictException("Không đủ " + goods.getName() + "trong kho");
                 }
                 goods.setQuantity(goods.getQuantity() - transaction.getQuantity());
@@ -149,5 +162,23 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
         }
         // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return repository.saveAll(transactions);
+    }
+
+    @Override
+    public ExportExcelResponse exportTransaction(int page, String warehouseId, Boolean origin, String fromDate, String toDate) throws Exception {
+
+        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
+
+        List<TransactionDTO> transactions = repository.getTransactionByFilter(page, warehouseId, origin, dateRange.getFirst(), dateRange.getSecond());
+
+        if (CollectionUtils.isEmpty(transactions)) {
+            throw new NotFoundException("No data");
+        }
+        String fileName = "Transactions Export" + ".xlsx";
+
+        ByteArrayInputStream in = ExcelUtils.export(transactions, fileName, ExportConfig.transactionExport);
+        InputStreamResource resource = new InputStreamResource(in);
+
+        return new ExportExcelResponse(fileName, resource);
     }
 }

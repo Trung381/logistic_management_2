@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.service.truck;
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.truck.TruckDTO;
 import com.project.logistic_management_2.entity.Truck;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
@@ -12,31 +13,33 @@ import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.repository.user.UserRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.ExportConfig;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class TruckServiceImpl extends BaseService  implements TruckService {
+public class TruckServiceImpl extends BaseService implements TruckService {
 
     private final TruckRepo repository;
     private final TruckMapper mapper;
     private final PermissionType type = PermissionType.TRUCKS;
-    private final TruckMapper truckMapper;
-    private final TruckRepo truckRepo;
     private final UserRepo userRepo;
 
     @Override
     public TruckDTO createTruck(TruckDTO truckDTO) {
         checkPermission(type, PermissionKey.WRITE); // check quyền tạo
 
-        if(userRepo.getUserById(truckDTO.getDriverId()).getRoleId() != 4) {
+        if (userRepo.getUserById(truckDTO.getDriverId()).getRoleId() != 4) {
             throw new ConflictException("Người chịu trách nhiệm phải là tài xế");
         }
 
@@ -96,17 +99,31 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
         Workbook workbook = FileFactory.getWorkbookStream(importFile);
         List<TruckDTO> truckDTOList = ExcelUtils.getImportData(workbook, ImportConfig.truckImport);
 
-        for(TruckDTO truckDTO : truckDTOList) {
-            if(userRepo.getUserById(truckDTO.getDriverId()).getRoleId() != 4) {
+        for (TruckDTO truckDTO : truckDTOList) {
+            if (userRepo.getUserById(truckDTO.getDriverId()).getRoleId() != 4) {
                 throw new ConflictException("Người chịu trách nhiệm phải là tài xế");
             }
         }
 
-        List<Truck> trucks = truckMapper.toTruckList(truckDTOList);
+        List<Truck> trucks = mapper.toTruckList(truckDTOList);
 
         // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
-        return truckRepo.saveAll(trucks);
+        return repository.saveAll(trucks);
     }
 
+    @Override
+    public ExportExcelResponse exportTruckData() throws Exception {
+        List<TruckDTO> trucks = repository.getAllTrucks();
+
+        if (CollectionUtils.isEmpty(trucks)) {
+            throw new NotFoundException("No data");
+        }
+        String fileName = "Trucks Export" + ".xlsx";
+
+        ByteArrayInputStream in = ExcelUtils.export(trucks, fileName, ExportConfig.truckExport);
+
+        InputStreamResource inputStreamResource = new InputStreamResource(in);
+        return new ExportExcelResponse(fileName, inputStreamResource);
+    }
 }
 

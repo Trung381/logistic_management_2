@@ -1,5 +1,7 @@
 package com.project.logistic_management_2.service.schedule.schedule;
 
+import com.mysema.commons.lang.Pair;
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.schedule.ScheduleSalaryDTO;
 import com.project.logistic_management_2.entity.Schedule;
@@ -17,14 +19,18 @@ import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.service.notification.NotificationService;
 import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.ExportConfig;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.rmi.ServerException;
 import java.sql.Timestamp;
 import java.time.DateTimeException;
@@ -32,6 +38,8 @@ import java.time.LocalDate;
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static com.project.logistic_management_2.utils.Utils.parseAndValidateDates;
 
 @Service
 @RequiredArgsConstructor
@@ -78,18 +86,15 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
 
     // Pagination
     @Override
-    public List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    public List<ScheduleDTO> getAll(int page, String driverId, String truckLicense, String fromDate, String toDate) {
         checkPermission(type, PermissionKey.VIEW);
         if (page <= 0) {
             throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
         }
-        return scheduleRepo.getAll(page, driverId, truckLicense, fromDate, toDate);
-    }
 
-    @Override
-    public List<ScheduleDTO> getAll(String driverId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
-        checkPermission(type, PermissionKey.VIEW);
-        return scheduleRepo.getAll(driverId, truckLicense, fromDate, toDate);
+        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
+
+        return scheduleRepo.getAll(page, driverId, truckLicense, dateRange.getFirst(), dateRange.getSecond());
     }
 
     @Override
@@ -204,7 +209,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
     }
 
     @Override
-    public List<ScheduleSalaryDTO> exportScheduleSalary (String driverId, int year, int month) {
+    public List<ScheduleSalaryDTO> exportScheduleSalary(String driverId, int year, int month) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
         Date fromDate = convertToDate(year, month);
         Date toDate = convertToDate(year, (month % 12) + 1);
@@ -231,5 +236,21 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         List<Schedule> schedule = scheduleMapper.toScheduleList(scheduleDTOList);
 
         return scheduleRepo.saveAll(schedule);
+    }
+
+    @Override
+    public ExportExcelResponse exportSchedule(int page, String driverId, String truckLicense, String fromDate, String toDate) throws Exception {
+        Pair<Timestamp, Timestamp> dateRange = parseAndValidateDates(fromDate, toDate);
+        List<ScheduleDTO> schedule = scheduleRepo.getAll(page, driverId, truckLicense, dateRange.getFirst(), dateRange.getSecond());
+
+        if (CollectionUtils.isEmpty(schedule)) {
+            throw new NotFoundException("No data");
+        }
+        String fileName = "Schedule Export" + ".xlsx";
+
+        ByteArrayInputStream in = ExcelUtils.export(schedule, fileName, ExportConfig.scheduleExport);
+
+        InputStreamResource inputStreamResource = new InputStreamResource(in);
+        return new ExportExcelResponse(fileName, inputStreamResource);
     }
 }
