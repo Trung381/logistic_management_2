@@ -246,6 +246,30 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
     }
 
     @Override
+    public List<ScheduleDTO> findByLicensePlate(String licensePlate) {
+        // Xây dựng điều kiện tìm kiếm
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(schedule.deleted.eq(false)); // Chỉ tìm lịch trình không bị xóa
+
+        // Thêm điều kiện tìm theo truckLicense hoặc moocLicense
+        if (licensePlate != null && !licensePlate.isBlank()) {
+            builder.and(schedule.truckLicense.eq(licensePlate)
+                    .or(schedule.moocLicense.eq(licensePlate)));
+        }
+
+        return query.from(schedule)
+                .leftJoin(scheduleConfig).on(schedule.scheduleConfigId.eq(scheduleConfig.id))
+                .leftJoin(truck).on(schedule.truckLicense.eq(truck.licensePlate))
+                .leftJoin(user).on(truck.driverId.eq(user.id))
+                .where(builder) // Áp dụng điều kiện tìm kiếm
+                .select(scheduleProjection()) // Chọn các trường cần thiết
+                .orderBy(schedule.updatedAt.desc()) // Sắp xếp theo thời gian cập nhật mới nhất
+                .fetch(); // Lấy dữ liệu
+    }
+
+
+
+    @Override
     public List<ScheduleDTO> exportReport(String license, YearMonth period) {
         ConstructorExpression<ScheduleDTO> expression = Projections.constructor(ScheduleDTO.class,
                 schedule.scheduleConfigId.coalesce("Chạy nội bộ").as("scheduleConfigId"),

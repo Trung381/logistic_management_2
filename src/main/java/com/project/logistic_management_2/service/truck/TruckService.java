@@ -5,13 +5,14 @@ import com.project.logistic_management_2.entity.Truck;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TruckService {
     TruckDTO createTruck(TruckDTO truckDTO);
     List<TruckDTO> getAllTrucks();
    List<TruckDTO> getTrucksByType(Integer type);
     TruckDTO getTruckByLicensePlate(String licensePlate);
-    TruckDTO updateTruck(Integer id,TruckDTO truckDTO);
+    TruckDTO updateTruck(Integer id, TruckDTO truckDTO);
     long deleteTruck(Integer id);
     List<Truck> importTruckData(MultipartFile importFile);
 

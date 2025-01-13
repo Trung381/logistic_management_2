@@ -1,15 +1,21 @@
 package com.project.logistic_management_2.service.truck;
 
+import com.project.logistic_management_2.dto.schedule.ScheduleDTO;
 import com.project.logistic_management_2.dto.truck.TruckDTO;
+import com.project.logistic_management_2.entity.Schedule;
 import com.project.logistic_management_2.entity.Truck;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
 import com.project.logistic_management_2.exception.def.ConflictException;
+import com.project.logistic_management_2.exception.def.ForbiddenException;
 import com.project.logistic_management_2.exception.def.NotFoundException;
+import com.project.logistic_management_2.mapper.schedule.ScheduleMapper;
 import com.project.logistic_management_2.mapper.truck.TruckMapper;
+import com.project.logistic_management_2.repository.schedule.schedule.ScheduleRepo;
 import com.project.logistic_management_2.repository.truck.TruckRepo;
 import com.project.logistic_management_2.repository.user.UserRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.service.schedule.schedule.ScheduleService;
 import com.project.logistic_management_2.utils.ExcelUtils;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
@@ -20,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +38,8 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
     private final TruckMapper truckMapper;
     private final TruckRepo truckRepo;
     private final UserRepo userRepo;
+    private final ScheduleRepo scheduleRepo;
+    private final ScheduleMapper scheduleMapper;
 
     @Override
     public TruckDTO createTruck(TruckDTO truckDTO) {
@@ -82,7 +91,6 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
 @Override
 public TruckDTO updateTruck(Integer id, TruckDTO dto) {
     checkPermission(type, PermissionKey.WRITE);
-
     // Lấy thông tin xe hiện tại
     Truck existingTruck = mapper.toTruck(repository.getTruckById(id)
             .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe cần tìm!")));
@@ -96,7 +104,24 @@ public TruckDTO updateTruck(Integer id, TruckDTO dto) {
                 !existingTruck.getLicensePlate().equals(dto.getLicensePlate())) {
             throw new IllegalArgumentException("Biển số xe đã tồn tại!");
         }
+        String oldLicense = existingTruck.getLicensePlate();
         existingTruck.setLicensePlate(dto.getLicensePlate());
+
+        List<ScheduleDTO> schedules = scheduleRepo.findByLicensePlate(oldLicense);
+        if (!schedules.isEmpty()) {
+            for (ScheduleDTO scheduleDTO : schedules) {
+                // Lấy bản ghi Schedule hiện tại từ DB
+                Schedule existingSchedule = scheduleRepo.findById(scheduleDTO.getId())
+                        .orElseThrow(() -> new NotFoundException("Không tìm thấy lịch trình với ID: " + scheduleDTO.getId()));
+                if(existingSchedule.getTruckLicense().equals(oldLicense)) {
+                    existingSchedule.setTruckLicense(dto.getLicensePlate());
+                }
+                if(existingSchedule.getMoocLicense().equals(oldLicense)) {
+                    existingSchedule.setMoocLicense(dto.getLicensePlate());
+                }
+                scheduleRepo.save(existingSchedule);
+            }
+        }
     }
     if (dto.getCapacity() != null) {
         existingTruck.setCapacity(dto.getCapacity());
@@ -110,11 +135,7 @@ public TruckDTO updateTruck(Integer id, TruckDTO dto) {
     if (dto.getStatus() != null) {
         existingTruck.setStatus(dto.getStatus());
     }
-
-    // Cập nhật timestamp
     existingTruck.setUpdatedAt(new Date());
-
-    // Lưu lại thông tin
     repository.save(existingTruck);
     //TruckDTO truckDTO = mapper.toTruckDTO(existingTruck);
     return mapper.toTruckDTO(existingTruck);
