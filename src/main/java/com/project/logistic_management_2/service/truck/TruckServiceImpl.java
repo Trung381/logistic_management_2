@@ -106,7 +106,7 @@ public TruckDTO updateTruck(Integer id, TruckDTO dto) {
         }
         String oldLicense = existingTruck.getLicensePlate();
         existingTruck.setLicensePlate(dto.getLicensePlate());
-
+  
         List<ScheduleDTO> schedules = scheduleRepo.findByLicensePlate(oldLicense);
         if (!schedules.isEmpty()) {
             for (ScheduleDTO scheduleDTO : schedules) {
