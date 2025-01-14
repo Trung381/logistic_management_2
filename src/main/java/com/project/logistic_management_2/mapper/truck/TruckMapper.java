@@ -1,7 +1,7 @@
 package com.project.logistic_management_2.mapper.truck;
 
 import com.project.logistic_management_2.dto.truck.TruckDTO;
-import com.project.logistic_management_2.entity.Truck;
+import com.project.logistic_management_2.entity.truck.Truck;
 import com.project.logistic_management_2.enums.truck.TruckStatus;
 import com.project.logistic_management_2.enums.truck.TruckType;
 import org.springframework.stereotype.Component;
@@ -15,6 +15,17 @@ import java.util.stream.Collectors;
 public class TruckMapper {
     public Truck toTruck(TruckDTO truckDTO) {
         if(truckDTO==null)  return null;
+        return createTruck(truckDTO);
+    }
+
+    public List<Truck> toTruckList(List<TruckDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::createTruck).collect(Collectors.toList());
+    }
+
+    private Truck createTruck(TruckDTO truckDTO) {
         return Truck.builder()
                 .id(truckDTO.getId() != null ? truckDTO.getId() : null)
                 .driverId(truckDTO.getDriverId())
@@ -28,27 +39,6 @@ public class TruckMapper {
                 .updatedAt(new Date())
                 .build();
     }
-    public List<Truck> toTruckList(List<TruckDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return dtos.stream().map(truckDTO ->
-                Truck.builder()
-                        .id(truckDTO.getId() != null ? truckDTO.getId() : null)
-                        .driverId(truckDTO.getDriverId())
-                        .licensePlate(truckDTO.getLicensePlate())
-                        .capacity(truckDTO.getCapacity())
-                        .type(truckDTO.getType().getValue())
-                        .note(truckDTO.getNote())
-                        .status(TruckStatus.AVAILABLE.getValue())
-                        .deleted(false)
-                        .createdAt(new Date())
-                        .updatedAt(new Date())
-                        .build()
-        ).collect(Collectors.toList());
-    }
-
 
     public TruckDTO toTruckDTO(Truck truck) {
         if (truck == null) return null;

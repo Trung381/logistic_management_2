@@ -1,13 +1,14 @@
 package com.project.logistic_management_2.mapper.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
-import com.project.logistic_management_2.entity.ExpensesConfig;
+import com.project.logistic_management_2.entity.expenses.ExpensesConfig;
 import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.exception.define.InvalidFieldException;
+import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,61 +16,48 @@ import java.util.stream.Collectors;
 public class ExpensesConfigMapper {
     public ExpensesConfig toExpensesConfig(ExpensesConfigDTO dto) {
         if (dto == null) return null;
-        return ExpensesConfig.builder()
-                .id(Utils.genID(IDKey.EXPENSES_CONFIG))
-                .type(dto.getType())
-                .note(dto.getNote())
-                .deleted(false)
-                .createdAt(new Date())
-                .updatedAt(new Date())
-                .build();
+        return createExpensesConfig(dto);
     }
 
     public List<ExpensesConfig> toExpensesConfigList(List<ExpensesConfigDTO> dtos) {
         if(dtos == null || dtos.isEmpty()) {
             return Collections.emptyList();
         }
+        return dtos.stream().map(this::createExpensesConfig).collect(Collectors.toList());
+    }
 
-        return dtos.stream().map(dto ->
-                ExpensesConfig.builder()
-                        .id(Utils.genID(IDKey.EXPENSES_CONFIG))
-                        .type(dto.getType())
-                        .note(dto.getNote())
-                        .deleted(false)
-                        .createdAt(new Date())
-                        .updatedAt(new Date())
-                        .build()
-        ).collect(Collectors.toList());
+    private ExpensesConfig createExpensesConfig(ExpensesConfigDTO dto) {
+        return ExpensesConfig.builder()
+                .id(Utils.genID(IDKey.EXPENSES_CONFIG))
+                .type(dto.getType())
+                .note(dto.getNote())
+                .build();
     }
 
     public void updateExpensesConfig(ExpensesConfig config, ExpensesConfigDTO dto) {
         if (dto == null) return;
+        boolean isUpdated = false, isValidField = false;
 
-        //update type
-        if (dto.getType() != null)
-            config.setType(dto.getType());
-
-        //Update note
-        if (dto.getNote() != null)
-            config.setNote(dto.getNote());
-
-        config.setUpdatedAt(new Date());
-    }
-
-    public ExpensesConfigDTO toExpensesConfigDTO(ExpensesConfigDTO dto, ExpensesConfig config) {
-        if (config == null) return null;
-        if (dto == null) {
-            return ExpensesConfigDTO.builder()
-                    .id(config.getId())
-                    .type(config.getType())
-                    .note(config.getNote())
-                    .createdAt(config.getCreatedAt())
-                    .updatedAt(config.getUpdatedAt())
-                    .build();
+        if (dto.getType() != null) {
+            if (!dto.getType().equals(config.getType())) {
+                config.setType(dto.getType());
+                isUpdated = true;
+            }
+            isValidField = true;
         }
-        dto.setId(config.getId());
-        dto.setCreatedAt(config.getCreatedAt());
-        dto.setUpdatedAt(config.getUpdatedAt());
-        return dto;
+        if (dto.getNote() != null) {
+            if (!dto.getNote().equals(config.getNote())) {
+                config.setNote(dto.getNote());
+                isUpdated = true;
+            }
+            isValidField = true;
+        }
+
+        if (isUpdated) {
+        } else if (isValidField) {
+            throw new NotModifiedException("Không có sự thay đổi nào của cấu hình chi phí!");
+        } else {
+            throw new InvalidFieldException("Trường cần cập nhật không tồn tại trong cấu hình chi phí!");
+        }
     }
 }

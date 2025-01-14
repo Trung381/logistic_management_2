@@ -1,10 +1,10 @@
 package com.project.logistic_management_2.service;
 
-import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.entity.user.User;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
-import com.project.logistic_management_2.exception.def.ForbiddenException;
-import com.project.logistic_management_2.repository.rolePermission.RolePermissionRepo;
+import com.project.logistic_management_2.exception.define.ForbiddenException;
+import com.project.logistic_management_2.repository.rolepermission.RolePermissionRepo;
 import com.project.logistic_management_2.repository.user.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

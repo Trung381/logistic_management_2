@@ -1,6 +1,6 @@
 package com.project.logistic_management_2.repository.warehouses;
 
-import com.project.logistic_management_2.entity.Warehouses;
+import com.project.logistic_management_2.entity.warehouse.Warehouses;
 
 import java.util.Optional;
 

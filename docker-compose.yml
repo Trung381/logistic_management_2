@@ -8,11 +8,11 @@ services:
     networks:
       - spring-boot-network
     environment:
-      MYSQL_ROOT_PASSWORD:
+      MYSQL_ROOT_PASSWORD: ""
     volumes:
-      - mysql-data:/var/lib/mysql
+      - ./mysql-data:/var/lib/mysql
   app:
-    image: trung381/logistic_management:1.0
+    image: trung381/logistic_management:lst
     build:
       context: .
       dockerfile: Dockerfile
@@ -22,13 +22,15 @@ services:
     networks:
       - spring-boot-network
     environment:
-      SECRET_KEY:
-      UPLOAD_DIR:
-      DB_URL: jdbc:mysql://mysql:3306/logistic_management?createDatabaseIfNotExist=true
-      DB_USERNAME:
-      DB_PASSWORD:
+      SECRET_KEY: "404E635266556A586e3272357538782F413F4428472B4B6250645367566b5970"
+      UPLOAD_DIR: /usr/app/uploads
+      DB_URL: jdbc:mysql://mysql:3306/logistic_management_2?createDatabaseIfNotExist=true
+      DB_USERNAME: root
+      DB_PASSWORD: ""
     depends_on:
       - mysql
+    volumes:
+      - ./uploads:/app/uploads
 networks:
   spring-boot-network:
 volumes:

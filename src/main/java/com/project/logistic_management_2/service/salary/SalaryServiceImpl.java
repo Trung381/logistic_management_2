@@ -16,21 +16,17 @@ import java.util.List;
 public class SalaryServiceImpl extends BaseService implements SalaryService {
 
     private final SalaryRepo salaryRepo;
-    private PermissionType type = PermissionType.SALARIES;
+    private final PermissionType type = PermissionType.SALARIES;
 
     @Override
     public List<SalaryUserDTO> getAllSalaryWithUserPeriod(String period) {
-
         checkPermission(type, PermissionKey.VIEW);
-
         return salaryRepo.getAllSalaryWithUserPeriod(period);
     }
 
     @Override
     public SalaryUserDTO getSalaryWithUser(Integer id) {
-
         checkPermission(type, PermissionKey.VIEW);
-
         return salaryRepo.getSalaryWithUser(id);
     }
 
@@ -52,5 +48,4 @@ public class SalaryServiceImpl extends BaseService implements SalaryService {
     public void createSalaryForAllUsers(){
         salaryRepo.createSalaryForAllUsers();
     }
-
 }

@@ -32,10 +32,8 @@ public class ExcelUtils {
 
         XSSFWorkbook xssfWorkbook = new XSSFWorkbook();
 
-        //get file -> not found -> create file
         File file;
         FileInputStream fileInputStream;
-
         try {
             file = ResourceUtils.getFile(PATH_TEMPLATE + fileName);
             fileInputStream = new FileInputStream(file);
@@ -47,18 +45,15 @@ public class ExcelUtils {
 
         processInsertData(xssfWorkbook, list, exportConfig);
 
-
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         xssfWorkbook.write(outputStream);
 
-        //close resource
         outputStream.close();
         fileInputStream.close();
 
         log.info("done");
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
-
 
     private static void processInsertData(XSSFWorkbook workbook, Object data, ExportConfig exportConfig) throws Exception {
         if (data instanceof List<?> list && !list.isEmpty()) {
@@ -76,12 +71,8 @@ public class ExcelUtils {
         }
     }
 
-
     private static void processReportDetailSalary(XSSFWorkbook workbook, ReportDetailSalaryDTO reportDetail) throws Exception {
-        // Cấu hình xuất cho Salary
         ExportConfig salaryConfig = ExportConfig.createExportConfig(SalaryDTO.class, 0, 1);
-
-        // Cấu hình xuất cho Schedules
         ExportConfig schedulesConfig = ExportConfig.createExportConfig(ScheduleSalaryDTO.class, 1, 1);
 
         // Xuất dữ liệu Salary vào Sheet 1
@@ -96,23 +87,15 @@ public class ExcelUtils {
     }
 
     private static void processGenericList(XSSFWorkbook workbook, List<?> list, ExportConfig exportConfig) {
-        // Tạo sheet
         Sheet sheet = workbook.createSheet("sheet1");
-
-        // Tạo freeze pane
         sheet.createFreezePane(4, 2, 4, 2);
 
         XSSFCellStyle titleCellStyle = createTitleCellStyle(workbook);
         XSSFCellStyle dataCellStyle = createDataCellStyle(workbook);
 
-        // Sử dụng exportConfig để chèn tên trường làm tiêu đề vào Excel
         insertFieldNameAsTitleToWorkbook(exportConfig.getCellExportConfigList(), sheet, titleCellStyle);
-
-        // Sử dụng exportConfig để chèn dữ liệu vào Excel
         insertDataToWorkbook(workbook, exportConfig, list, dataCellStyle);
     }
-
-
 
     private static <T> void insertDataToWorkbook(Workbook workbook, ExportConfig exportConfig, List<T> datas,
                                                  XSSFCellStyle dataCellStyle) {
@@ -145,8 +128,6 @@ public class ExcelUtils {
 
         //title -> first row of excel -> get top row
         int currentRow = sheet.getTopRow();
-
-        //create row
         Row row = sheet.createRow(currentRow);
         int i = 0;
 
@@ -174,10 +155,8 @@ public class ExcelUtils {
                 currentCell = currentRow.createCell(cellConfig.getColumnIndex());
             }
 
-            //get data for cell
             String cellValue = getCellValue(data, cellConfig, clazz);
 
-            //set data
             currentCell.setCellValue(cellValue);
             sheet.autoSizeColumn(cellConfig.getColumnIndex());
             currentCell.setCellStyle(dataStyle);
@@ -224,9 +203,7 @@ public class ExcelUtils {
 
         return null;
     }
-    //end
 
-    //import config
     public static <T> List<T> getImportData(Workbook workbook, ImportConfig importConfig) {
         List<T> list = new ArrayList<>();
 
@@ -313,66 +290,27 @@ public class ExcelUtils {
         String clazzName = clazz.getSimpleName();
 
         switch (clazzName) {
-            case "char":
-                cellValue = parseChar(cellValue);
-                break;
-            case "String":
-                cellValue = cellValue.toString().trim();
-                break;
-            case "boolean":
-            case "Boolean":
-                cellValue = parseBoolean(cellValue);
-                break;
-            case "byte":
-            case "Byte":
-                cellValue = parseByte(cellValue);
-                break;
-            case "short":
-            case "Short":
-                cellValue = parseShort(cellValue);
-                break;
-            case "int":
-            case "Integer":
-                cellValue = parseInt(cellValue);
-                break;
-            case "long":
-            case "Long":
-                cellValue = parseLong(cellValue);
-                break;
-            case "float":
-            case "Float":
-                cellValue = parseFloat(cellValue);
-                break;
-            case "double":
-            case "Double":
-                cellValue = parseDouble(cellValue);
-                break;
-            case "Date":
-                cellValue = parseDate(cellValue);
-                break;
-            case "Instant":
-                cellValue = parseInstant(cellValue);
-                break;
-            case "Enum":
-                cellValue = parseEnum(cellValue, clazz);
-                break;
-            case "Map":
-                cellValue = parseMap(cellValue);
-                break;
-            case "BigDecimal":
-                cellValue = parseBigDecimal(cellValue);
-                break;
-            default:
-                break;
+            case "char" -> cellValue = parseChar(cellValue);
+            case "String" -> cellValue = cellValue.toString().trim();
+            case "boolean", "Boolean" -> cellValue = parseBoolean(cellValue);
+            case "byte", "Byte" -> cellValue = parseByte(cellValue);
+            case "short", "Short" -> cellValue = parseShort(cellValue);
+            case "int", "Integer" -> cellValue = parseInt(cellValue);
+            case "long", "Long" -> cellValue = parseLong(cellValue);
+            case "float", "Float" -> cellValue = parseFloat(cellValue);
+            case "double", "Double" -> cellValue = parseDouble(cellValue);
+            case "Date" -> cellValue = parseDate(cellValue);
+            case "Instant" -> cellValue = parseInstant(cellValue);
+            case "Enum" -> cellValue = parseEnum(cellValue, clazz);
+            case "Map" -> cellValue = parseMap(cellValue);
+            case "BigDecimal" -> cellValue = parseBigDecimal(cellValue);
         }
         return cellValue;
     }
 
-
     private static Object parseChar(Object value) {
         return ObjectUtils.isEmpty(value) ? null : (char) value;
     }
-
 
     private static Object parseBoolean(Object value) {
         return ObjectUtils.isEmpty(value) ? null : (Boolean) value;
@@ -382,7 +320,7 @@ public class ExcelUtils {
         if (ObjectUtils.isEmpty(value)) {
             return null;
         }
-        return (Map) value;
+        return value;
     }
 
     private static Object parseEnum(Object value, Class clazz) {
@@ -401,13 +339,11 @@ public class ExcelUtils {
             return null;
         }
 
-        String dateStr = value.toString().trim(); // Đảm bảo xóa khoảng trắng thừa
-
-        // Xử lý giá trị kiểu số (Excel date)
+        String dateStr = value.toString().trim();
         if (dateStr.matches("\\d+(\\.\\d+)?")) {
             try {
                 double excelDate = Double.parseDouble(dateStr);
-                return convertExcelDateToJavaDate(excelDate); // Hàm chuyển đổi từ số Excel
+                return convertExcelDateToJavaDate(excelDate);
             } catch (NumberFormatException e) {
                 e.printStackTrace();
                 return null;
@@ -424,11 +360,8 @@ public class ExcelUtils {
                 // Bỏ qua lỗi, thử định dạng tiếp theo
             }
         }
-
-        // Không thể parse giá trị chuỗi thành Date
         return null;
     }
-
 
     private static Object parseInstant(Object value) {
         return ObjectUtils.isEmpty(value) ? null : parseDate(value).toInstant();
@@ -550,11 +483,10 @@ public class ExcelUtils {
     }
 
     public static Date convertExcelDateToJavaDate(double excelDate) {
-        // Số ngày bắt đầu từ 1/1/1900
+        // Ngày bắt đầu từ 1/1/1900
         Calendar calendar = Calendar.getInstance();
         calendar.set(1900, Calendar.JANUARY, 1);
         calendar.add(Calendar.DATE, (int) excelDate - 2); // Trừ 2 vì Excel bắt đầu từ 1/1/1900
         return calendar.getTime();
     }
-
 }

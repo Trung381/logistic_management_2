@@ -1,10 +1,8 @@
 package com.project.logistic_management_2.mapper.expenses;
 
 import com.project.logistic_management_2.dto.expenses.ExpenseAdvancesDTO;
-import com.project.logistic_management_2.entity.ExpenseAdvances;
+import com.project.logistic_management_2.entity.expenses.ExpenseAdvances;
 import org.springframework.stereotype.Component;
-
-import java.util.Date;
 
 @Component
 public class ExpenseAdvancesMapper {
@@ -16,8 +14,6 @@ public class ExpenseAdvancesMapper {
                 .advance(dto.getAdvance())
                 .remainingBalance(0f)
                 .note(dto.getNote())
-                .createdAt(new Date())
-                .updatedAt(new Date())
                 .build();
     }
 
@@ -29,6 +25,5 @@ public class ExpenseAdvancesMapper {
         expenseAdvances.setAdvance(dto.getAdvance());
         expenseAdvances.setRemainingBalance(dto.getRemainingBalance());
         expenseAdvances.setNote(dto.getNote());
-        expenseAdvances.setUpdatedAt(new Date());
     }
 }

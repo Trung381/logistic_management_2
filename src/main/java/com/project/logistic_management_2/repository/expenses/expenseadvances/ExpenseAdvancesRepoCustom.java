@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ExpenseAdvancesRepoCustom {
-    List<ExpenseAdvancesDTO> getAll();
+    List<ExpenseAdvancesDTO> getAll(int page);
     Optional<ExpenseAdvancesDTO> getByDriverId(String id);
     long deleted(Integer id);
     Optional<ExpenseAdvancesDTO> getExpenseAdvanceById(Integer id);

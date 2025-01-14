@@ -1,22 +1,26 @@
 package com.project.logistic_management_2.service.expenses.expensesconfig;
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
-import com.project.logistic_management_2.entity.ExpensesConfig;
+import com.project.logistic_management_2.entity.expenses.ExpensesConfig;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
-import com.project.logistic_management_2.exception.def.InvalidParameterException;
-import com.project.logistic_management_2.exception.def.NotFoundException;
+import com.project.logistic_management_2.exception.define.NotFoundException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesConfigMapper;
 import com.project.logistic_management_2.repository.expenses.expensesconfig.ExpensesConfigRepo;
 import com.project.logistic_management_2.service.BaseService;
 import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.ExportConfig;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 @Service
@@ -46,12 +50,8 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
     @Override
     public ExpensesConfigDTO getByID(String id) {
         checkPermission(type, PermissionKey.VIEW);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
-        ExpensesConfig config = expensesConfigRepo.getByID(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin cấu hình chi phí!"));
-        return expensesConfigMapper.toExpensesConfigDTO(null, config);
+        return expensesConfigRepo.getByID(id)
+                .orElseThrow(() -> new NotFoundException("Thông tin cấu hình chi phí không tồn tại!"));
     }
 
     @Override
@@ -59,20 +59,19 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
         checkPermission(type, PermissionKey.WRITE);
         ExpensesConfig config = expensesConfigMapper.toExpensesConfig(dto);
         expensesConfigRepo.save(config);
-        return expensesConfigMapper.toExpensesConfigDTO(dto, config);
+        return getByID(config.getId());
     }
 
     @Override
     public ExpensesConfigDTO update(String id, ExpensesConfigDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
 
-        ExpensesConfig config = expensesConfigRepo.getByID(id)
+        ExpensesConfig config = expensesConfigRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Cấu hình chi phí không tồn tại!"));
 
         expensesConfigMapper.updateExpensesConfig(config, dto);
 
-        //save to DB
-        return expensesConfigMapper.toExpensesConfigDTO(dto, expensesConfigRepo.save(config));
+        return getByID(config.getId());
     }
 
     @Override
@@ -98,5 +97,21 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
 
         // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return expensesConfigRepo.saveAll(expensesConfigs);
+    }
+
+    @Override
+    public ExportExcelResponse exportExpensesConfig() throws Exception {
+        List<ExpensesConfigDTO> expensesConfig = expensesConfigRepo.getAll();
+
+        if (!CollectionUtils.isEmpty(expensesConfig)) {
+            String fileName = "ExpensesConfig Export" + ".xlsx";
+
+            ByteArrayInputStream in = ExcelUtils.export(expensesConfig, fileName, ExportConfig.expensesConfigExport);
+
+            InputStreamResource inputStreamResource = new InputStreamResource(in);
+            return new ExportExcelResponse(fileName, inputStreamResource);
+        } else {
+            throw new NotFoundException("No data");
+        }
     }
 }

@@ -1,32 +1,41 @@
 package com.project.logistic_management_2.service.expenses.expenses;
 
+import com.project.logistic_management_2.dto.ExportExcelResponse;
 import com.project.logistic_management_2.dto.expenses.ExpensesDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesIncurredDTO;
 import com.project.logistic_management_2.dto.expenses.ExpensesReportDTO;
-import com.project.logistic_management_2.entity.Expenses;
+import com.project.logistic_management_2.entity.expenses.Expenses;
+import com.project.logistic_management_2.enums.attached.AttachedType;
+import com.project.logistic_management_2.enums.expenses.ExpensesStatus;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
-import com.project.logistic_management_2.exception.def.ConflictException;
-import com.project.logistic_management_2.exception.def.InvalidParameterException;
-import com.project.logistic_management_2.exception.def.NotFoundException;
+import com.project.logistic_management_2.exception.define.ConflictException;
+import com.project.logistic_management_2.exception.define.InvalidParameterException;
+import com.project.logistic_management_2.exception.define.NotFoundException;
+import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesMapper;
 import com.project.logistic_management_2.repository.expenses.expenses.ExpensesRepo;
 import com.project.logistic_management_2.service.BaseService;
+import com.project.logistic_management_2.service.attached.AttachedImageService;
 import com.project.logistic_management_2.service.notification.NotificationService;
 import com.project.logistic_management_2.utils.ExcelUtils;
+import com.project.logistic_management_2.utils.ExportConfig;
 import com.project.logistic_management_2.utils.FileFactory;
 import com.project.logistic_management_2.utils.ImportConfig;
+import com.project.logistic_management_2.utils.Utils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.sql.Timestamp;
-import java.time.YearMonth;
+import java.io.ByteArrayInputStream;
+import java.rmi.ServerException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -34,98 +43,136 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     private final ExpensesRepo expensesRepo;
     private final ExpensesMapper expensesMapper;
     private final NotificationService notificationService;
+    private final AttachedImageService attachedService;
     private final PermissionType type = PermissionType.EXPENSES;
 
     @Override
-    public List<ExpensesDTO> getAll(String expensesConfigId, String truckLicense, Timestamp fromDate, Timestamp toDate) {
+    public List<ExpensesDTO> getAll(Integer page, String expensesConfigId, String truckLicense, String fromDateStr, String toDateStr) {
         checkPermission(type, PermissionKey.VIEW);
-        return expensesRepo.getAll(expensesConfigId, truckLicense, fromDate, toDate);
+        Date[] range = Utils.createDateRange(fromDateStr, toDateStr);
+        if (page != null) {
+            if (page <= 0) {
+                throw new InvalidParameterException("Vui lòng chọn trang bắt đầu từ 1!");
+            } else {
+                return expensesRepo.getAll(page, expensesConfigId, truckLicense, range[0], range[1]);
+            }
+        } else {
+            return expensesRepo.getAll(expensesConfigId, truckLicense, range[0], range[1]);
+        }
     }
 
     @Override
     public ExpensesDTO getByID(String id) {
         checkPermission(type, PermissionKey.VIEW);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
-
         return expensesRepo.getByID(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin chi phí!"));
+                .orElseThrow(() -> new NotFoundException("Chi phí không tồn tại!"));
     }
 
     @Override
-    public ExpensesDTO create(ExpensesDTO dto) {
+    @Transactional
+    public ExpensesDTO create(ExpensesDTO dto) throws ServerException {
         checkPermission(type, PermissionKey.WRITE);
-        Expenses expenses = expensesMapper.toExpenses(dto);
-        expensesRepo.save(expenses);
+
+        Expenses expenses = createExpensesFromDTO(dto);
+        attachImages(expenses.getId(), dto);
 
         String notifyMsg = "Có một chi phí được tạo mới cần được phê duyệt lúc " + new Date();
         notificationService.sendNotification("{\"message\":\"" + notifyMsg + "\"}");
 
-        return expensesRepo.getByID(expenses.getId()).orElse(null);
+        Optional<ExpensesDTO> result = expensesRepo.getByID(expenses.getId());
+        if (result.isEmpty()) {
+            throw new ServerException("Có lỗi khi tạo chi phí mới. Vui lòng thử lại sau!");
+        }
+        return result.get();
+    }
+
+    private void attachImages(String referenceID, ExpensesDTO dto) {
+        String[] attachedImagePaths = dto.getAttachedPaths();
+        attachedService.addAttachedImages(referenceID, AttachedType.ATTACHED_OF_EXPENSES, attachedImagePaths);
+    }
+
+    private Expenses createExpensesFromDTO(ExpensesDTO dto) {
+        Expenses expenses = expensesMapper.toExpenses(dto);
+        expensesRepo.save(expenses);
+        return expenses;
     }
 
     @Override
     public ExpensesDTO update(String id, ExpensesDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
 
-        // Return not found message if expenses does not exist
         Expenses expenses = expensesRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Chi phí cần cập nhật không tồn tại!"));
+        checkUpdateConditions(id);
 
-        // approved => error message
-        if (!expensesRepo.checkApproved(id)) {
+        updateExpensesFromDTO(expenses, dto);
+
+        Optional<ExpensesDTO> result = expensesRepo.getByID(expenses.getId());
+        return result.orElse(null);
+    }
+
+    private void checkUpdateConditions(String id) {
+        ExpensesStatus status = expensesRepo.getStatusByID(id);
+        if (status == ExpensesStatus.APPROVED) {
             throw new ConflictException("Chi phí đã được duyệt không thể chỉnh sửa!");
         }
+    }
 
-        // Update expenses object
+    private void updateExpensesFromDTO(Expenses expenses, ExpensesDTO dto) {
         expensesMapper.updateExpenses(expenses, dto);
-        // Save to DB
         expensesRepo.save(expenses);
-
-        Optional<ExpensesDTO> res = expensesRepo.getByID(expenses.getId());
-        return res.orElse(null);
     }
 
     @Override
-    public long deleteByID(String id) {
+    public long deleteByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.DELETE);
-        if (expensesRepo.countByID(id) == 0)
-            throw new NotFoundException("Chi phí cần xóa không tồn tại hoặc đã được xóa trước đó!");
+        checkDeleteConditions(id);
+        return delete(id);
+    }
 
-        return expensesRepo.delete(id);
+    private void checkDeleteConditions(String id) {
+        if (expensesRepo.countByID(id) == 0)
+            throw new NotFoundException("Chi phí cần xóa không tồn tại!");
+    }
+
+    private long delete(String id) throws ServerException {
+        long result = expensesRepo.delete(id);
+        if (result == 0) {
+            throw new ServerException("Có lỗi khi xóa chi phí. Vui lòng thử lại sau!");
+        }
+        return result;
     }
 
     @Override
-    public long approveByID(String id) {
+    public long approveByID(String id) throws ServerException {
         checkPermission(type, PermissionKey.APPROVE);
+        checkApproveConditions(id);
+        return approve(id);
+    }
 
-        // does not exist
+    private void checkApproveConditions(String id) {
         if (expensesRepo.countByID(id) == 0)
             throw new NotFoundException("Chi phí cần duyệt không tồn tại!");
 
-        // not approved yet
-        if (!expensesRepo.checkApproved(id))
-            return -1;
-
-        return expensesRepo.approve(id);
+        ExpensesStatus status = expensesRepo.getStatusByID(id);
+        if (status == ExpensesStatus.APPROVED) {
+            throw new NotModifiedException("Chi phí đã được duyệt trước đó!");
+        }
     }
 
-    // thees moiws cos chuwcs nanwg bao cao
-    // thang dc xem bao cao la chuc cao nhat roi. quyenn all
+    private long approve(String id) throws ServerException {
+        long result = expensesRepo.approve(id);
+        if (result == 0) {
+            throw new ServerException("Có lỗi khi duyệt chi phí. Vui lòng thử lại sau!");
+        }
+        return result;
+    }
 
     @Override
     public List<ExpensesIncurredDTO> report(String driverId, String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        //Check định dạng chu kỳ: yyyy-MM
-        String regex = "^(\\d{4}-(0[1-9]|1[0-2]))$";
-        if (!Pattern.matches(regex, period)) {
-            throw new InvalidParameterException("Định dạng chu kỳ không hợp lệ! Dạng đúng: yyyy-MM");
-        }
-
-        YearMonth periodYM = YearMonth.parse(period);
-
-        return expensesRepo.getByFilter(driverId, periodYM);
+        Date[] range = Utils.createDateRange(period);
+        return expensesRepo.getExpenseIncurredByDriverID(driverId, range[0], range[1]);
     }
 
     @Override
@@ -144,7 +191,38 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
 
         List<Expenses> expenses = expensesMapper.toExpensesList(expensesDTOList);
 
-        // Lưu tất cả các thực thể vào cơ sở dữ liệu và trả về danh sách đã lưu
         return expensesRepo.saveAll(expenses);
+    }
+
+    @Override
+    public ExportExcelResponse exportExpenses(String expensesConfigId, String truckLicense, String fromDate, String toDate) throws Exception {
+        Date[] range = Utils.createDateRange(fromDate, toDate);
+        List<ExpensesDTO> expenses = expensesRepo.getAll(expensesConfigId, truckLicense, range[0], range[1]);
+
+        if (CollectionUtils.isEmpty(expenses)) {
+            throw new NotFoundException("No data");
+        }
+        String fileName = "Expenses Export" + ".xlsx";
+
+        ByteArrayInputStream in = ExcelUtils.export(expenses, fileName, ExportConfig.expensesExport);
+
+        InputStreamResource inputStreamResource = new InputStreamResource(in);
+        return new ExportExcelResponse(fileName, inputStreamResource);
+    }
+
+    @Override
+    public ExportExcelResponse exportReportExpenses(String driverId, String period) throws Exception {
+        Date[] range = Utils.createDateRange(period);
+        List<ExpensesIncurredDTO> expensesReport = expensesRepo.getExpenseIncurredByDriverID(driverId, range[0], range[1]);
+
+        if (CollectionUtils.isEmpty(expensesReport)) {
+            throw new NotFoundException("No data");
+        }
+        String fileName = "ExpensesReport Export" + ".xlsx";
+
+        ByteArrayInputStream in = ExcelUtils.export(expensesReport, fileName, ExportConfig.expenseReportByDriverExport);
+
+        InputStreamResource inputStreamResource = new InputStreamResource(in);
+        return new ExportExcelResponse(fileName, inputStreamResource);
     }
 }

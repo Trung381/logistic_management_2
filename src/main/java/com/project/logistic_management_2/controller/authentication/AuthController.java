@@ -4,7 +4,7 @@ import com.project.logistic_management_2.dto.authentication.AuthRequest;
 import com.project.logistic_management_2.dto.user.UserDTO;
 import com.project.logistic_management_2.dto.BaseResponse;
 import com.project.logistic_management_2.dto.authentication.AuthResponse;
-import com.project.logistic_management_2.entity.User;
+import com.project.logistic_management_2.entity.user.User;
 import com.project.logistic_management_2.service.authentication.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

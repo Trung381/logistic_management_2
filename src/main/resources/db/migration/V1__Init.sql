@@ -1,3 +1,5 @@
+create database logistic_management_2;
+use logistic_management_2;
 CREATE TABLE `permissions` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL,
@@ -21,8 +23,6 @@ INSERT INTO `permissions` (`id`, `title`, `name`, `created_at`, `updated_at`) VA
     (9, 'Báo cáo', 'REPORTS', NOW(), NOW()),
     (10, 'Quản lý hàng hoá', 'GOODS', NOW(), NOW()),
     (11, 'Quản lý kho hàng', 'WAREHOUSES', NOW(), NOW());
-    
-select * from permissions where name = "SCHEDULE";
 
 CREATE TABLE `roles` (
  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -121,6 +121,7 @@ CREATE TABLE `users` (
  `password` VARCHAR(255) NOT NULL,
  `phone` VARCHAR(20) NOT NULL,
  `date_of_birth` DATE NOT NULL,
+ `image_path` VARCHAR(255) NOT NULL,
  `note` VARCHAR(255),
  `role_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến vai trò",
  `status` INT NOT NULL DEFAULT 1 COMMENT "Trạng thái người dùng: 0 - Không hoạt động, 1 - Đang hoạt động",
@@ -196,24 +197,17 @@ COLLATE = utf8mb4_0900_ai_ci;
 CREATE TABLE `schedules` (
  `id` VARCHAR(255) UNIQUE NOT NULL,
  `schedule_config_id` VARCHAR(255) COMMENT "Khóa ngoại đến cấu hình lịch trình, null nếu chạy nội bộ",
-    -- `truck_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến xe tải (đầu xe)",
---   `mooc_id` INT UNSIGNED NOT NULL COMMENT "Khóa ngoại đến xe tải (rơ-mooc)",
  `truck_license` VARCHAR(255) NOT NULL,
  `mooc_license` VARCHAR(255) NOT NULL,
- `attach_document` VARCHAR(255) COMMENT "Đường dẫn lưu tài liệu bổ sung",
  `departure_time` TIMESTAMP NOT NULL COMMENT "Thời gian khởi hành",
  `arrival_time` TIMESTAMP COMMENT "Thời gian hoàn thành",
  `note` TEXT COMMENT "Ghi chú của mỗi hành trình",
  `type` INT NOT NULL DEFAULT 1 COMMENT "Loại lịch trình: 0 - Chạy nội bộ, 1 - Tính lương",
- `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành",
+ `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái lịch trình: -1 - Bị từ chối, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành",
  `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Đã xóa: 0 - false, 1 - true",
  `created_at` TIMESTAMP NOT NULL DEFAULT now(),
  `updated_at` TIMESTAMP NOT NULL DEFAULT now(),
  PRIMARY KEY (`id`),
-    -- FOREIGN KEY (`truck_id`) REFERENCES `trucks`(`id`),
---   FOREIGN KEY (`mooc_id`) REFERENCES `trucks`(`id`),
--- FOREIGN KEY (`truck_license`) REFERENCES `trucks`(`license_plate`),
--- FOREIGN KEY (`mooc_license`) REFERENCES `trucks`(`license_plate`),
  FOREIGN KEY (`schedule_config_id`) REFERENCES `schedule_configs`(`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4
@@ -237,7 +231,6 @@ CREATE TABLE `expenses` (
     `expenses_config_id`  VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến cấu hình chi phí",
     `amount` FLOAT NOT NULL DEFAULT 0 COMMENT "Giá tiền",
     `note` TEXT COMMENT "Ghi chú của chi phí",
-    `img_path` VARCHAR(255) DEFAULT NULL COMMENT "Đường dẫn lưu ảnh hóa đơn",
     `status` INT NOT NULL DEFAULT 0 COMMENT "Trạng thái của chi phí: 0 - Chưa duyệt, 1 - Đã duyệt",
     `deleted` BIT NOT NULL DEFAULT b'0' COMMENT "Trạng thái: 0 - Chưa xóa, 1 - Đã xóa",
     `created_at` TIMESTAMP NOT NULL DEFAULT now(),
@@ -289,7 +282,6 @@ CREATE TABLE `goods` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
-
 CREATE TABLE `transactions` (
     `id` VARCHAR(255) UNIQUE NOT NULL,
     `ref_user_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến người dùng - Người chịu trách nhiệm",
@@ -310,14 +302,24 @@ CREATE TABLE `transactions` (
 DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE `attached_images` (
+	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `reference_id` VARCHAR(255) NOT NULL COMMENT "Khóa ngoại đến bảng liên quan (schedules hoặc expenses)",
+    `type` INT NOT NULL COMMENT "Loại của ảnh đính kèm: 0 - schedule, 1 - expenses",
+    `img_path` VARCHAR(255) NOT NULL COMMENT "Đường dẫn lưu ảnh",
+    `uploaded_at` TIMESTAMP NOT NULL DEFAULT now(),
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+DEFAULT CHARSET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
 
 -- Insert data into `users` table
-INSERT INTO `users` (`id`, `full_name`, `username`, `password`, `phone`, `date_of_birth`, `note`, `role_id`, `status`, `created_at`, `updated_at`) VALUES
-('US001', 'Nguyen Van A', 'nguyenvana', '123456', '0901234567', '1990-05-15', 'Admin user', 1, 1, NOW(), NOW()),
-('US002', 'Tran Thi B', 'tranthib', '123456', '0912345678', '1992-10-20', 'Accountant user', 2, 1, NOW(), NOW()),
-('US003', 'Le Van C', 'levanc', '123456', '0923456789', '1988-03-25', 'Manager user', 3, 1, NOW(), NOW()),
-('US005', 'Le Van C', 'admin123', '$2a$10$RjVfmafLNmmjvWKOSYQFI.zcJ7jxjyZYBwtg/fKWSqbtVYqB7pG86', '0923456789', '1988-03-25', 'Manager user', 1, 1, NOW(), NOW()),
-('US004', 'Pham Van D', 'phamvand', '123456', '0934567890', '1995-07-10', 'Driver user', 4, 1, NOW(), NOW());
+INSERT INTO `users` (`id`, `full_name`, `username`, `password`, `phone`, `date_of_birth`, `image_path`, `note`, `role_id`, `status`, `created_at`, `updated_at`) VALUES
+('US001', 'Nguyen Van A', 'nguyenvana', '123456', '0901234567', '1990-05-15', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Admin user', 1, 1, NOW(), NOW()),
+('US002', 'Tran Thi B', 'tranthib', '123456', '0912345678', '1992-10-20', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Accountant user', 2, 1, NOW(), NOW()),
+('US003', 'Le Van C', 'levanc', '123456', '0923456789', '1988-03-25', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Manager user', 3, 1, NOW(), NOW()),
+('US005', 'Le Van C', 'admin123', '$2a$10$RjVfmafLNmmjvWKOSYQFI.zcJ7jxjyZYBwtg/fKWSqbtVYqB7pG86', '0923456789', '1988-03-25', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Manager user', 1, 1, NOW(), NOW()),
+('US004', 'Pham Van D', 'phamvand', '123456', '0934567890', '1995-07-10', '/uploads/f9bb3d5e4b44f71aae55.jpg', 'Driver user', 4, 1, NOW(), NOW());
 
 
 -- Insert data into `salary` table
@@ -333,7 +335,7 @@ VALUES
 INSERT INTO `trucks` (`driver_id`, `license_plate`, `capacity`, `note`, `type`, `status`, `deleted`, `created_at`, `updated_at`) VALUES
  ('US004', '51C-12345', 10, 'Xe tải chính', 0, 1, b'0', NOW(), NOW()),
  ('US001', '51R-67890', 20, 'Mooc chính', 1, 1, b'0', NOW(), NOW()),
- ('US001', '51R-11223', 20, 'Mooc phụ', 1, 0, b'0', NOW(), NOW());
+ ('US001', '51R-11223', 20, 'Mooc phụ', 1, 1, b'0', NOW(), NOW());
 
 
 -- Insert data into `schedule_configs` table
@@ -343,12 +345,12 @@ INSERT INTO `schedule_configs` (`id`, `place_a`, `place_b`, `amount`, `note`, `d
  ('SCDC003', 'Kho A', 'Kho C', 6000000, 'Chuyến hàng thường', b'0', NOW(), NOW());
 
 -- Insert data into `schedules` table
-INSERT INTO `schedules` (`id`, `schedule_config_id`, `truck_license`, `mooc_license`, `attach_document`, `departure_time`, `arrival_time`, `note`, `type`, `status`, `deleted`, `created_at`, `updated_at`) VALUES
- ('SCD001', 'SCDC001', '51C-12345', '51R-67890', '/path/to/document1.pdf', '2024-05-10', '2024-05-11', 'Chuyến hàng 1', 1, 2, b'0', NOW(), NOW()),
- ('SCD002', 'SCDC002', '51C-12345', '51R-11223', '/path/to/document2.pdf', '2024-05-10', '2024-05-11', 'Chuyến hàng 2', 1, 1, b'0', NOW(), NOW()),
- ('SCD003', 'SCDC003', '51C-12345', '51R-67890', '/path/to/document3.pdf', '2024-05-10', '2024-05-11', 'Chuyến hàng 3', 1, 0, b'0', NOW(), NOW()),
- ('SCD004', 'SCDC002', '51C-12345', '51R-67890', NULL, '2024-05-10', '2024-05-11', 'Chuyến hàng nội bộ 1', 0, 0, b'0', NOW(), NOW()),
- ('SCD005', 'SCDC002', '51C-12345', '51R-67890', NULL, '2024-05-10', '2024-05-11', 'Chuyến hàng nội bộ 2', 0, 0, b'0', NOW(), NOW());
+INSERT INTO `schedules` (`id`, `schedule_config_id`, `truck_license`, `mooc_license`, `departure_time`, `arrival_time`, `note`, `type`, `status`, `deleted`, `created_at`, `updated_at`) VALUES
+ ('SCD001', 'SCDC001', '51C-12345', '51R-67890', '2024-05-10', '2024-05-11', 'Chuyến hàng 1', 1, 2, b'0', NOW(), NOW()),
+ ('SCD002', 'SCDC002', '51C-12345', '51R-11223', '2024-05-10', '2024-05-11', 'Chuyến hàng 2', 1, 2, b'0', NOW(), NOW()),
+ ('SCD003', 'SCDC003', '51C-12345', '51R-67890', '2024-05-10', '2024-05-11', 'Chuyến hàng 3', 1, 0, b'0', NOW(), NOW()),
+ ('SCD004', 'SCDC002', '51C-12345', '51R-67890', '2024-05-10', '2024-05-11', 'Chuyến hàng nội bộ 1', 0, 0, b'0', NOW(), NOW()),
+ ('SCD005', 'SCDC002', '51C-12345', '51R-67890', '2024-05-10', '2024-05-11', 'Chuyến hàng nội bộ 2', 0, 0, b'0', NOW(), NOW());
 
 
 -- Insert data into `expenses_configs` table
@@ -358,20 +360,31 @@ INSERT INTO `expenses_configs` (`id`, `type`, `note`, `deleted`, `created_at`, `
  ('EXC003', 'Sửa chữa', 'Chi phí sửa chữa xe', b'0', NOW(), NOW());
 
 -- Insert data into `expenses` table
-INSERT INTO `expenses` (`id`, `schedule_id`, `expenses_config_id`, `amount`, `note`, `img_path`, `status`, `deleted`, `created_at`, `updated_at`) VALUES
- ('EX001', 'SCD001', 'EXC001', 1500000, 'Chi phí nhiên liệu chuyến 1', '/path/to/image1.jpg', 1, b'0', NOW(), NOW()),
- ('EX002', 'SCD002', 'EXC002', 500000, 'Chi phí thay dầu chuyến 2', '/path/to/image2.jpg', 1, b'0', NOW(), NOW()),
- ('EX003', 'SCD003', 'EXC003', 1000000, 'Chi phí sửa chữa chuyến 3', '/path/to/image3.jpg', 0, b'0', NOW(), NOW()),
- ('EX004', 'SCD001', 'EXC003', 1000000, 'Chi phí sửa chữa chuyến 1', '/path/to/image4.jpg', 0, b'0', NOW(), NOW()),
- ('EX005', 'SCD004', 'EXC001', 1000000, 'Chi phí nhiên liệu chuyến nội bộ 1', '/path/to/image5.jpg', 0, b'0', NOW(), NOW()),
- ('EX006', 'SCD005', 'EXC001', 1000000, 'Chi phí nhiên liệu chuyến nội bộ 2', '/path/to/image6.jpg', 0, b'0', NOW(), NOW());
-
+INSERT INTO `expenses` (`id`, `schedule_id`, `expenses_config_id`, `amount`, `note`, `status`, `deleted`, `created_at`, `updated_at`) VALUES
+ ('EX001', 'SCD001', 'EXC001', 1500000, 'Chi phí nhiên liệu chuyến 1', 1, b'0', NOW(), NOW()),
+ ('EX002', 'SCD002', 'EXC002', 500000, 'Chi phí thay dầu chuyến 2', 1, b'0', NOW(), NOW()),
+ ('EX003', 'SCD003', 'EXC003', 1000000, 'Chi phí sửa chữa chuyến 3', 1, b'0', NOW(), NOW()),
+ ('EX004', 'SCD001', 'EXC003', 1000000, 'Chi phí sửa chữa chuyến 1', 1, b'0', NOW(), NOW()),
+ ('EX005', 'SCD004', 'EXC001', 1000000, 'Chi phí nhiên liệu chuyến nội bộ 1', 1, b'0', NOW(), NOW()),
+ ('EX006', 'SCD005', 'EXC001', 1000000, 'Chi phí nhiên liệu chuyến nội bộ 2', 1, b'0', NOW(), NOW());
 
 -- Insert data into `expense_advances` table
 INSERT INTO `expense_advances` (`driver_id`, `period`, `advance`, `remaining_balance`, `note`, `deleted`, `created_at`, `updated_at`) VALUES
  ('US004', '2024-05', 2000000, 1000000, 'Ứng trước tháng 5', b'0', NOW(), NOW()),
  ('US004', '2024-04', 1000000, 500000, 'Ứng trước tháng 4', b'0', NOW(), NOW()),
  ('US004', '2024-03', 2000000, 0, 'Ứng trước tháng 3', b'0', NOW(), NOW());
+ 
+ -- insert data into `attached_images` table
+ INSERT INTO `attached_images` (`id`, `reference_id`, `type`, `img_path`, `uploaded_at`) VALUES 
+	(1, 'SCD001', 0, 'uploads/schedule/img1.png', NOW()),
+	(2, 'SCD001', 0, 'uploads/schedule/img2.png', NOW()),
+	(3, 'SCD002', 0, 'uploads/schedule/img3.png', NOW()),
+	(4, 'SCD005', 0, 'uploads/schedule/img4.png', NOW()),
+    (5, 'EX001', 1, 'uploads/expenses/img1.png', NOW()),
+	(6, 'EX002', 1, 'uploads/expenses/img2.png', NOW()),
+	(7, 'EX003', 1, 'uploads/expenses/img3.png', NOW()),
+	(8, 'EX003', 1, 'uploads/expenses/img4.png', NOW()),
+	(9, 'EX005', 1, 'uploads/expenses/img5.png', NOW());
 
 -- Insert data into `warehouses` table
 INSERT INTO `warehouses` (`id`, `name`, `note`, `created_at`, `updated_at`) VALUES
@@ -392,7 +405,6 @@ INSERT INTO `transactions` (`id`, `ref_user_id`, `goods_id`, `quantity`, `transa
  ('TRANS003', 'US003', 'GS003', 200, '2024-05-11 09:00:00', b'1', 'Kho A', b'0', NOW(), NOW(), 'giang', 'C:\giang'),
  ('TRANS004', 'US003', 'GS004', 200, '2024-05-11 10:00:00', b'1', 'Kho B', b'0', NOW(), NOW(), 'giang', 'C:\giang');
  
--- Triger trên bảng schedules - UPDATE
 DELIMITER //
 -- Cập nhật trạng thái của xe tải hoặc mooc khi trạng thái lịch trình thay đổi
 CREATE TRIGGER UD_schedules_after_update_trigger
@@ -400,16 +412,26 @@ AFTER UPDATE ON schedules
 FOR EACH ROW
 BEGIN
 	-- Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
-	-- Trạng thái xe: `status`: -1: Bảo trì, 0 - Không có sẵn, 1 - Có sẵn
+	-- Trạng thái xe: `status`: -1: Bảo trì, 0 - Không có sẵn, 1 - Có sẵn, 2 - chờ xử lý lịch trình
     DECLARE newStatus INT;
-    -- Khi status của lịch trình thay đổi
     IF OLD.status != NEW.status THEN
 		SET newStatus = CASE 
 							WHEN NEW.status IN (-1, 2) THEN 1
 							WHEN NEW.status = 1 THEN 0
                         END;
-		-- Cập nhật trạng thái xe
 		UPDATE `trucks` SET `status` = newStatus WHERE `license_plate` = OLD.truck_license OR `license_plate` = OLD.mooc_license;
 	END IF;
+END;//
+DELIMITER ;
+
+DELIMITER //
+-- Cập nhật trạng thái của xe tải hoặc mooc thành chờ duyệt (2) khi lịch trình được tạo
+CREATE TRIGGER UD_schedules_after_insert_trigger
+AFTER INSERT ON schedules
+FOR EACH ROW
+BEGIN
+	-- Trạng thái lịch trình: -1 - Không duyệt, 0 - Đang chờ, 1 - Đã duyệt và chưa hoàn thành, 2 - Đã hoàn thành
+	-- Trạng thái xe: `status`: -1: Bảo trì, 0 - Không có sẵn, 1 - Có sẵn, 2 - chờ xử lý lịch trình
+    UPDATE `trucks` SET `status` = 2 WHERE `license_plate` = NEW.truck_license OR `license_plate` = NEW.mooc_license;
 END;//
 DELIMITER ;

@@ -2,7 +2,7 @@ package com.project.logistic_management_2.repository.permission;
 
 
 
-import com.project.logistic_management_2.entity.Permission;
+import com.project.logistic_management_2.entity.permission.Permission;
 
 import java.util.List;
 
