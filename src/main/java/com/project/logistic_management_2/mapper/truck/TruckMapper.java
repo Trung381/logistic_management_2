@@ -49,15 +49,6 @@ public class TruckMapper {
         ).collect(Collectors.toList());
     }
 
-    public void updateTruck(Truck truck, TruckDTO truckDTO) {
-        if (truckDTO == null) return;
-        truck.setLicensePlate(truckDTO.getLicensePlate());
-        truck.setCapacity(truckDTO.getCapacity());
-        truck.setNote(truckDTO.getNote());
-        truck.setType(truckDTO.getType().getValue());
-        truck.setStatus(truck.getStatus());
-        truck.setUpdatedAt(new Date());
-    }
 
     public TruckDTO toTruckDTO(Truck truck) {
         if (truck == null) return null;

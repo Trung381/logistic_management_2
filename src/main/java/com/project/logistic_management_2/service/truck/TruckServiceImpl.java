@@ -23,6 +23,7 @@ import com.project.logistic_management_2.utils.ImportConfig;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
@@ -90,6 +91,7 @@ public class TruckServiceImpl extends BaseService  implements TruckService {
 //    }
 
 @Override
+@Transactional
 public TruckDTO updateTruck(Integer id, TruckDTO dto) {
     checkPermission(type, PermissionKey.WRITE);
     // Lấy thông tin xe hiện tại
