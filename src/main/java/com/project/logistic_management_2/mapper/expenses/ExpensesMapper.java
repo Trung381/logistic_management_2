@@ -17,17 +17,6 @@ import java.util.stream.Collectors;
 public class ExpensesMapper {
     public Expenses toExpenses(ExpensesDTO dto) {
         if (dto == null) return null;
-        return createExpenses(dto);
-    }
-
-    public List<Expenses> toExpensesList(List<ExpensesDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return dtos.stream().map(this::createExpenses).collect(Collectors.toList());
-    }
-
-    private Expenses createExpenses(ExpensesDTO dto) {
         return Expenses.builder()
                 .id(Utils.genID(IDKey.EXPENSES))
                 .scheduleId(dto.getScheduleId())
@@ -36,6 +25,13 @@ public class ExpensesMapper {
                 .note(dto.getNote())
                 .status(ExpensesStatus.PENDING.getValue())
                 .build();
+    }
+
+    public List<Expenses> toExpensesList(List<ExpensesDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::toExpenses).collect(Collectors.toList());
     }
 
     public void updateExpenses(Expenses expenses, ExpensesDTO dto) {

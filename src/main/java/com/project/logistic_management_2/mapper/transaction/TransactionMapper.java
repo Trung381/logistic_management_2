@@ -17,17 +17,6 @@ import java.util.stream.Collectors;
 public class TransactionMapper {
     public Transaction toTransaction(TransactionDTO dto) {
         if (dto == null) return null;
-        return createTransaction(dto);
-    }
-
-    public List<Transaction> toTransactions(List<TransactionDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return dtos.stream().map(this::createTransaction).collect(Collectors.toList());
-    }
-
-    private Transaction createTransaction(TransactionDTO dto) {
         return Transaction.builder()
                 .id(Utils.genID(IDKey.TRANSACTION))
                 .refUserId(dto.getRefUserId())
@@ -42,5 +31,12 @@ public class TransactionMapper {
                 .createdAt(new Date())
                 .updatedAt(new Date())
                 .build();
+    }
+
+    public List<Transaction> toTransactions(List<TransactionDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::toTransaction).collect(Collectors.toList());
     }
 }

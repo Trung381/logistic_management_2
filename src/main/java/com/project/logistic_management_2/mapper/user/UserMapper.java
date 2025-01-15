@@ -20,17 +20,6 @@ public class UserMapper{
 
     public User toUser(UserDTO dto) {
         if (dto == null) { return null; }
-        return createUser(dto);
-    }
-
-    public List<User> toUserList(List<UserDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return dtos.stream().map(this::createUser).collect(Collectors.toList());
-    }
-
-    private User createUser(UserDTO dto) {
         return User.builder()
                 .id(Utils.genID(IDKey.USER))
                 .fullName(dto.getFullName())
@@ -44,5 +33,12 @@ public class UserMapper{
                 .createdAt(new Date())
                 .updatedAt(new Date())
                 .build();
+    }
+
+    public List<User> toUserList(List<UserDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::toUser).collect(Collectors.toList());
     }
 }
