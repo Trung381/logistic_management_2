@@ -5,7 +5,6 @@ import com.project.logistic_management_2.dto.expenses.ExpensesConfigDTO;
 import com.project.logistic_management_2.entity.expenses.ExpensesConfig;
 import com.project.logistic_management_2.enums.permission.PermissionKey;
 import com.project.logistic_management_2.enums.permission.PermissionType;
-import com.project.logistic_management_2.exception.define.InvalidParameterException;
 import com.project.logistic_management_2.exception.define.NotFoundException;
 import com.project.logistic_management_2.mapper.expenses.ExpensesConfigMapper;
 import com.project.logistic_management_2.repository.expenses.expensesconfig.ExpensesConfigRepo;
@@ -51,12 +50,8 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
     @Override
     public ExpensesConfigDTO getByID(String id) {
         checkPermission(type, PermissionKey.VIEW);
-        if (id == null || id.isEmpty()) {
-            throw new InvalidParameterException("Tham số không hợp lệ!");
-        }
-        ExpensesConfig config = expensesConfigRepo.getByID(id)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin cấu hình chi phí!"));
-        return expensesConfigMapper.toExpensesConfigDTO(null, config);
+        return expensesConfigRepo.getByID(id)
+                .orElseThrow(() -> new NotFoundException("Thông tin cấu hình chi phí không tồn tại!"));
     }
 
     @Override
@@ -64,20 +59,19 @@ public class ExpensesConfigServiceImpl extends BaseService implements ExpensesCo
         checkPermission(type, PermissionKey.WRITE);
         ExpensesConfig config = expensesConfigMapper.toExpensesConfig(dto);
         expensesConfigRepo.save(config);
-        return expensesConfigMapper.toExpensesConfigDTO(dto, config);
+        return getByID(config.getId());
     }
 
     @Override
     public ExpensesConfigDTO update(String id, ExpensesConfigDTO dto) {
         checkPermission(type, PermissionKey.WRITE);
 
-        ExpensesConfig config = expensesConfigRepo.getByID(id)
+        ExpensesConfig config = expensesConfigRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Cấu hình chi phí không tồn tại!"));
 
         expensesConfigMapper.updateExpensesConfig(config, dto);
 
-        //save to DB
-        return expensesConfigMapper.toExpensesConfigDTO(dto, expensesConfigRepo.save(config));
+        return getByID(config.getId());
     }
 
     @Override

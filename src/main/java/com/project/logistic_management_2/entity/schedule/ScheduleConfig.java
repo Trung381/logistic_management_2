@@ -1,9 +1,8 @@
 package com.project.logistic_management_2.entity.schedule;
 
+import com.project.logistic_management_2.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Date;
 
 @Getter
 @Setter
@@ -12,7 +11,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @Table(name = "schedule_configs")
-public class ScheduleConfig {
+public class ScheduleConfig extends BaseEntity {
     @Id
     private String id;
 
@@ -27,13 +26,4 @@ public class ScheduleConfig {
 
     @Column(name = "note")
     private String note;
-
-    @Column(name = "deleted")
-    private Boolean deleted;
-
-    @Column(name = "created_at")
-    private Date createdAt;
-
-    @Column(name = "updated_at")
-    private Date updatedAt;
 }
