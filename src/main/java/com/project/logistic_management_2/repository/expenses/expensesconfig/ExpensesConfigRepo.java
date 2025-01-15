@@ -4,6 +4,9 @@ import com.project.logistic_management_2.entity.expenses.ExpensesConfig;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ExpensesConfigRepo extends JpaRepository<ExpensesConfig, String>, ExpensesConfigRepoCustom {
+    Optional<ExpensesConfig> findById(String id);
 }

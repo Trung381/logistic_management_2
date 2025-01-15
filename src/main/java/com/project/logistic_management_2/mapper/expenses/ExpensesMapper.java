@@ -43,28 +43,28 @@ public class ExpensesMapper {
         boolean isUpdated = false, isValidField = false;
 
         if (dto.getScheduleId() != null) {
-            if (!expenses.getScheduleId().equals(dto.getScheduleId())) {
+            if (!dto.getScheduleId().equals(expenses.getScheduleId())) {
                 expenses.setScheduleId(dto.getScheduleId());
                 isUpdated = true;
             }
             isValidField = true;
         }
         if (dto.getExpensesConfigId() != null) {
-            if (!expenses.getExpensesConfigId().equals(dto.getExpensesConfigId())) {
+            if (!dto.getExpensesConfigId().equals(expenses.getExpensesConfigId())) {
                 expenses.setExpensesConfigId(dto.getExpensesConfigId());
                 isUpdated = true;
             }
             isValidField = true;
         }
         if (dto.getAmount() != null) {
-            if (!expenses.getAmount().equals(dto.getAmount())) {
+            if (!dto.getAmount().equals(expenses.getAmount())) {
                 expenses.setAmount(dto.getAmount());
                 isUpdated = true;
             }
             isValidField = true;
         }
         if (dto.getNote() != null) {
-            if (!expenses.getNote().equals(dto.getNote())) {
+            if (!dto.getNote().equals(expenses.getNote())) {
                 expenses.setNote(dto.getNote());
                 isUpdated = true;
             }

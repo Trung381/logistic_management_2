@@ -9,7 +9,6 @@ import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,9 +31,6 @@ public class ExpensesConfigMapper {
                 .id(Utils.genID(IDKey.EXPENSES_CONFIG))
                 .type(dto.getType())
                 .note(dto.getNote())
-                .deleted(false)
-                .createdAt(new Date())
-                .updatedAt(new Date())
                 .build();
     }
 
@@ -43,14 +39,14 @@ public class ExpensesConfigMapper {
         boolean isUpdated = false, isValidField = false;
 
         if (dto.getType() != null) {
-            if (!config.getType().equals(dto.getType())) {
+            if (!dto.getType().equals(config.getType())) {
                 config.setType(dto.getType());
                 isUpdated = true;
             }
             isValidField = true;
         }
         if (dto.getNote() != null) {
-            if (!config.getNote().equals(dto.getNote())) {
+            if (!dto.getNote().equals(config.getNote())) {
                 config.setNote(dto.getNote());
                 isUpdated = true;
             }
@@ -58,28 +54,10 @@ public class ExpensesConfigMapper {
         }
 
         if (isUpdated) {
-            config.setUpdatedAt(new Date());
         } else if (isValidField) {
             throw new NotModifiedException("Không có sự thay đổi nào của cấu hình chi phí!");
         } else {
             throw new InvalidFieldException("Trường cần cập nhật không tồn tại trong cấu hình chi phí!");
         }
-    }
-
-    public ExpensesConfigDTO toExpensesConfigDTO(ExpensesConfigDTO dto, ExpensesConfig config) {
-        if (config == null) return null;
-        if (dto == null) {
-            return ExpensesConfigDTO.builder()
-                    .id(config.getId())
-                    .type(config.getType())
-                    .note(config.getNote())
-                    .createdAt(config.getCreatedAt())
-                    .updatedAt(config.getUpdatedAt())
-                    .build();
-        }
-        dto.setId(config.getId());
-        dto.setCreatedAt(config.getCreatedAt());
-        dto.setUpdatedAt(config.getUpdatedAt());
-        return dto;
     }
 }
