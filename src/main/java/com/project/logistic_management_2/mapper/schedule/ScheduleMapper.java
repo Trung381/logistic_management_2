@@ -9,8 +9,8 @@ import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,11 +20,11 @@ public class ScheduleMapper {
         if (dto == null) return null;
         return Schedule.builder()
                 .id(Utils.genID(IDKey.SCHEDULE))
-                .scheduleConfigId(dto.getScheduleConfigId().isBlank() ? null : dto.getScheduleConfigId())
-                .truckLicense(dto.getTruckLicense())
-                .moocLicense(dto.getMoocLicense())
+                .scheduleConfigId(dto.getScheduleConfigId().isBlank() ? null : dto.getScheduleConfigId().trim())
+                .truckLicense(dto.getTruckLicense().trim())
+                .moocLicense(dto.getMoocLicense().trim())
                 .departureTime(dto.getDepartureTime())
-                .note(dto.getNote())
+                .note(dto.getNote().trim())
                 .type(dto.getType().getValue())
                 .status(ScheduleStatus.PENDING.getValue())
                 .build();
@@ -34,20 +34,7 @@ public class ScheduleMapper {
         if(dtos == null || dtos.isEmpty()) {
             return Collections.emptyList();
         }
-
-        return dtos.stream().map(dto ->
-                Schedule.builder()
-                        .id(Utils.genID(IDKey.SCHEDULE))
-                        .scheduleConfigId(dto.getScheduleConfigId().isBlank() ? null : dto.getScheduleConfigId())
-                        .truckLicense(dto.getTruckLicense())
-                        .moocLicense(dto.getMoocLicense())
-                        .departureTime(dto.getDepartureTime())
-                        .arrivalTime(dto.getDepartureTime())
-                        .note(dto.getNote())
-                        .type(dto.getType().getValue())
-                        .status(ScheduleStatus.PENDING.getValue())
-                        .build()
-        ).collect(Collectors.toList());
+        return dtos.stream().map(this::toSchedule).collect(Collectors.toList());
     }
 
     public void updateSchedule(Schedule schedule, ScheduleDTO dto) {
@@ -104,8 +91,7 @@ public class ScheduleMapper {
             isValidField = true;
         }
 
-        if (isUpdated) {
-        } else if (isValidField) {
+       if (!isUpdated && isValidField) {
             throw new NotModifiedException("Không có sự thay đổi nào của lịch trình!");
         } else {
             throw new InvalidFieldException("Trường cần cập nhật không tồn tại trong lịch trình!");
