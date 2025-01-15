@@ -3,8 +3,6 @@ package com.project.logistic_management_2.mapper.schedule;
 import com.project.logistic_management_2.dto.schedule.ScheduleConfigDTO;
 import com.project.logistic_management_2.entity.schedule.ScheduleConfig;
 import com.project.logistic_management_2.enums.IDKey;
-import com.project.logistic_management_2.exception.define.InvalidFieldException;
-import com.project.logistic_management_2.exception.define.NotModifiedException;
 import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +33,6 @@ public class ScheduleConfigMapper {
 
     public void updateScheduleConfig(ScheduleConfig config, ScheduleConfigDTO dto) {
         if (dto == null) return;
-        boolean isUpdated = false, isValidField = false;
 
         Field[] fields = dto.getClass().getDeclaredFields();
         for (Field srcField : fields) {
@@ -44,11 +41,9 @@ public class ScheduleConfigMapper {
                 Object newValue = srcField.get(dto);
                 if (newValue != null) {
                     Field targetField = config.getClass().getField(srcField.getName());
-                    isValidField = true;
                     targetField.setAccessible(true);
                     if (!newValue.equals(targetField.get(config))) {
                         targetField.set(config, newValue);
-                        isUpdated = true;
                     }
                     targetField.setAccessible(false);
                 }
@@ -57,12 +52,6 @@ public class ScheduleConfigMapper {
             } finally {
                 srcField.setAccessible(false);
             }
-        }
-
-        if (!isUpdated && isValidField) {
-            throw new NotModifiedException("Không có sự thay đổi nào của cấu hình lịch trình!");
-        } else {
-            throw new InvalidFieldException("Trường cần cập nhật không tồn tại trong cấu hình lịch trình!");
         }
     }
 }
