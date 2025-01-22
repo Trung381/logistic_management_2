@@ -81,11 +81,6 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 .and(expenses.id.eq(id));
     }
 
-    BooleanBuilder initBuilder() {
-        return new BooleanBuilder()
-                .and(expenses.deleted.eq(false));
-    }
-
     @Override
     public List<ExpensesDTO> getAll(int page, String expensesConfigId, String truckLicense, Date fromDate, Date toDate) {
         BooleanBuilder builder = initGetAllBuilder(expensesConfigId, truckLicense, fromDate, toDate);
@@ -115,7 +110,8 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
 
     @Override
     public List<ExpensesIncurredDTO> getExpenseIncurredByDriverID(String driverId, Date fromDate, Date toDate) {
-        BooleanBuilder builder = initBuilder();
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(expenses.deleted.eq(false));
 
         if (driverId != null && !driverId.isBlank()) {
             builder.and(truck.driverId.eq(driverId));
@@ -178,7 +174,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     @Override
-    public List<ExpensesReportDTO> reportForAll(String period) {
+    public List<ExpensesReportDTO> reportAll(String period) {
         ConstructorExpression<ExpensesIncurredDTO> expensesIncurredExpression = Projections.constructor(
                 ExpensesIncurredDTO.class,
                 expensesConfig.id.as("expensesConfigId"),
@@ -239,9 +235,9 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
     }
 
     private List<ExpensesReportDTO> reportsQuery(String period, ConstructorExpression<ExpensesReportDTO> expression) {
-        BooleanBuilder builder = initBuilder()
-                .and(user.roleId.eq(UserRole.DRIVER.getId()))
-                .and(expenseAdvances.period.eq(period));
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(user.roleId.eq(UserRole.DRIVER.getId()));
+//                .and(expenseAdvances.period.eq(period));
 
         return query.from(user)
                 .leftJoin(truck).on(truck.driverId.eq(user.id))

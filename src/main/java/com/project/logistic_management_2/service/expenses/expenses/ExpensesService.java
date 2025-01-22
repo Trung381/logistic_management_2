@@ -18,7 +18,7 @@ public interface ExpensesService {
     long deleteByID(String id) throws ServerException;
     long approveByID(String id) throws ServerException;
     List<ExpensesIncurredDTO> report(String driverId, String period);
-    List<ExpensesReportDTO> reportForAll(String period);
+    List<ExpensesReportDTO> reportAll(String period);
     List<Expenses> importExpensesData(MultipartFile importFile);
     ExportExcelResponse exportExpenses(String expensesConfigId, String truckLicense, String fromDate, String toDate) throws Exception;
     ExportExcelResponse exportReportExpenses(String driverId, String period) throws Exception;

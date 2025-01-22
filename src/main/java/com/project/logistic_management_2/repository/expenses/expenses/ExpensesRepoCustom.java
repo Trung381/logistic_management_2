@@ -16,7 +16,7 @@ public interface ExpensesRepoCustom {
     Optional<ExpensesDTO> getByID(String id);
     long delete(String id);
     long approve(String id);
-    List<ExpensesReportDTO> reportForAll(String period);
+    List<ExpensesReportDTO> reportAll(String period);
     long countByID(String id);
     ExpensesStatus getStatusByID(String id);
 }
