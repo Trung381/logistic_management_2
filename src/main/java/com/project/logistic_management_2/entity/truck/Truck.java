@@ -4,9 +4,6 @@ import com.project.logistic_management_2.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-
-import java.util.Date;
-
 @Getter
 @Setter
 @Builder
@@ -36,5 +33,4 @@ public class Truck extends BaseEntity {
 
     @Column(name = "type", nullable = false)
     private Integer type;
-
 }

@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.entity.transaction;
 
+import com.project.logistic_management_2.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "transactions")
-public class Transaction {
+public class Transaction extends BaseEntity {
     @Id
     private String id;
 
@@ -39,15 +40,4 @@ public class Transaction {
 
     @Column(name = "image")
     private String image;
-
-    @Column(name = "deleted")
-    private Boolean deleted;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
-    private Date createdAt;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
-    private Date updatedAt;
 }

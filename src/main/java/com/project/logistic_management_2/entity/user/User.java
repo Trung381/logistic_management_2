@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.entity.user;
 
+import com.project.logistic_management_2.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
-public class User {
+public class User extends BaseEntity {
     @Id
     private String id;
 
@@ -42,12 +43,4 @@ public class User {
 
     @Column(name = "status")
     private Integer status;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
-    private Date createdAt;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
-    private Date updatedAt;
 }

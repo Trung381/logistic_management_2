@@ -17,7 +17,7 @@ import java.util.Date;
 public abstract class BaseEntity {
 
     @Column(name = "deleted")
-    private boolean deleted = false;
+    private Boolean deleted = false;
 
     @Column(name = "created_at")
     @CreatedDate

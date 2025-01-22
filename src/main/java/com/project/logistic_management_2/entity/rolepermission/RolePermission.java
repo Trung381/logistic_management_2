@@ -1,16 +1,15 @@
 package com.project.logistic_management_2.entity.rolepermission;
 
+import com.project.logistic_management_2.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "role_permission")
-public class RolePermission {
+public class RolePermission extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -32,12 +31,4 @@ public class RolePermission {
 
     @Column(name = "can_delete")
     private Boolean canDelete;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
-    private Date createdAt;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
-    private Date updatedAt;
 }

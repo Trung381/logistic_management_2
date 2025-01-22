@@ -31,9 +31,8 @@ public class WarehousesServiceImpl extends BaseService implements WarehousesServ
     public List<WarehousesDTO> getAllWarehouses() {
 
         checkPermission(type, PermissionKey.VIEW);
-
-        List<Warehouses> warehousesList = repository.findAll();
-        return mapper.toWarehouseDTOList(warehousesList);
+        List<WarehousesDTO> warehousesList = repository.getAll();
+        return warehousesList;
     }
 
     @Override

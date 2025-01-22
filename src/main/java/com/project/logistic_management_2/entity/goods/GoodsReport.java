@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.entity.goods;
 
 
+import com.project.logistic_management_2.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +15,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GoodsReport {
+public class GoodsReport extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -28,9 +29,4 @@ public class GoodsReport {
 
     @Column(name = "ending_inventory")
     private Float endingInventory;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
-    private Date createdAt;
-
 }

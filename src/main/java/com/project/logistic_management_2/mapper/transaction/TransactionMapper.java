@@ -27,9 +27,6 @@ public class TransactionMapper {
                 .origin(dto.getOrigin().getValue())
                 .destination(dto.getDestination())
                 .image(dto.getImage())
-                .deleted(false)
-                .createdAt(new Date())
-                .updatedAt(new Date())
                 .build();
     }
 
