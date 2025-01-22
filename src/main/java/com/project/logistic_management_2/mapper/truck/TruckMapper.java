@@ -15,31 +15,8 @@ import java.util.stream.Collectors;
 public class TruckMapper {
     public Truck toTruck(TruckDTO truckDTO) {
         if(truckDTO==null)  return null;
-        return createTruck(truckDTO);
-    }
-
-    public List<Truck> toTruckList(List<TruckDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return dtos.stream().map(this::createTruck).collect(Collectors.toList());
-    }
-
-//    private Truck createTruck(TruckDTO truckDTO) {
-//        return Truck.builder()
-//                .id(truckDTO.getId() != null ? truckDTO.getId() : null)
-//                .driverId(truckDTO.getDriverId())
-//                .licensePlate(truckDTO.getLicensePlate())
-//                .capacity(truckDTO.getCapacity())
-//                .type(truckDTO.getType().getValue())
-//                .note(truckDTO.getNote())
-//                .status(TruckStatus.AVAILABLE.getValue())
-//                .build();
-//    }
-
-    private Truck createTruck(TruckDTO truckDTO) {
-        Truck truck = Truck.builder()
-                .id(truckDTO.getId())
+        return Truck.builder()
+                .id(truckDTO.getId() != null ? truckDTO.getId() : null)
                 .driverId(truckDTO.getDriverId())
                 .licensePlate(truckDTO.getLicensePlate())
                 .capacity(truckDTO.getCapacity())
@@ -47,12 +24,14 @@ public class TruckMapper {
                 .note(truckDTO.getNote())
                 .status(TruckStatus.AVAILABLE.getValue())
                 .build();
-        truck.setCreatedAt(truckDTO.getCreatedAt() != null ? truckDTO.getCreatedAt() : new Date());
-        truck.setUpdatedAt(truckDTO.getUpdatedAt() != null ? truckDTO.getUpdatedAt() : new Date());
-
-        return truck;
     }
 
+    public List<Truck> toTruckList(List<TruckDTO> dtos) {
+        if(dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dtos.stream().map(this::toTruck).collect(Collectors.toList());
+    }
 
     public TruckDTO toTruckDTO(Truck truck) {
         if (truck == null) return null;

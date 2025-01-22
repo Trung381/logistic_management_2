@@ -10,7 +10,6 @@ import com.project.logistic_management_2.utils.Utils;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,95 +19,46 @@ public class ScheduleMapper {
         if (dto == null) return null;
         return Schedule.builder()
                 .id(Utils.genID(IDKey.SCHEDULE))
-                .scheduleConfigId(dto.getScheduleConfigId().isBlank() ? null : dto.getScheduleConfigId())
-                .truckLicense(dto.getTruckLicense())
-                .moocLicense(dto.getMoocLicense())
+                .scheduleConfigId(dto.getScheduleConfigId().isBlank() ? null : dto.getScheduleConfigId().trim())
+                .truckLicense(dto.getTruckLicense().trim())
+                .moocLicense(dto.getMoocLicense().trim())
                 .departureTime(dto.getDepartureTime())
-                .note(dto.getNote())
+                .note(dto.getNote().trim())
                 .type(dto.getType().getValue())
                 .status(ScheduleStatus.PENDING.getValue())
                 .build();
     }
 
     public List<Schedule> toScheduleList(List<ScheduleDTO> dtos) {
-        if(dtos == null || dtos.isEmpty()) {
+        if (dtos == null || dtos.isEmpty()) {
             return Collections.emptyList();
         }
-
-        return dtos.stream().map(dto ->
-                Schedule.builder()
-                        .id(Utils.genID(IDKey.SCHEDULE))
-                        .scheduleConfigId(dto.getScheduleConfigId().isBlank() ? null : dto.getScheduleConfigId())
-                        .truckLicense(dto.getTruckLicense())
-                        .moocLicense(dto.getMoocLicense())
-                        .departureTime(dto.getDepartureTime())
-                        .arrivalTime(dto.getDepartureTime())
-                        .note(dto.getNote())
-                        .type(dto.getType().getValue())
-                        .status(ScheduleStatus.PENDING.getValue())
-                        .build()
-        ).collect(Collectors.toList());
+        return dtos.stream().map(this::toSchedule).collect(Collectors.toList());
     }
 
     public void updateSchedule(Schedule schedule, ScheduleDTO dto) {
         if (dto == null) return;
-        boolean isUpdated = false, isValidField = false;
 
-        if (dto.getScheduleConfigId() != null) {
-            if (!schedule.getScheduleConfigId().equals(dto.getScheduleConfigId())) {
-                schedule.setScheduleConfigId(dto.getScheduleConfigId());
-                isUpdated = true;
-            }
-            isValidField = true;
+        if (dto.getScheduleConfigId() != null && !schedule.getScheduleConfigId().equals(dto.getScheduleConfigId())) {
+            schedule.setScheduleConfigId(dto.getScheduleConfigId());
         }
-        if (dto.getTruckLicense() != null) {
-            if (!schedule.getTruckLicense().equals(dto.getTruckLicense())) {
-                schedule.setTruckLicense(dto.getTruckLicense());
-                isUpdated = true;
-            }
-            isValidField = true;
+        if (dto.getTruckLicense() != null && !schedule.getTruckLicense().equals(dto.getTruckLicense())) {
+            schedule.setTruckLicense(dto.getTruckLicense());
         }
-        if (dto.getMoocLicense() != null) {
-            if (!schedule.getMoocLicense().equals(dto.getMoocLicense())) {
-                schedule.setMoocLicense(dto.getMoocLicense());
-                isUpdated = true;
-            }
-            isValidField = true;
+        if (dto.getMoocLicense() != null && !schedule.getMoocLicense().equals(dto.getMoocLicense())) {
+            schedule.setMoocLicense(dto.getMoocLicense());
         }
-        if (dto.getDepartureTime() != null) {
-            if (!schedule.getDepartureTime().equals(dto.getDepartureTime())) {
-                schedule.setDepartureTime(dto.getDepartureTime());
-                isUpdated = true;
-            }
-            isValidField = true;
+        if (dto.getDepartureTime() != null && !schedule.getDepartureTime().equals(dto.getDepartureTime())) {
+            schedule.setDepartureTime(dto.getDepartureTime());
         }
-        if (dto.getArrivalTime() != null) {
-            if (!schedule.getArrivalTime().equals(dto.getArrivalTime())) {
-                schedule.setArrivalTime(dto.getArrivalTime());
-                isUpdated = true;
-            }
-            isValidField = true;
+        if (dto.getArrivalTime() != null && !schedule.getArrivalTime().equals(dto.getArrivalTime())) {
+            schedule.setArrivalTime(dto.getArrivalTime());
         }
-        if (dto.getNote() != null) {
-            if (!schedule.getNote().equals(dto.getNote())) {
-                schedule.setNote(dto.getNote());
-                isUpdated = true;
-            }
-            isValidField = true;
+        if (dto.getNote() != null && !schedule.getNote().equals(dto.getNote())) {
+            schedule.setNote(dto.getNote());
         }
-        if (dto.getType() != null) {
-            if (!schedule.getType().equals(dto.getType().getValue())) {
-                schedule.setType(dto.getType().getValue());
-                isUpdated = true;
-            }
-            isValidField = true;
-        }
-
-        if (isUpdated) {
-        } else if (isValidField) {
-            throw new NotModifiedException("Không có sự thay đổi nào của lịch trình!");
-        } else {
-            throw new InvalidFieldException("Trường cần cập nhật không tồn tại trong lịch trình!");
+        if (dto.getType() != null && !schedule.getType().equals(dto.getType().getValue())) {
+            schedule.setType(dto.getType().getValue());
         }
     }
 }
