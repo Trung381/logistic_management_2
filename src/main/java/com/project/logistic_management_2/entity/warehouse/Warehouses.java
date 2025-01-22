@@ -1,5 +1,6 @@
 package com.project.logistic_management_2.entity.warehouse;
 
+import com.project.logistic_management_2.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Warehouses {
+public class Warehouses extends BaseEntity {
     @Id
     private String id;
 
@@ -22,12 +23,4 @@ public class Warehouses {
 
     @Column(name = "note")
     private String note;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
-    private Date createdAt;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
-    private Date updatedAt;
 }

@@ -26,12 +26,11 @@ public class UserMapper{
                 .phone(dto.getPhone())
                 .note(dto.getNote())
                 .dateOfBirth(dto.getDateOfBirth())
+                .imagePath(dto.getImagePath())
                 .username(dto.getUsername())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .roleId(dto.getRoleId())
                 .status(1)
-                .createdAt(new Date())
-                .updatedAt(new Date())
                 .build();
     }
 

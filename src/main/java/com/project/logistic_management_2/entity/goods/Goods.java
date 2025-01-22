@@ -1,19 +1,19 @@
 package com.project.logistic_management_2.entity.goods;
 
+import com.project.logistic_management_2.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
 @Entity
-@Data
+@Table(name = "goods")
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Goods {
+public class Goods extends BaseEntity {
     @Id
     private String id;
 
@@ -28,12 +28,4 @@ public class Goods {
 
     @Column(name = "amount")
     private Float amount;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
-    private Date createdAt;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
-    private Date updatedAt;
 }

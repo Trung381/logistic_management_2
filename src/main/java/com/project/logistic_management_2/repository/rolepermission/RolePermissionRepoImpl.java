@@ -1,6 +1,5 @@
 package com.project.logistic_management_2.repository.rolepermission;
 
-
 import com.project.logistic_management_2.dto.rolepermission.RolePermissionResponse;
 import com.project.logistic_management_2.entity.permission.QPermission;
 import com.project.logistic_management_2.entity.role.QRole;

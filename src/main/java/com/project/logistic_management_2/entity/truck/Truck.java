@@ -1,8 +1,8 @@
 package com.project.logistic_management_2.entity.truck;
 
+import com.project.logistic_management_2.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -11,7 +11,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @Table(name = "trucks")
-public class Truck {
+public class Truck extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -28,20 +28,9 @@ public class Truck {
     @Column(name = "note")
     private String note;
 
-    @Column(name = "deleted", nullable = false)
-    private Boolean deleted;
-
     @Column(name = "status", nullable = false)
     private Integer status;
 
     @Column(name = "type", nullable = false)
     private Integer type;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Temporal(value = TemporalType.TIMESTAMP)
-    private Date createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    @Temporal(value = TemporalType.TIMESTAMP)
-    private Date updatedAt;
 }
