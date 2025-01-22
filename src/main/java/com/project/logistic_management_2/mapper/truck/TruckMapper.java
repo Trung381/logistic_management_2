@@ -25,20 +25,34 @@ public class TruckMapper {
         return dtos.stream().map(this::createTruck).collect(Collectors.toList());
     }
 
+//    private Truck createTruck(TruckDTO truckDTO) {
+//        return Truck.builder()
+//                .id(truckDTO.getId() != null ? truckDTO.getId() : null)
+//                .driverId(truckDTO.getDriverId())
+//                .licensePlate(truckDTO.getLicensePlate())
+//                .capacity(truckDTO.getCapacity())
+//                .type(truckDTO.getType().getValue())
+//                .note(truckDTO.getNote())
+//                .status(TruckStatus.AVAILABLE.getValue())
+//                .build();
+//    }
+
     private Truck createTruck(TruckDTO truckDTO) {
-        return Truck.builder()
-                .id(truckDTO.getId() != null ? truckDTO.getId() : null)
+        Truck truck = Truck.builder()
+                .id(truckDTO.getId())
                 .driverId(truckDTO.getDriverId())
                 .licensePlate(truckDTO.getLicensePlate())
                 .capacity(truckDTO.getCapacity())
                 .type(truckDTO.getType().getValue())
                 .note(truckDTO.getNote())
                 .status(TruckStatus.AVAILABLE.getValue())
-                .deleted(false)
-                .createdAt(new Date())
-                .updatedAt(new Date())
                 .build();
+        truck.setCreatedAt(truckDTO.getCreatedAt() != null ? truckDTO.getCreatedAt() : new Date());
+        truck.setUpdatedAt(truckDTO.getUpdatedAt() != null ? truckDTO.getUpdatedAt() : new Date());
+
+        return truck;
     }
+
 
     public TruckDTO toTruckDTO(Truck truck) {
         if (truck == null) return null;
