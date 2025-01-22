@@ -23,9 +23,6 @@ public class TruckMapper {
                 .type(truckDTO.getType().getValue())
                 .note(truckDTO.getNote())
                 .status(TruckStatus.AVAILABLE.getValue())
-                .deleted(false)
-                .createdAt(new Date())
-                .updatedAt(new Date())
                 .build();
     }
 

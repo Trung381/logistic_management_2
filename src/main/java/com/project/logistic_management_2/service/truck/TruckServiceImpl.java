@@ -26,6 +26,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -77,9 +78,9 @@ public class TruckServiceImpl extends BaseService implements TruckService {
     }
 
 @Override
+@Transactional
 public TruckDTO updateTruck(Integer id, TruckDTO dto) {
     checkPermission(type, PermissionKey.WRITE);
-    // Lấy thông tin xe hiện tại
     Truck existingTruck = mapper.toTruck(repository.getTruckById(id)
             .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin xe cần tìm!")));
     // Cập nhật các trường từ body (chỉ cập nhật nếu không null)
@@ -123,7 +124,7 @@ public TruckDTO updateTruck(Integer id, TruckDTO dto) {
     if (dto.getStatus() != null) {
         existingTruck.setStatus(dto.getStatus().getValue());
     }
-    existingTruck.setUpdatedAt(new Date());
+//    existingTruck.setUpdatedAt(new Date());
     repository.save(existingTruck);
     return mapper.toTruckDTO(existingTruck);
 }
