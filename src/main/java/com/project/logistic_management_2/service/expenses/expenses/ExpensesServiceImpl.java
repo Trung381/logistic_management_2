@@ -176,9 +176,9 @@ public class ExpensesServiceImpl extends BaseService implements ExpensesService 
     }
 
     @Override
-    public List<ExpensesReportDTO> reportForAll(String period) {
+    public List<ExpensesReportDTO> reportAll(String period) {
         checkPermission(PermissionType.REPORTS, PermissionKey.VIEW);
-        return expensesRepo.reportForAll(period);
+        return expensesRepo.reportAll(period);
     }
 
     @Override

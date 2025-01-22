@@ -82,9 +82,9 @@ public class ExpensesController {
     }
 
     @GetMapping("/reports/all")
-    public ResponseEntity<Object> exportReportForAll(@RequestParam String period) {
+    public ResponseEntity<Object> exportReportAll(@RequestParam String period) {
         return ResponseEntity.ok(
-                BaseResponse.ok(expensesService.reportForAll(period))
+                BaseResponse.ok(expensesService.reportAll(period))
         );
     }
 
