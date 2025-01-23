@@ -233,8 +233,11 @@ public class ScheduleRepoImpl extends BaseRepo implements ScheduleRepoCustom {
 
         BooleanBuilder builder = new BooleanBuilder()
                 .and(schedule.truckLicense.eq(license));
-        if (fromDate != null && toDate != null) {
-            builder.and(schedule.createdAt.between(fromDate, toDate));
+        if (fromDate != null) {
+            builder.and(schedule.departureTime.goe(fromDate));
+        }
+        if (toDate != null) {
+            builder.and(schedule.departureTime.loe(toDate));
         }
 
         return query.from(schedule)

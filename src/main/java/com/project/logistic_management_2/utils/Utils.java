@@ -1,6 +1,7 @@
 package com.project.logistic_management_2.utils;
 
 import com.project.logistic_management_2.enums.IDKey;
+import com.project.logistic_management_2.enums.PeriodFormatter;
 import com.project.logistic_management_2.exception.define.InvalidParameterException;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +15,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 public class Utils {
-    static final DateTimeFormatter YMD_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    static final DateTimeFormatter YM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
-
     public static String genID(IDKey key) {
         if (key == null) return null;
         LocalDateTime now = LocalDateTime.now();
@@ -34,14 +32,18 @@ public class Utils {
         return calendar.getTime();
     }
 
-    static Date convertStringToDate(String dateString, DateTimeFormatter formatter, boolean isOffset) {
+    static Date convertStringToDate(String dateString, String pattern, boolean isOffset) {
         if (dateString == null) return null;
         try {
-            LocalDate localDate = LocalDate.parse(dateString, formatter);
+            if (PeriodFormatter.YM_FORMATTER.getPattern().equals(pattern)) {
+                dateString += "-01";
+                pattern = PeriodFormatter.YMD_FORMATTER.getPattern();
+            }
+            LocalDate localDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern(pattern));
             if (isOffset) localDate = localDate.plusDays(1);
             return java.sql.Date.valueOf(localDate);
         } catch (DateTimeParseException ex) {
-            throw new InvalidParameterException("Định dạng yêu cầu không hợp lệ! (" + formatter + ")");
+            throw new InvalidParameterException("Định dạng yêu cầu không hợp lệ! Yêu cầu dạng: " + pattern);
         }
     }
 
@@ -52,8 +54,8 @@ public class Utils {
      */
     public static Date[] createDateRange(String fromDateStr, String toDateStr) {
         Date[] range = new Date[2];
-        range[0] = convertStringToDate(fromDateStr, YMD_FORMATTER, false);
-        range[1] = convertStringToDate(toDateStr, YMD_FORMATTER, true);
+        range[0] = convertStringToDate(fromDateStr, PeriodFormatter.YMD_FORMATTER.getPattern(), false);
+        range[1] = convertStringToDate(toDateStr, PeriodFormatter.YMD_FORMATTER.getPattern(), true);
         return range;
     }
 
@@ -63,7 +65,7 @@ public class Utils {
      */
     public static Date[] createDateRange(String periodStr) {
         Date[] range = new Date[2];
-        range[0] = convertStringToDate(periodStr, YM_FORMATTER, false);
+        range[0] = convertStringToDate(periodStr, PeriodFormatter.YM_FORMATTER.getPattern(), false);
         range[1] = toNextMonth(range[0]);
         return range;
     }
