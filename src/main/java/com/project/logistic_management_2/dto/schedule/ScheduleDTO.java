@@ -27,7 +27,6 @@ public class ScheduleDTO {
     @ExportColumn(name = "Số tiền")
     private Float amount;
 
-    @NotBlank(message = "Thông tin tài xế không được để trống!")
     @ExportColumn(name = "Mã tài xế")
     private String driverId;
     @ExportColumn(name = "Tên tài xế")

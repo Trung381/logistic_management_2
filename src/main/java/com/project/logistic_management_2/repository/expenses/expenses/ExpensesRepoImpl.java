@@ -182,22 +182,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 expenses.amount.sum().as("amount")
         );
 
-        String prevPeriod = prevPeriod(period);
-
-        ConstructorExpression<ExpensesReportDTO> reportExpression = Projections.constructor(
-                ExpensesReportDTO.class,
-                user.id.as("driverId"),
-                user.fullName.as("driverName"),
-                Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", schedule.truckLicense).as("truckLicense"),
-                Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", schedule.moocLicense).as("moocLicense"),
-                JPAExpressions.select(expenseAdvances.remainingBalance.coalesce(0f).as("prevRemainingBalance"))
-                        .from(expenseAdvances)
-                        .where(expenseAdvances.driverId.eq(user.id).and(expenseAdvances.period.eq(prevPeriod))),
-                expenseAdvances.advance.coalesce(0f).as("advance"),
-                expenseAdvances.remainingBalance.coalesce(0f).as("remainingBalance")
-        );
-
-        List<ExpensesReportDTO> reports = reportsQuery(period, reportExpression);
+        List<ExpensesReportDTO> reports = reportsQuery(period);
 
         for (ExpensesReportDTO report : reports) {
             report.setExpensesIncurred(
@@ -234,10 +219,25 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
         return prevMonth.toString();
     }
 
-    private List<ExpensesReportDTO> reportsQuery(String period, ConstructorExpression<ExpensesReportDTO> expression) {
+    private List<ExpensesReportDTO> reportsQuery(String period) {
+        String prevPeriod = prevPeriod(period);
+
+        ConstructorExpression<ExpensesReportDTO> expression = Projections.constructor(
+                ExpensesReportDTO.class,
+                user.id.as("driverId"),
+                user.fullName.as("driverName"),
+                Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", schedule.truckLicense).as("truckLicense"),
+                Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", schedule.moocLicense).as("moocLicense"),
+                JPAExpressions.select(expenseAdvances.remainingBalance.coalesce(0f).as("prevRemainingBalance"))
+                        .from(expenseAdvances)
+                        .where(expenseAdvances.driverId.eq(user.id).and(expenseAdvances.period.eq(prevPeriod))),
+                expenseAdvances.advance.sum().coalesce(0f).as("advance"),
+                expenseAdvances.remainingBalance.sum().coalesce(0f).as("remainingBalance")
+        );
+
         BooleanBuilder builder = new BooleanBuilder()
-                .and(user.roleId.eq(UserRole.DRIVER.getId()));
-//                .and(expenseAdvances.period.eq(period));
+                .and(user.roleId.eq(UserRole.DRIVER.getId()))
+                .and(expenseAdvances.period.eq(period));
 
         return query.from(user)
                 .leftJoin(truck).on(truck.driverId.eq(user.id))
@@ -245,7 +245,7 @@ public class ExpensesRepoImpl extends BaseRepo implements ExpensesRepoCustom {
                 .leftJoin(expenseAdvances).on(expenseAdvances.driverId.eq(user.id))
                 .where(builder)
                 .select(expression)
-                .groupBy(user.id, user.fullName, expenseAdvances.advance, expenseAdvances.remainingBalance)
+                .groupBy(user.id, user.fullName)
                 .fetch();
     }
 
