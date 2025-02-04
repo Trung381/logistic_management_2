@@ -1,0 +1,54 @@
+<configuration>
+    <!--Định dạng log-->
+    <property name="LOG_PATTERN" value="%d{YYYY-MM-dd HH:mm:ss:SSS} [%thread] %highlight(%-5level) %yellow(%logger{45}) : %msg%n"/>
+
+    <!--local-->
+    <springProfile name="local">
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>logs/application-log.json</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- Lưu log mỗi ngày -->
+                <fileNamePattern>logs/application-log-%d{yyyy-MM-dd}.json</fileNamePattern>
+                <!-- Giữ log trong 30 ngày -->
+                <maxHistory>30</maxHistory>
+            </rollingPolicy>
+            <!--            <encoder>-->
+            <!--                <pattern>${LOG_PATTERN}</pattern>-->
+            <!--            </encoder>-->
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+
+        <!--Info-->
+        <root level="INFO">
+            <appender-ref ref="STDOUT" />
+            <appender-ref ref="FILE" />
+        </root>
+    </springProfile>
+
+    <!--production-->
+    <springProfile name="prod">
+        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>logs/application-log.json</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>logs/application-log-%d{yyyy-MM-dd}.json</fileNamePattern>
+                <!-- Giữ log trong 30 ngày -->
+                <maxHistory>30</maxHistory>
+            </rollingPolicy>
+            <!--            <encoder>-->
+            <!--                <pattern>${LOG_PATTERN}</pattern>-->
+            <!--            </encoder>-->
+            <!--Bộ mã hóa định dạng JSON-->
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+
+        <!--Ghi log mức INFO-->
+        <root level="INFO">
+            <appender-ref ref="FILE" />
+        </root>
+    </springProfile>
+</configuration>

@@ -1,4 +1,3 @@
-use logistic_management_2;
 CREATE TABLE `permissions` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL,
